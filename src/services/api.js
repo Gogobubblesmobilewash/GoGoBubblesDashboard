@@ -11,6 +11,18 @@ const JOBS_API = 'https://script.google.com/macros/s/AKfycbzM7AVH7DpFOl76YL2f0sH
 // Update this URL with your new Orders Management script deployment URL
 export const ORDERS_API = 'https://script.google.com/macros/s/AKfycbwclBp7hoN6XnNWVGAMoPDjMfV38uUsaN6M_Ucas_3dGV3SoQ5aTT5FKO7aV3VKeiY/exec';
 
+// CORS Proxy for development (only used in development mode)
+const CORS_PROXY = 'http://localhost:8080/';
+
+// Helper function to add CORS proxy in development
+const addCorsProxy = (url) => {
+  // Only use proxy in development (when running on localhost)
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    return CORS_PROXY + url;
+  }
+  return url;
+};
+
 // Service configuration and rules
 export const SERVICE_CONFIG = {
   'Mobile Car Wash': {
@@ -199,7 +211,7 @@ const apiCall = async (action, method = 'GET', data = null) => {
       options.body = null;
     }
 
-    const response = await fetch(API_BASE, options);
+    const response = await fetch(addCorsProxy(API_BASE), options);
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     return await response.json();
   } catch (error) {
@@ -211,7 +223,7 @@ const apiCall = async (action, method = 'GET', data = null) => {
 // Helper for POST requests to Google Apps Script
 async function postToJobsAPI(action, data = {}) {
   const payload = JSON.stringify({ action, ...data });
-  const response = await fetch(JOBS_API, {
+  const response = await fetch(addCorsProxy(JOBS_API), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: payload,
@@ -235,8 +247,8 @@ async function postToOrdersAPI(action, data = {}) {
     });
     console.log('Orders API POST request:', { action, data, payload });
     
-    // Use the original URL for POST requests (browser will handle redirect)
-    const response = await fetch(ORDERS_API, {
+    // Use CORS proxy in development for POST requests
+    const response = await fetch(addCorsProxy(ORDERS_API), {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json'
@@ -675,7 +687,7 @@ async function getFromOrdersAPI(action, params = {}) {
   try {
     if (!action) throw new Error('Action parameter is required');
     
-    const url = new URL(ORDERS_API);
+    const url = new URL(addCorsProxy(ORDERS_API));
     url.searchParams.set('action', action);
     Object.entries(params).forEach(([key, value]) => {
       url.searchParams.set(key, value);
