@@ -1,4 +1,4 @@
-# GoGoBubbles Bubbler Dashboard
+# GoGoBubblesDashboard
 
 A comprehensive dashboard application for GoGoBubbles field staff (Bubblers) and administrators to manage jobs, equipment, and operations.
 
