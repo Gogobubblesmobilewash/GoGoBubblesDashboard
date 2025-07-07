@@ -16,9 +16,10 @@ import {
   FiCamera
 } from 'react-icons/fi';
 import useStore from '../../store/useStore';
+import { supabase } from '../../services/api';
 
 const Dashboard = () => {
-  const { user, isAdmin, dailyJobs, setDailyJobs, loading, setLoading } = useStore();
+  const { user, isAdmin, setDailyJobs, loading, setLoading } = useStore();
   const [stats, setStats] = useState({
     totalJobs: 0,
     completedJobs: 0,
@@ -32,49 +33,53 @@ const Dashboard = () => {
   const loadDashboardData = async () => {
     setLoading(true);
     try {
-      const mockJobs = [
-        {
-          id: 1,
-          customerName: 'Jane Doe',
-          serviceType: 'Home Cleaning',
-          timeWindow: '9:00 AM - 11:00 AM',
-          status: 'pending',
-          earnings: 85.00
-        },
-        {
-          id: 2,
-          customerName: 'John Smith',
-          serviceType: 'Laundry Service',
-          timeWindow: '2:00 PM - 4:00 PM',
-          status: 'completed',
-          earnings: 65.00
-        },
-        {
-          id: 3,
-          customerName: 'Sarah Wilson',
-          serviceType: 'Mobile Car Wash',
-          timeWindow: '10:00 AM - 12:00 PM',
-          status: 'in-progress',
-          earnings: 95.00
-        }
-      ];
+      // Fetch jobs from Supabase
+      const { data: jobs, error: jobsError } = await supabase
+        .from('job_assignments')
+        .select('*');
+      if (jobsError) throw jobsError;
+      setDailyJobs(jobs);
 
-      setDailyJobs(mockJobs);
+      // Calculate stats
+      const totalJobs = jobs.length;
+      const completedJobs = jobs.filter(j => j.jobStatus === 'completed').length;
+      const pendingJobs = jobs.filter(j => j.jobStatus === 'pending').length;
+      const totalEarnings = jobs.reduce((sum, j) => sum + (parseFloat(j.earningsEstimate) || 0), 0);
+
+      // Fetch ratings (if available)
+      const { data: ratings, error: ratingsError } = await supabase
+        .from('ratings')
+        .select('rating');
+      if (ratingsError) throw ratingsError;
+      const averageRating = ratings.length > 0 ? (ratings.reduce((sum, r) => sum + (parseFloat(r.rating) || 0), 0) / ratings.length).toFixed(2) : 0;
+
+      // Fetch equipment (if available)
+      const { data: equipment, error: equipmentError } = await supabase
+        .from('equipment')
+        .select('*');
+      if (equipmentError) throw equipmentError;
+      const activeEquipment = equipment.filter(e => e.status === 'active').length;
 
       setStats({
-        totalJobs: mockJobs.length,
-        completedJobs: mockJobs.filter(j => j.status === 'completed').length,
-        pendingJobs: mockJobs.filter(j => j.status === 'pending').length,
-        totalEarnings: mockJobs.reduce((sum, j) => sum + j.earnings, 0),
-        averageRating: 4.8,
-        activeEquipment: 3
+        totalJobs,
+        completedJobs,
+        pendingJobs,
+        totalEarnings,
+        averageRating,
+        activeEquipment
       });
 
-      setRecentActivity([
-        { id: 1, type: 'job_completed', message: 'Car wash completed for John Doe', time: '2 hours ago' },
-        { id: 2, type: 'new_job', message: 'New home cleaning job assigned', time: '4 hours ago' },
-        { id: 3, type: 'payment', message: 'Payment received for laundry service', time: '6 hours ago' }
-      ]);
+      // Fetch recent activity (last 5 jobs)
+      const recent = jobs
+        .sort((a, b) => new Date(b.updated_at || b.created_at) - new Date(a.updated_at || a.created_at))
+        .slice(0, 5)
+        .map(j => ({
+          id: j.id,
+          type: j.jobStatus,
+          message: `${j.serviceType} for ${j.customerName} (${j.jobStatus})`,
+          time: new Date(j.updated_at || j.created_at).toLocaleString()
+        }));
+      setRecentActivity(recent);
     } catch (err) {
       console.error('Error loading dashboard data:', err);
     } finally {
@@ -84,6 +89,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     loadDashboardData();
+    // eslint-disable-next-line
   }, []);
 
   const StatCard = ({ title, value, icon: Icon, change }) => (
