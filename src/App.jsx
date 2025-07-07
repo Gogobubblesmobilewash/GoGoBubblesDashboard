@@ -15,12 +15,12 @@ import Ratings from './components/admin/Ratings';
 import Analytics from './components/admin/Analytics';
 import Orders from './components/orders/Orders';
 import Bubblers from './components/bubblers/Bubblers';
-
+import { useAuth } from './store/AuthContext';
 import { SpeedInsights } from "@vercel/speed-insights/react";
 
 // Protected Route wrapper
 const ProtectedRoute = ({ children, requireAdmin = false }) => {
-  const { isAuthenticated, isAdmin } = useStore();
+  const { isAuthenticated, isAdmin } = useAuth();
 
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   if (requireAdmin && !isAdmin) return <Navigate to="/dashboard" replace />;
@@ -38,7 +38,7 @@ ProtectedRoute.defaultProps = {
 };
 
 function App() {
-  const { isAuthenticated } = useStore();
+  const { isAuthenticated } = useAuth();
 
   return (
     <>

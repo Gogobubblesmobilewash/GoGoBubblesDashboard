@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import {
-  FiCalendar as Calendar,
-  FiDollarSign as DollarSign,
-  FiCheckCircle as CheckCircle,
-  FiClock as Clock,
-  FiTrendingUp as TrendingUp,
-  FiUsers as Users,
-  FiBriefcase as Briefcase,
-  FiStar as Star,
-  FiAlertCircle as AlertCircle,
-  FiArrowRight as ArrowRight,
+  FiCalendar,
+  FiDollarSign,
+  FiCheckCircle,
+  FiClock,
+  FiTrendingUp,
+  FiUsers,
+  FiBriefcase,
+  FiStar,
+  FiAlertCircle,
+  FiArrowRight,
   FiPlus,
   FiList,
   FiCamera
