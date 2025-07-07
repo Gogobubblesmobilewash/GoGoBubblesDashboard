@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import {
   FiBriefcase as Briefcase,
   FiCalendar as Calendar,
@@ -11,19 +12,18 @@ import {
   FiSearch as Search,
   FiDownload as Download,
   FiUpload as Upload,
-  FiUser as User
+  FiUser as User,
+  FiFilter as Filter
 } from 'react-icons/fi';
 import useStore from '../../store/useStore';
 import Modal from '../shared/Modal';
-import { equipmentAPI } from '../../services/api';
+import { supabase } from '../../services/api';
 
 const Equipment = () => {
   const { user, isAdmin, equipment, setEquipment, loading, setLoading } = useStore();
   const [filteredEquipment, setFilteredEquipment] = useState([]);
-  const [filters, setFilters] = useState({
-    status: 'all',
-    search: '',
-  });
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
 
   // for modal control
   const [selectedEquipment, setSelectedEquipment] = useState(null);
@@ -41,13 +41,14 @@ const Equipment = () => {
 
   useEffect(() => {
     filterEquipment();
-  }, [equipment, filters]);
+  }, [equipment, searchTerm, statusFilter]);
 
   const loadEquipment = async () => {
     setLoading(true);
     try {
-      const data = await equipmentAPI.getEquipment();
+      const data = await supabase.from('equipment').select();
       setEquipment(data);
+      setFilteredEquipment(data);
     } catch (error) {
       console.error('Error loading equipment:', error);
     } finally {
@@ -56,19 +57,23 @@ const Equipment = () => {
   };
 
   const filterEquipment = () => {
-    let result = equipment;
+    let filtered = equipment;
 
-    if (filters.status !== 'all') {
-      result = result.filter((e) => e.status === filters.status);
-    }
-    if (filters.search) {
-      result = result.filter((e) =>
-        [e.item, e.assignedTo, e.serialNumber]
-          .filter(Boolean)
-          .some((field) => field.toLowerCase().includes(filters.search.toLowerCase()))
+    // Apply search filter
+    if (searchTerm) {
+      filtered = filtered.filter(item =>
+        item.item.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.serialNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (item.assignedTo && item.assignedTo.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
-    setFilteredEquipment(result);
+
+    // Apply status filter
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(item => item.status === statusFilter);
+    }
+
+    setFilteredEquipment(filtered);
   };
 
   const getStatusColor = (status) => {
@@ -118,7 +123,7 @@ const Equipment = () => {
     if (window.confirm('Delete this equipment?')) {
       setLoading(true);
       try {
-        const response = await equipmentAPI.updateEquipmentStatus(id, 'deleted');
+        const response = await supabase.from('equipment').update({ status: 'deleted' }).eq('id', id);
         console.log('Equipment deleted response:', response);
         
         // Reload equipment to get updated data
@@ -135,7 +140,7 @@ const Equipment = () => {
     if (assigningEquipment) {
       setLoading(true);
       try {
-        const response = await equipmentAPI.assignEquipment(assigningEquipment.id, assigningEquipment.assignedTo);
+        const response = await supabase.from('equipment').update({ assignedTo: assigningEquipment.assignedTo }).eq('id', assigningEquipment.id);
         console.log('Equipment assigned response:', response);
         
         // Reload equipment to get updated data
@@ -156,11 +161,11 @@ const Equipment = () => {
       try {
         if (editingEquipment.id) {
           // Update existing equipment
-          const response = await equipmentAPI.updateEquipmentStatus(editingEquipment.id, editingEquipment.status);
+          const response = await supabase.from('equipment').update({ status: editingEquipment.status }).eq('id', editingEquipment.id);
           console.log('Equipment updated response:', response);
         } else {
           // Add new equipment
-          const response = await equipmentAPI.addEquipment(editingEquipment);
+          const response = await supabase.from('equipment').insert([editingEquipment]);
           console.log('Equipment added response:', response);
         }
         
@@ -181,7 +186,7 @@ const Equipment = () => {
       setLoading(true);
       try {
         const returnDate = new Date().toISOString().split('T')[0];
-        const response = await equipmentAPI.returnEquipment(selectedEquipment.id, returnDate);
+        const response = await supabase.from('equipment').update({ returned: true, status: 'returned' }).eq('id', selectedEquipment.id);
         console.log('Equipment returned response:', response);
         
         // Reload equipment to get updated data
@@ -314,10 +319,24 @@ const Equipment = () => {
     );
   };
 
+  EquipmentCard.propTypes = {
+    item: PropTypes.shape({
+      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      item: PropTypes.string,
+      serialNumber: PropTypes.string,
+      status: PropTypes.string,
+      condition: PropTypes.string,
+      assignedTo: PropTypes.string,
+      rentalDate: PropTypes.string,
+      expectedReturn: PropTypes.string,
+      notes: PropTypes.string
+    }).isRequired
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin border-b-2 border-cyan-500 h-12 w-12 rounded-full"></div>
+        <div className="animate-spin border-b-2 border-cyan-500 h-12 w-12 rounded-full" />
       </div>
     );
   }
@@ -378,18 +397,14 @@ const Equipment = () => {
               <input
                 placeholder="Search equipment"
                 className="pl-10 pr-4 py-2 border rounded-xl focus:ring-2 focus:ring-cyan-500"
-                value={filters.search}
-                onChange={(e) =>
-                  setFilters({ ...filters, search: e.target.value })
-                }
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
             <select
               className="px-4 py-2 border rounded-xl focus:ring-2 focus:ring-cyan-500"
-              value={filters.status}
-              onChange={(e) =>
-                setFilters({ ...filters, status: e.target.value })
-              }
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
             >
               <option value="all">All</option>
               <option value="available">Available</option>

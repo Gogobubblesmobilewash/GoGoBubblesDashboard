@@ -25,11 +25,10 @@ const Layout = () => {
 
   const bubblerNavItems = [
     { name: 'Dashboard', icon: Home, path: '/dashboard', color: 'text-cyan-600' },
-{ name: 'Daily Jobs', icon: Calendar, path: '/jobs', color: 'text-cyan-600' },
-{ name: 'Equipment', icon: Briefcase, path: '/equipment', color: 'text-cyan-600' },
-{ name: 'QR Scanner', icon: QrCode, path: '/qr-scanner', color: 'text-cyan-600' },
-{ name: 'Earnings', icon: DollarSign, path: '/earnings', color: 'text-cyan-600' },
-{ name: 'Profile', icon: User, path: '/profile', color: 'text-cyan-600' },
+    { name: 'Daily Jobs', icon: Calendar, path: '/jobs', color: 'text-cyan-600' },
+    { name: 'Equipment', icon: Briefcase, path: '/equipment', color: 'text-cyan-600' },
+    { name: 'Earnings', icon: DollarSign, path: '/earnings', color: 'text-cyan-600' },
+    { name: 'Profile', icon: User, path: '/profile', color: 'text-cyan-600' },
   ];
   
   const adminNavItems = [

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import {
   FiCalendar as Calendar,
   FiClock as Clock,
@@ -24,19 +25,19 @@ import {
   FiCamera as Camera,
   FiBox as Car,
   FiHome as Home,
-  FiPackage as Package
+  FiPackage as Package,
+  FiPlus as Plus,
+  FiEdit as Edit,
+  FiTrash2 as Trash2
 } from 'react-icons/fi';
 import useStore from '../../store/useStore';
 import Modal from '../shared/Modal';
 import { 
-  ordersAPI, 
-  testOrdersAPI, 
   parseServicesForSplitting,
-  getPhotoRequirements,
   getPerks,
   SERVICE_CONFIG,
   generateOrderId,
-  mockData
+  supabase
 } from '../../services/api';
 
 const GOLD = '#FFD700'; // Brand gold for perk icon
@@ -44,10 +45,8 @@ const GOLD = '#FFD700'; // Brand gold for perk icon
 const Orders = () => {
   const { user, isAdmin, orders, setOrders, loading, setLoading } = useStore();
   const [filteredOrders, setFilteredOrders] = useState([]);
-  const [filters, setFilters] = useState({
-    status: 'all',
-    search: ''
-  });
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showSplitModal, setShowSplitModal] = useState(false);
   const [showCompletionModal, setShowCompletionModal] = useState(false);
@@ -69,28 +68,22 @@ const Orders = () => {
 
   useEffect(() => {
     filterOrders();
-  }, [orders, filters]);
+  }, [orders, searchTerm, statusFilter]);
 
   const loadOrders = async () => {
     setLoading(true);
     setError(null);
     try {
       console.log('🔄 Loading orders from Orders sheet...');
-      const response = await ordersAPI.getAllOrders();
-      console.log('📡 Orders API Response:', response);
-      
-      if (response.success) {
-        const ordersData = response.data || [];
-        // Only show orders that are not completed (as per requirements)
-        const activeOrders = ordersData.filter(order => 
-          order['Order Status'] !== 'Completed' && order['Order Status'] !== 'Cancelled'
-        );
-        setOrders(activeOrders);
-        console.log('✅ Orders loaded successfully:', activeOrders.length);
-      } else {
-        console.error('❌ Failed to load orders:', response.message);
-        setError('Failed to load orders: ' + response.message);
-      }
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setOrders(data || []);
+      setFilteredOrders(data || []);
+      console.log('✅ Orders loaded successfully:', data.length);
     } catch (error) {
       console.error('❌ Error loading orders:', error);
       setError('Error loading orders: ' + error.message);
@@ -102,30 +95,16 @@ const Orders = () => {
   const filterOrders = () => {
     let filtered = orders;
 
-    if (filters.status !== 'all') {
-      filtered = filtered.filter(order => {
-        const orderStatus = order['Order Status'] || '';
-        const splitStatus = getSplitStatus(order);
-        
-        if (filters.status === 'pending') return orderStatus === 'Pending' && splitStatus === 'Pending';
-        if (filters.status === 'split') return splitStatus === 'Split Completed';
-        if (filters.status === 'single') return splitStatus === 'Single Service';
-        if (filters.status === 'assigned') return orderStatus === 'Assigned';
-        if (filters.status === 'accepted') return orderStatus === 'Accepted';
-        if (filters.status === 'declined') return orderStatus === 'Declined';
-        if (filters.status === 'arrival') return orderStatus === 'Arrival';
-        if (filters.status === 'completed') return orderStatus === 'Completed';
-        if (filters.status === 'cancelled') return orderStatus === 'Cancelled';
-        return true;
-      });
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(order => order['Order Status'] === statusFilter);
     }
 
-    if (filters.search) {
+    if (searchTerm) {
       filtered = filtered.filter(order =>
-        (order.name || '').toLowerCase().includes(filters.search.toLowerCase()) ||
-        (order.email || '').toLowerCase().includes(filters.search.toLowerCase()) ||
-        (order.address || '').toLowerCase().includes(filters.search.toLowerCase()) ||
-        (order['Order ID'] || '').toLowerCase().includes(filters.search.toLowerCase())
+        (order.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (order.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (order.address || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (order['Order ID'] || '').toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -196,6 +175,31 @@ const Orders = () => {
     }
   };
 
+  getServiceIcon.propTypes = {
+    serviceType: PropTypes.string.isRequired
+  };
+
+  const PerkDisplay = ({ perks }) => {
+    if (!perks || perks.length === 0) return null;
+    
+    return (
+      <div className="flex items-center mt-1">
+        <Gift className="h-3 w-3 mr-1" style={{ color: GOLD }} />
+        <span className="text-xs font-medium" style={{ color: GOLD }}>
+          Perk: {perks.join(', ')}
+        </span>
+      </div>
+    );
+  };
+
+  PerkDisplay.propTypes = {
+    perks: PropTypes.arrayOf(PropTypes.string)
+  };
+
+  PerkDisplay.defaultProps = {
+    perks: []
+  };
+
   const handleSplitOrder = (order) => {
     const services = parseServicesForSplitting(order.services);
     if (services.length <= 1) {
@@ -235,27 +239,31 @@ const Orders = () => {
     setError(null);
     try {
       console.log('🔄 Splitting order:', splitConfirmation.orderId);
-      const response = await ordersAPI.splitOrder(splitConfirmation.orderId);
+      // Update order status in Supabase
+      const { error } = await supabase
+        .from('orders')
+        .update({ 
+          'Job Split Status': 'Split Completed',
+          'Split Status': 'Split Completed',
+          updated_at: new Date().toISOString()
+        })
+        .eq('orderId', splitConfirmation.orderId);
       
-      if (response.success) {
-        // Add to recently split orders for revert functionality
-        setRecentlySplitOrders(prev => [...prev, {
-          orderId: splitConfirmation.orderId,
-          splitTime: new Date().toISOString(),
-          services: splitConfirmation.services
-        }]);
-        
-        // Reload orders to get updated split status
-        await loadOrders();
-        
-        setShowSplitModal(false);
-        setSplitConfirmation(null);
-        setSelectedOrder(null);
-        
-        alert(`✅ Successfully split order into ${splitConfirmation.servicesCount} jobs! Check the Jobs tab to assign them to bubblers.`);
-      } else {
-        setError('Error splitting order: ' + (response.message || 'Unknown error'));
-      }
+      // Add to recently split orders for revert functionality
+      setRecentlySplitOrders(prev => [...prev, {
+        orderId: splitConfirmation.orderId,
+        splitTime: new Date().toISOString(),
+        services: splitConfirmation.services
+      }]);
+      
+      // Reload orders to get updated split status
+      await loadOrders();
+      
+      setShowSplitModal(false);
+      setSplitConfirmation(null);
+      setSelectedOrder(null);
+      
+      alert(`✅ Successfully split order into ${splitConfirmation.servicesCount} jobs! Check the Jobs tab to assign them to bubblers.`);
     } catch (error) {
       console.error('Error splitting order:', error);
       setError('Error splitting order: ' + error.message);
@@ -268,15 +276,22 @@ const Orders = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await ordersAPI.completeOrder(orderId, completionNotes, user?.email || 'Admin');
-      if (response.success) {
-        alert('✅ Order marked as completed successfully!');
-        setShowCompletionModal(false);
-        setSelectedOrder(null);
-        await loadOrders(); // This will hide the completed order
-      } else {
-        setError('Error completing order: ' + (response.message || 'Unknown error'));
-      }
+      const { error } = await supabase
+        .from('orders')
+        .update({ 
+          'Order Status': 'Completed',
+          completionNotes,
+          completedBy: user?.email || 'Admin',
+          updated_at: new Date().toISOString()
+        })
+        .eq('orderId', orderId);
+      
+      if (error) throw error;
+      
+      alert('✅ Order marked as completed successfully!');
+      setShowCompletionModal(false);
+      setSelectedOrder(null);
+      await loadOrders(); // This will hide the completed order
     } catch (error) {
       console.error('Error completing order:', error);
       setError('Error completing order: ' + error.message);
@@ -289,15 +304,22 @@ const Orders = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await ordersAPI.cancelOrder(orderId, cancellationReason, user?.email || 'Admin');
-      if (response.success) {
-        alert('✅ Order cancelled successfully!');
-        setShowCancellationModal(false);
-        setSelectedOrder(null);
-        await loadOrders(); // This will hide the cancelled order
-      } else {
-        setError('Error cancelling order: ' + (response.message || 'Unknown error'));
-      }
+      const { error } = await supabase
+        .from('orders')
+        .update({ 
+          'Order Status': 'Cancelled',
+          cancellationReason,
+          cancelledBy: user?.email || 'Admin',
+          updated_at: new Date().toISOString()
+        })
+        .eq('orderId', orderId);
+      
+      if (error) throw error;
+      
+      alert('✅ Order cancelled successfully!');
+      setShowCancellationModal(false);
+      setSelectedOrder(null);
+      await loadOrders(); // This will hide the cancelled order
     } catch (error) {
       console.error('Error cancelling order:', error);
       setError('Error cancelling order: ' + error.message);
@@ -378,13 +400,19 @@ const Orders = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await ordersAPI.revertSplitOrder(order['Order ID'] || order.orderId);
-      if (response.success) {
-        alert('✅ Order split has been reverted!');
-        await loadOrders();
-      } else {
-        setError('Error reverting split: ' + (response.message || 'Unknown error'));
-      }
+      const { error } = await supabase
+        .from('orders')
+        .update({ 
+          'Job Split Status': null,
+          'Split Status': null,
+          updated_at: new Date().toISOString()
+        })
+        .eq('orderId', order['Order ID'] || order.orderId);
+      
+      if (error) throw error;
+      
+      alert('✅ Order split has been reverted!');
+      await loadOrders();
     } catch (error) {
       setError('Error reverting split: ' + error.message);
     } finally {
@@ -445,10 +473,7 @@ const Orders = () => {
                       </p>
                     )}
                     {showPerk && perkName && (
-                      <div className="flex items-center mt-1">
-                        <Gift className="h-3 w-3 mr-1" style={{ color: GOLD }} />
-                        <span className="text-xs font-medium" style={{ color: GOLD }}>Perk: {perkName}</span>
-                      </div>
+                      <PerkDisplay perks={[perkName]} />
                     )}
                   </div>
                 </div>
@@ -552,10 +577,35 @@ const Orders = () => {
     );
   };
 
+  OrderCard.propTypes = {
+    order: PropTypes.shape({
+      '_date': PropTypes.string,
+      'Job Split Status': PropTypes.string,
+      'Order ID': PropTypes.string,
+      'Order Status': PropTypes.string,
+      'Split Status': PropTypes.string,
+      address: PropTypes.string,
+      email: PropTypes.string,
+      jobs: PropTypes.arrayOf(PropTypes.shape({
+        addons: PropTypes.array,
+        bagTypes: PropTypes.array,
+        perk: PropTypes.string,
+        service: PropTypes.string,
+        tier: PropTypes.string,
+        totalBags: PropTypes.number
+      })),
+      name: PropTypes.string,
+      orderId: PropTypes.string,
+      phone: PropTypes.string,
+      services: PropTypes.string,
+      total: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+    }).isRequired
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-500" />
       </div>
     );
   }
@@ -575,9 +625,7 @@ const Orders = () => {
           <button className="btn-secondary" onClick={loadOrders}>
             <RefreshCw className="h-4 w-4 mr-2" /> Refresh
           </button>
-          <button className="btn-secondary" onClick={testOrdersAPI}>
-            <Wifi className="h-4 w-4 mr-2" /> Test API
-          </button>
+
         </div>
       </div>
 
@@ -596,11 +644,7 @@ const Orders = () => {
               <XCircle className="h-5 w-5" />
             </button>
           </div>
-          {error.toLowerCase().includes('cors') || error.toLowerCase().includes('access control') ? (
-            <div className="mt-2 text-xs text-red-700">
-              <strong>API CORS Error:</strong> Your backend must allow CORS for this frontend. Update your Google Apps Script to include Access-Control-Allow-Origin headers.
-            </div>
-          ) : null}
+
         </div>
       )}
 
@@ -613,14 +657,14 @@ const Orders = () => {
               <input
                 type="text"
                 placeholder="Search orders..."
-                value={filters.search}
-                onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-cyan-500"
               />
             </div>
             <select
-              value={filters.status}
-              onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-cyan-500"
             >
               <option value="all">All Orders</option>
@@ -818,10 +862,7 @@ const Orders = () => {
                         {(() => {
                           const perks = getPerks(service.service, service.tier);
                           return perks && perks.length > 0 ? (
-                            <div className="flex items-center mt-1">
-                              <Gift className="h-3 w-3 mr-1 text-purple-600" />
-                              <span className="text-xs text-purple-700 font-medium">Perk: {perks.join(', ')}</span>
-                            </div>
+                            <PerkDisplay perks={perks} />
                           ) : null;
                         })()}
                       </div>

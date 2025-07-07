@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FiPlus as Plus, FiSearch as Search, FiFilter as Filter, FiCalendar as Calendar, FiUser as User, FiFileText as FileText, FiRefreshCw as RefreshCw } from 'react-icons/fi';
 import Modal from '../shared/Modal';
-import { notesAPI } from '../../services/api';
+import { supabase } from '../../services/api';
 
 const AdminNotes = () => {
   const [notes, setNotes] = useState([]);
@@ -39,12 +39,13 @@ const AdminNotes = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await notesAPI.getAllNotes();
-      if (response.success) {
-        setNotes(response.data || []);
-      } else {
-        setError(response.message || 'Failed to fetch notes');
-      }
+      const { data, error } = await supabase
+        .from('admin_notes')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      setNotes(data || []);
     } catch (err) {
       setError('Failed to load admin notes. Please try again.');
       console.error('Error fetching notes:', err);
@@ -57,12 +58,14 @@ const AdminNotes = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await notesAPI.getNotesByJob(jobId);
-      if (response.success) {
-        setNotes(response.data || []);
-      } else {
-        setError(response.message || 'Failed to fetch notes for this job');
-      }
+      const { data, error } = await supabase
+        .from('admin_notes')
+        .select('*')
+        .ilike('relatedJobId', `%${jobId}%`)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      setNotes(data || []);
     } catch (err) {
       setError('Failed to load notes for this job. Please try again.');
       console.error('Error fetching notes by job:', err);
@@ -87,21 +90,22 @@ const AdminNotes = () => {
         author: newNote.author || 'Admin'
       };
 
-      const response = await notesAPI.addNote(noteData);
-      if (response.success) {
-        // Refresh the notes list
-        await fetchNotes();
-        setNewNote({
-          relatedJobId: '',
-          teamMember: '',
-          followUp: 'No',
-          author: '',
-          content: ''
-        });
-        setShowModal(false);
-      } else {
-        setError(response.message || 'Failed to add note');
-      }
+      const { error } = await supabase
+        .from('admin_notes')
+        .insert([noteData]);
+      
+      if (error) throw error;
+      
+      // Refresh the notes list
+      await fetchNotes();
+      setNewNote({
+        relatedJobId: '',
+        teamMember: '',
+        followUp: 'No',
+        author: '',
+        content: ''
+      });
+      setShowModal(false);
     } catch (err) {
       setError('Failed to add note. Please try again.');
       console.error('Error adding note:', err);

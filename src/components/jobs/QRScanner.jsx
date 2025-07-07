@@ -1,67 +1,64 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { Html5QrcodeScanner } from 'html5-qrcode';
 import useStore from '../../store/useStore';
 
 const QRScanner = ({ onScanSuccess, onScanError, onClose }) => {
-  const [scanner, setScanner] = useState(null);
-  const [error, setError] = useState(null);
-  const { user } = useStore();
+  const [scanning, setScanning] = useState(false);
+  const { isAdmin } = useStore();
 
-  const scannerRef = useRef(null);
+  const handleScanSuccess = (decodedText) => {
+    if (onScanSuccess) {
+      onScanSuccess(decodedText);
+    }
+  };
+
+  const handleScanError = (error) => {
+    console.error('QR Scan error:', error);
+    if (onScanError) {
+      onScanError(error);
+    }
+  };
 
   useEffect(() => {
-    let html5QrcodeScanner;
+    const scanner = new Html5QrcodeScanner(
+      'qr-reader',
+      { fps: 10, qrbox: { width: 250, height: 250 } },
+      false
+    );
 
-    const startScanner = async () => {
-      try {
-        html5QrcodeScanner = new Html5QrcodeScanner(
-          'qr-reader',
-          {
-            fps: 10,
-            qrbox: { width: 250, height: 250 },
-            aspectRatio: 1.0,
-          },
-          false
-        );
-
-        html5QrcodeScanner.render(handleScanSuccess, handleScanError);
-        setScanner(html5QrcodeScanner);
-      } catch (err) {
-        console.error('Error initializing QR scanner:', err);
-        setError('Camera initialization failed.');
-      }
-    };
-
-    startScanner();
+    scanner.render(handleScanSuccess, handleScanError);
+    setScanning(true);
 
     return () => {
-      if (html5QrcodeScanner) {
-        html5QrcodeScanner.clear().catch((err) => {
-          console.error('Error clearing scanner on unmount:', err);
-        });
-      }
+      scanner.clear().catch(console.error);
     };
-  }, []);
-
-  const handleScanSuccess = (decodedText, decodedResult) => {
-    console.log('Scan success:', decodedText);
-    if (onScanSuccess) onScanSuccess(decodedText, decodedResult);
-  };
-
-  const handleScanError = (err) => {
-    console.warn('Scan error:', err);
-    if (onScanError) onScanError(err);
-  };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div className="p-4">
+    <div className="space-y-4">
       <div id="qr-reader" className="w-full" />
-      {error && <div className="text-red-600 mt-2">{error}</div>}
-      <button onClick={onClose} className="btn-secondary mt-4">
-        Close Scanner
-      </button>
+      <div className="flex justify-end space-x-2">
+        <button
+          onClick={onClose}
+          className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
+        >
+          Close
+        </button>
+      </div>
     </div>
   );
+};
+
+QRScanner.propTypes = {
+  onClose: PropTypes.func.isRequired,
+  onScanError: PropTypes.func,
+  onScanSuccess: PropTypes.func
+};
+
+QRScanner.defaultProps = {
+  onScanError: null,
+  onScanSuccess: null
 };
 
 export default QRScanner;

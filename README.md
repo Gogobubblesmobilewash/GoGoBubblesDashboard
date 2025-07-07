@@ -38,23 +38,25 @@ A comprehensive dashboard application for GoGoBubbles field staff (Bubblers) and
 - **Routing**: React Router DOM
 - **Icons**: Lucide React
 - **QR Code**: qrcode.react
-- **Backend**: Google Apps Script (API endpoints)
-- **Data Storage**: Google Sheets
+- **Backend**: Supabase (Database, Authentication, Storage)
+- **Real-time**: Supabase Realtime subscriptions
 
 ## 📊 Data Structure
 
-### Google Sheets Tabs
-1. **Jobs**: job id, bubbler name, service type, customer info, status, earnings
-2. **QR Scans**: scan tracking for laundry bags and equipment
-3. **Equipment**: item tracking, assignments, rental status
-4. **Ratings**: customer feedback and ratings
-5. **Admin Notes**: internal communications and notes
+### Supabase Database Tables
+1. **job_assignments**: job id, bubbler name, service type, customer info, status, earnings
+2. **qr_scans**: scan tracking for laundry bags and equipment
+3. **equipment**: item tracking, assignments, rental status
+4. **ratings**: customer feedback and ratings
+5. **admin_notes**: internal communications and notes
+6. **users**: user authentication and profile data
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 - Node.js (v18 or higher)
 - npm or yarn
+- Supabase account and project
 
 ### Installation
 
@@ -69,12 +71,20 @@ A comprehensive dashboard application for GoGoBubbles field staff (Bubblers) and
    npm install
    ```
 
-3. **Start the development server**
+3. **Set up environment variables**
+   Create a `.env` file in the root directory:
+   ```env
+   VITE_SUPABASE_URL=your_supabase_project_url
+   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+   VITE_APP_NAME=GoGoBubbles Bubbler Dashboard
+   ```
+
+4. **Start the development server**
    ```bash
    npm run dev
    ```
 
-4. **Open your browser**
+5. **Open your browser**
    Navigate to `http://localhost:5173`
 
 ### Demo Credentials
@@ -89,25 +99,28 @@ A comprehensive dashboard application for GoGoBubbles field staff (Bubblers) and
 
 ## 🔧 Configuration
 
-### Google Apps Script Setup
+### Supabase Setup
 
-1. Create a new Google Apps Script project
-2. Set up the following endpoints:
-   - Authentication (login, password reset)
-   - Jobs (CRUD operations)
-   - Equipment (tracking and management)
-   - QR Scans (logging and history)
-   - Ratings (feedback management)
-   - Admin Notes (internal communications)
+1. Create a new Supabase project
+2. Set up the following tables:
+   - `job_assignments` (jobs, status, assignments)
+   - `equipment` (equipment tracking)
+   - `qr_scans` (scan history)
+   - `ratings` (customer feedback)
+   - `admin_notes` (internal communications)
+   - `users` (authentication)
 
-3. Update the `BASE_URL` in `src/services/api.js` with your Apps Script deployment URL
+3. Configure Row Level Security (RLS) policies
+4. Set up Supabase Storage buckets for photo uploads
+5. Configure authentication providers
 
 ### Environment Variables
 
 Create a `.env` file in the root directory:
 
 ```env
-VITE_API_BASE_URL=https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 VITE_APP_NAME=GoGoBubbles Bubbler Dashboard
 ```
 
@@ -168,10 +181,10 @@ VITE_APP_NAME=GoGoBubbles Bubbler Dashboard
 
 ## 🔒 Security Features
 
-- **Authentication**: Secure login with session management
+- **Authentication**: Secure login with Supabase Auth
 - **Authorization**: Role-based access control (Bubbler vs Admin)
 - **Data Privacy**: Customer address hiding after job completion
-- **API Security**: Secure Google Apps Script endpoints
+- **API Security**: Secure Supabase endpoints with RLS
 - **Input Validation**: Client and server-side validation
 
 ## 📈 Performance
@@ -179,7 +192,7 @@ VITE_APP_NAME=GoGoBubbles Bubbler Dashboard
 - **Fast Loading**: Optimized with Vite build system
 - **Responsive Design**: Works on desktop, tablet, and mobile
 - **Offline Support**: Basic offline functionality for critical features
-- **Real-time Updates**: Live data synchronization
+- **Real-time Updates**: Live data synchronization with Supabase Realtime
 
 ## 🐛 Troubleshooting
 
@@ -187,7 +200,7 @@ VITE_APP_NAME=GoGoBubbles Bubbler Dashboard
 
 1. **Camera Access**: Ensure camera permissions are granted for QR scanning
 2. **Biometric Login**: Requires device support and user setup
-3. **API Errors**: Check Google Apps Script deployment and permissions
+3. **API Errors**: Check Supabase project configuration and RLS policies
 4. **Offline Mode**: Some features require internet connection
 
 ### Support

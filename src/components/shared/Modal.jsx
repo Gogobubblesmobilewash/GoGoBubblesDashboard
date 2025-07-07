@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { FiX as X } from 'react-icons/fi';
 
 const Modal = ({ title, children, onClose }) => {
@@ -20,6 +21,16 @@ const Modal = ({ title, children, onClose }) => {
       </div>
     </div>
   );
+};
+
+Modal.propTypes = {
+  children: PropTypes.node.isRequired,
+  onClose: PropTypes.func.isRequired,
+  title: PropTypes.string
+};
+
+Modal.defaultProps = {
+  title: null
 };
 
 export default Modal; 
