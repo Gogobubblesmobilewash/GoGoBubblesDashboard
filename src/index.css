@@ -1,110 +1,107 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* Base styles matching GoGoBubbles branding */
 @layer base {
-  html {
-    font-family: 'Poppins', sans-serif;
+  html, body {
+    @apply box-border w-full overflow-x-hidden;
+  }
+  
+  *, *:before, *:after {
+    @apply box-border;
   }
   
   body {
-    background-color: white;
-    color: #111827;
+    @apply min-h-screen m-0 font-inter bg-gradient-to-br from-gray-50 to-blue-50 text-gray-800;
+    font-family: 'Inter', Arial, sans-serif;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-poppins font-semibold text-gray-800;
   }
 }
 
+/* Custom component styles */
 @layer components {
+  /* Button styles matching HTML pages */
   .btn-primary {
-    @apply bg-blue-500 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105;
+    @apply bg-brand-aqua text-white font-poppins font-bold py-4 px-8 rounded-lg text-lg cursor-pointer transition-all duration-300 shadow-button hover:bg-brand-aqua-light hover:shadow-button-hover;
   }
   
   .btn-secondary {
-    @apply bg-white text-blue-500 border-2 border-blue-500 font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105;
+    @apply bg-brand-blue text-white font-poppins font-bold py-4 px-8 rounded-lg text-lg cursor-pointer transition-all duration-300 shadow-button hover:bg-brand-blue-dark hover:shadow-button-hover;
   }
   
+  .btn-outline {
+    @apply bg-transparent border-2 border-brand-aqua text-brand-aqua font-poppins font-bold py-4 px-8 rounded-lg text-lg cursor-pointer transition-all duration-300 hover:bg-brand-aqua hover:text-white;
+  }
+  
+  /* Card styles */
   .card {
-    @apply bg-white rounded-2xl shadow-lg p-6 border border-gray-100;
+    @apply bg-white rounded-2xl shadow-card p-6;
   }
   
   .card-hover {
-    @apply bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:scale-105;
+    @apply bg-white rounded-2xl shadow-card p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
   }
   
-  .highlight {
-    @apply bg-blue-500 text-white;
+  /* Form styles */
+  .form-input {
+    @apply w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-gray-50 text-gray-800 font-inter text-base focus:border-brand-aqua focus:outline-none transition-colors duration-200;
   }
   
-  .sticky-cta {
-    @apply fixed bottom-6 right-6 z-50;
+  .form-label {
+    @apply block font-poppins font-semibold text-gray-700 mb-2;
+  }
+  
+  /* Gradient backgrounds */
+  .bg-gradient-primary {
+    background: linear-gradient(120deg, #4fd1c5 0%, #4299e1 100%);
+  }
+  
+  .bg-gradient-secondary {
+    background: linear-gradient(120deg, #4299e1 0%, #4fd1c5 100%);
+  }
+  
+  /* Logo animation */
+  .logo-float {
+    animation: logo-float 3.2s ease-in-out infinite;
+  }
+  
+  /* Highlight styles */
+  .highlight-yellow {
+    @apply bg-brand-yellow text-gray-800 px-4 py-2 rounded-lg font-bold inline-block text-center;
+  }
+  
+  .highlight-red {
+    @apply bg-brand-red text-white px-4 py-2 rounded-lg font-bold inline-block text-center;
   }
 }
 
-/* Dashboard layout alignment fixes */
-.dashboard-container,
-.dashboard,
-.content-area {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start !important;
-  align-items: flex-start !important;
-  margin-top: 0 !important;
-  padding-top: 0 !important;
+/* Custom animations */
+@keyframes logo-float {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-16px); }
+  100% { transform: translateY(0); }
 }
 
-.dashboard-welcome-banner,
-.dashboard-header {
-  margin-top: 0 !important;
-  padding-top: 0 !important;
-  min-height: auto !important;
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
 }
 
-body,
-html {
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-.dashboard-grid {
-  row-gap: 0 !important;
-}
-
-header {
-  position: relative !important;
-  top: 0 !important;
-}
-
-.welcome-banner {
-  align-self: start !important;
-  justify-self: start !important;
-  margin-top: 0 !important;
-  padding-top: 0 !important;
-}
-
-/* Additional fixes for main content alignment */
-main {
-  margin-top: 0 !important;
-  padding-top: 0 !important;
-}
-
-/* Ensure the first child of main has no top spacing */
-main > *:first-child {
-  margin-top: 0 !important;
-  padding-top: 0 !important;
-}
-
-/* Force dashboard container to start at the very top */
-.dashboard-container {
-  margin-top: 0 !important;
-  padding-top: 0 !important;
-  gap: 0 !important;
-}
-
-/* Remove any spacing from the welcome banner */
-.dashboard-welcome-banner {
-  margin-top: 0 !important;
-  padding-top: 0 !important;
-  margin-bottom: 1.5rem !important;
+/* Responsive utilities */
+@layer utilities {
+  .text-shadow {
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .backdrop-blur {
+    backdrop-filter: blur(10px);
+  }
 }

@@ -92,17 +92,17 @@ const Dashboard = () => {
     // eslint-disable-next-line
   }, []);
 
-  const StatCard = ({ title, value, icon: Icon, change }) => (
-    <div className="bg-white rounded-lg shadow p-6">
+  const StatCard = ({ title, value, icon: Icon, change, color = 'brand-aqua' }) => (
+    <div className="card-hover">
       <div className="flex items-center">
-        <div className="p-2 bg-blue-100 rounded-lg">
-          <Icon className="h-6 w-6 text-blue-600" />
+        <div className={`p-3 bg-${color}-100 rounded-xl`}>
+          <Icon className={`h-6 w-6 text-${color}-600`} />
         </div>
-        <div className="ml-4">
-          <p className="text-sm font-medium text-gray-600">{title}</p>
-          <p className="text-2xl font-semibold text-gray-900">{value}</p>
+        <div className="ml-4 flex-1">
+          <p className="text-sm font-semibold text-gray-600 mb-1">{title}</p>
+          <p className="text-2xl font-bold text-gray-800">{value}</p>
           {change !== null && (
-            <p className={`text-sm ${change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            <p className={`text-sm font-medium ${change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
               {change >= 0 ? '+' : ''}{change}% from last week
             </p>
           )}
@@ -113,52 +113,67 @@ const Dashboard = () => {
 
   StatCard.propTypes = {
     change: PropTypes.number,
+    color: PropTypes.string,
     icon: PropTypes.elementType.isRequired,
     title: PropTypes.string.isRequired,
     value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired
   };
 
   StatCard.defaultProps = {
-    change: null
+    change: null,
+    color: 'brand-aqua'
   };
 
-  const QuickAction = ({ title, description, icon: Icon, onClick }) => (
+  const QuickAction = ({ title, description, icon: Icon, onClick, color = 'brand-aqua' }) => (
     <button
       onClick={onClick}
-      className="bg-white rounded-lg shadow p-4 hover:shadow-md transition-shadow text-left"
+      className="card-hover w-full text-left group"
     >
-      <div className="flex items-center">
-        <div className="p-2 bg-green-100 rounded-lg">
-          <Icon className="h-5 w-5 text-green-600" />
+        <div className="flex items-center">
+        <div className={`p-3 bg-${color}-100 rounded-xl group-hover:bg-${color}-200 transition-colors`}>
+          <Icon className={`h-5 w-5 text-${color}-600`} />
+          </div>
+        <div className="ml-4">
+          <h3 className="text-sm font-semibold text-gray-800 mb-1">{title}</h3>
+          <p className="text-xs text-gray-600">{description}</p>
         </div>
-        <div className="ml-3">
-          <h3 className="text-sm font-medium text-gray-900">{title}</h3>
-          <p className="text-xs text-gray-500">{description}</p>
-        </div>
+        <FiArrowRight className="ml-auto h-4 w-4 text-gray-400 group-hover:text-brand-aqua transition-colors" />
       </div>
     </button>
   );
 
   QuickAction.propTypes = {
+    color: PropTypes.string,
     description: PropTypes.string.isRequired,
     icon: PropTypes.elementType.isRequired,
     onClick: PropTypes.func.isRequired,
     title: PropTypes.string.isRequired
   };
 
+  QuickAction.defaultProps = {
+    color: 'brand-aqua'
+  };
+
   const RecentActivity = () => (
-    <div className="bg-white rounded-lg shadow p-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
-      <div className="space-y-3">
-        {recentActivity.map((activity) => (
-          <div key={activity.id} className="flex items-center space-x-3">
-            <div className="w-2 h-2 bg-blue-500 rounded-full" />
-            <div className="flex-1">
-              <p className="text-sm text-gray-900">{activity.message}</p>
-              <p className="text-xs text-gray-500">{activity.time}</p>
+    <div className="card">
+      <h3 className="text-lg font-bold text-gray-800 mb-4 font-poppins">Recent Activity</h3>
+      <div className="space-y-4">
+        {recentActivity.length > 0 ? (
+          recentActivity.map((activity) => (
+            <div key={activity.id} className="flex items-start space-x-3">
+              <div className="w-2 h-2 bg-brand-aqua rounded-full mt-2 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-800">{activity.message}</p>
+                <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
+              </div>
             </div>
+          ))
+        ) : (
+          <div className="text-center py-8">
+            <FiClock className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+            <p className="text-gray-500 text-sm">No recent activity</p>
           </div>
-        ))}
+        )}
       </div>
     </div>
   );
@@ -166,81 +181,84 @@ const Dashboard = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-500" />
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-aqua" />
       </div>
     );
   }
 
   return (
-    <div className="p-6">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-600 mt-2">Welcome back! Here's what's happening today.</p>
-      </div>
-
+    <div className="space-y-6">
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
           title="Total Jobs"
           value={stats.totalJobs}
           icon={FiList}
           change={12}
+          color="brand-aqua"
         />
         <StatCard
           title="Completed"
           value={stats.completedJobs}
           icon={FiCheckCircle}
           change={8}
+          color="green"
         />
         <StatCard
           title="Pending"
           value={stats.pendingJobs}
           icon={FiClock}
           change={-3}
+          color="brand-blue"
         />
         <StatCard
           title="Total Earnings"
-          value={`$${stats.totalEarnings}`}
+          value={`$${stats.totalEarnings.toFixed(2)}`}
           icon={FiDollarSign}
           change={15}
+          color="brand-aqua"
         />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Quick Actions */}
+      {/* Quick Actions */}
         <div className="lg:col-span-2">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h2>
+          <h2 className="text-xl font-bold text-gray-800 mb-4 font-poppins">Quick Actions</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <QuickAction
               title="New Job"
               description="Create a new job assignment"
               icon={FiPlus}
               onClick={() => {/* Handle new job */}}
+              color="brand-aqua"
             />
             <QuickAction
               title="Scan QR"
               description="Scan QR code for job verification"
               icon={FiCamera}
               onClick={() => {/* Handle QR scan */}}
+              color="brand-blue"
             />
             <QuickAction
               title="View Jobs"
               description="See all active jobs"
               icon={FiList}
               onClick={() => {/* Handle view jobs */}}
+              color="green"
             />
-            <QuickAction
-              title="Manage Team"
+              <QuickAction
+                title="Manage Team"
               description="View and manage bubblers"
               icon={FiUsers}
               onClick={() => {/* Handle team management */}}
+              color="brand-aqua"
             />
           </div>
         </div>
 
         {/* Recent Activity */}
         <div>
-          <RecentActivity />
+        <RecentActivity />
         </div>
       </div>
 
@@ -248,47 +266,56 @@ const Dashboard = () => {
       {isAdmin && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="card">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">System Alerts</h3>
-            <div className="space-y-3">
-              <div className="flex items-center p-3 bg-yellow-50 border border-yellow-200 rounded-xl">
-                <AlertCircle className="h-5 w-5 text-yellow-600 mr-3" />
+            <h3 className="text-lg font-bold text-gray-800 mb-4 font-poppins">System Alerts</h3>
+            <div className="space-y-4">
+              <div className="flex items-start p-4 bg-yellow-50 border-2 border-yellow-200 rounded-xl">
+                <FiAlertCircle className="h-5 w-5 text-yellow-600 mr-3 mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="font-medium text-yellow-800">Equipment Return Due</p>
-                  <p className="text-sm text-yellow-700">3 items need to be returned today</p>
+                  <p className="font-semibold text-yellow-800">Equipment Return Due</p>
+                  <p className="text-sm text-yellow-700 mt-1">3 items need to be returned today</p>
                 </div>
               </div>
-              <div className="flex items-center p-3 bg-blue-50 border border-blue-200 rounded-xl">
-                <Clock className="h-5 w-5 text-blue-600 mr-3" />
+              <div className="flex items-start p-4 bg-blue-50 border-2 border-blue-200 rounded-xl">
+                <FiClock className="h-5 w-5 text-blue-600 mr-3 mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="font-medium text-blue-800">Pending Job Assignments</p>
-                  <p className="text-sm text-blue-700">5 jobs need to be assigned</p>
+                  <p className="font-semibold text-blue-800">Pending Job Assignments</p>
+                  <p className="text-sm text-blue-700 mt-1">5 jobs need to be assigned</p>
                 </div>
               </div>
             </div>
           </div>
+          
           <div className="card">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Performance Overview</h3>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">Team Completion Rate</span>
-                <span className="font-semibold text-green-600">94%</span>
+            <h3 className="text-lg font-bold text-gray-800 mb-4 font-poppins">Performance Overview</h3>
+            <div className="space-y-6">
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-gray-600 font-medium">Team Completion Rate</span>
+                  <span className="font-bold text-green-600">94%</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
-                <div className="bg-green-500 h-2 rounded-full" style={{ width: '94%' }} />
+                  <div className="bg-green-500 h-2 rounded-full transition-all duration-500" style={{ width: '94%' }} />
+                </div>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">Customer Satisfaction</span>
-                <span className="font-semibold text-blue-600">4.8/5.0</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div className="bg-blue-500 h-2 rounded-full" style={{ width: '96%' }} />
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">Revenue This Week</span>
-                <span className="font-semibold text-purple-600">$12,450</span>
+              
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-gray-600 font-medium">Customer Satisfaction</span>
+                  <span className="font-bold text-brand-blue">4.8/5.0</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
-                <div className="bg-purple-500 h-2 rounded-full" style={{ width: '87%' }} />
+                  <div className="bg-brand-blue h-2 rounded-full transition-all duration-500" style={{ width: '96%' }} />
+                </div>
+              </div>
+              
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-gray-600 font-medium">Revenue This Week</span>
+                  <span className="font-bold text-brand-aqua">$12,450</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="bg-brand-aqua h-2 rounded-full transition-all duration-500" style={{ width: '87%' }} />
+                </div>
               </div>
             </div>
           </div>

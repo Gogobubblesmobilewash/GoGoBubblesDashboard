@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { FiSearch, FiFilter, FiPlus, FiEdit, FiTrash2, FiCheck, FiX, FiCamera, FiUpload, FiDownload } from 'react-icons/fi';
+import { FiSearch, FiFilter, FiPlus, FiEdit, FiTrash2, FiCheck, FiX, FiCamera, FiUpload, FiDownload, FiMessageCircle } from 'react-icons/fi';
 import toast, { Toaster } from 'react-hot-toast';
 import useStore from '../../store/useStore';
 import { supabase } from '../../services/api';
@@ -16,1008 +16,526 @@ import {
 } from '../../constants';
 import QRScanner from './QRScanner';
 import Modal from '../shared/Modal';
+import MessageThread from './MessageThread';
+import { parseServicesForSplitting, fetchBubblersWithTravelPrefs } from '../../services/api';
+import dayjs from 'dayjs';
+
+const ACCEPTANCE_WINDOWS = {
+  urgent: 15,
+  standard: 30,
+};
 
 const Jobs = () => {
   const { user, isAdmin } = useStore();
-  const [jobs, setJobs] = useState([]);
-  const [filteredJobs, setFilteredJobs] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [bubblers, setBubblers] = useState([]);
+  const [assignModal, setAssignModal] = useState({ open: false, service: null, order: null });
+  const [assigning, setAssigning] = useState(false);
+  const [assignError, setAssignError] = useState('');
+  const [messageModal, setMessageModal] = useState({ open: false, assignment: null });
+  const [messageCounts, setMessageCounts] = useState({});
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [serviceFilter, setServiceFilter] = useState('all');
-  const [loading, setLoading] = useState(true);
-  const [showQRScanner, setShowQRScanner] = useState(false);
-  const [selectedJob, setSelectedJob] = useState(null);
-  const [showPhotoModal, setShowPhotoModal] = useState(false);
-  const [showPhotoUploadModal, setShowPhotoUploadModal] = useState(false);
-  const [selectedJobForPhoto, setSelectedJobForPhoto] = useState(null);
-  const [photoUploadMode, setPhotoUploadMode] = useState('before');
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [editingJob, setEditingJob] = useState(null);
-  const [showDeclineModal, setShowDeclineModal] = useState(false);
-  const [jobToDecline, setJobToDecline] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [jobsPerPage] = useState(12); // Pagination
 
-  const loadJobs = async () => {
+  // Helper to determine acceptance window (minutes) based on job type
+  const getAcceptanceWindow = (service) => {
+    // Example: urgent for same-day, standard for others
+    if (service.service_type === 'Home Cleaning' && service.status === 'urgent') return ACCEPTANCE_WINDOWS.urgent;
+    return ACCEPTANCE_WINDOWS.standard;
+  };
+
+  // Helper to check if a job offer is expired
+  const isOfferExpired = (assignment) => {
+    if (!assignment.offer_sent_at || !assignment.acceptance_window_minutes) return false;
+    const sent = dayjs(assignment.offer_sent_at);
+    const now = dayjs();
+    return now.diff(sent, 'minute') >= assignment.acceptance_window_minutes;
+  };
+
+  // Helper to get remaining time (MM:SS)
+  const getRemainingTime = (assignment) => {
+    if (!assignment.offer_sent_at || !assignment.acceptance_window_minutes) return null;
+    const sent = dayjs(assignment.offer_sent_at);
+    const now = dayjs();
+    const totalSeconds = assignment.acceptance_window_minutes * 60 - now.diff(sent, 'second');
+    if (totalSeconds <= 0) return '00:00';
+    const mm = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+    const ss = String(totalSeconds % 60).padStart(2, '0');
+    return `${mm}:${ss}`;
+  };
+
+  // Helper to expire job offers that have timed out
+  const expireJobIfNeeded = async (assignment) => {
+    if (assignment.status === 'assigned' && isOfferExpired(assignment)) {
+      await supabase
+        .from('Job_Assignments')
+        .update({ status: 'expired', expired_at: new Date().toISOString() })
+        .eq('id', assignment.id);
+      loadOrders();
+    }
+  };
+
+  // Helper to check if today is the assignment day
+  const isTodayAssignmentDay = (assignment) => {
+    if (!assignment?.assigned_at) return false;
+    const assignedDate = dayjs(assignment.assigned_at).format('YYYY-MM-DD');
+    const today = dayjs().format('YYYY-MM-DD');
+    return assignedDate === today;
+  };
+
+  // Helper to check if job is completed
+  const isJobCompleted = (assignment) => assignment?.status === 'completed';
+
+  // Handle job status updates
+  const updateJobStatus = async (assignmentId, newStatus) => {
+    try {
+      const { error } = await supabase
+        .from('Job_Assignments')
+        .update({ 
+          status: newStatus,
+          ...(newStatus === 'accepted' && { accepted_at: new Date().toISOString() }),
+          ...(newStatus === 'in-progress' && { started_at: new Date().toISOString() }),
+          ...(newStatus === 'completed' && { completed_at: new Date().toISOString() })
+        })
+        .eq('id', assignmentId);
+      
+      if (error) throw error;
+      
+      toast.success(`Job ${newStatus.replace('-', ' ')}!`);
+      loadOrders(); // Refresh the orders to show updated status
+    } catch (error) {
+      console.error('Error updating job status:', error);
+      toast.error('Failed to update job status');
+    }
+  };
+
+  // Load message counts for all job assignments
+  const loadMessageCounts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .select('job_assignment_id')
+        .not('job_assignment_id', 'is', null);
+      
+      if (error) throw error;
+      
+      // Count messages per job assignment
+      const counts = {};
+      data?.forEach(msg => {
+        counts[msg.job_assignment_id] = (counts[msg.job_assignment_id] || 0) + 1;
+      });
+      
+      setMessageCounts(counts);
+    } catch (error) {
+      console.error('Error loading message counts:', error);
+    }
+  };
+
+  // Filter orders/services for bubbler view with search and status filtering
+  const getVisibleOrders = () => {
+    let filteredOrders = orders;
+    
+    // For bubblers: only show orders/services assigned to them
+    if (!isAdmin) {
+      filteredOrders = orders
+        .map(order => {
+          // Filter order_service to only those assigned to this bubbler
+          const filteredServices = (order.order_service || []).filter(service => {
+            if (!service.job_assignments || service.job_assignments.length === 0) return false;
+            // Find assignment for this bubbler
+            return service.job_assignments.some(a => a.bubbler_id === user?.id);
+          });
+          if (filteredServices.length === 0) return null;
+          return { ...order, order_service: filteredServices };
+        })
+        .filter(Boolean);
+    }
+    
+    // Apply search filter
+    if (searchTerm) {
+      filteredOrders = filteredOrders.filter(order => {
+        const searchLower = searchTerm.toLowerCase();
+        return (
+          order.customer_name?.toLowerCase().includes(searchLower) ||
+          order.address?.toLowerCase().includes(searchLower) ||
+          order.order_service?.some(service => 
+            service.service_type?.toLowerCase().includes(searchLower)
+          )
+        );
+      });
+    }
+    
+    // Apply status filter
+    if (statusFilter !== 'all') {
+      filteredOrders = filteredOrders.map(order => {
+        const filteredServices = (order.order_service || []).filter(service => {
+          const assignment = isAdmin
+            ? (service.job_assignments || [])[0]
+            : (service.job_assignments || []).find(a => a.bubbler_id === user?.id);
+          return assignment?.status === statusFilter;
+        });
+        if (filteredServices.length === 0) return null;
+        return { ...order, order_service: filteredServices };
+      }).filter(Boolean);
+    }
+    
+    return filteredOrders;
+  };
+
+  // Fetch all orders with their related services
+  const loadOrders = async () => {
     setLoading(true);
     try {
       const { data, error } = await supabase
-        .from('job_assignments')
-        .select('*')
+        .from('orders')
+        .select(`*, order_service(*, order_cleaning_details(*), order_laundry_bags(*), order_vehicles(*), job_assignments(*))`)
         .order('created_at', { ascending: false });
-
       if (error) throw error;
-      setJobs(data || []);
-      setFilteredJobs(data || []);
+      setOrders(data || []);
     } catch (error) {
-      console.error('Error loading jobs:', error);
-      toast.error('Failed to load jobs');
+      console.error('Error loading orders:', error);
+      toast.error('Failed to load orders');
     } finally {
       setLoading(false);
     }
   };
 
-  const loadQRScanData = async () => {
-    // Load QR scan data if needed
-  };
-
-  const filterJobs = () => {
-    let filtered = jobs;
-
-    // Apply search filter
-    if (searchTerm) {
-      filtered = filtered.filter(job =>
-        job.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        job.customerAddress?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        job.jobId?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    // Apply status filter
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(job => job.jobStatus === statusFilter);
-    }
-
-    // Apply service filter
-    if (serviceFilter !== 'all') {
-      filtered = filtered.filter(job => job.serviceType === serviceFilter);
-    }
-
-    setFilteredJobs(filtered);
-    setCurrentPage(1); // Reset to first page when filtering
-  };
-
-  useEffect(() => {
-    loadJobs();
-  }, []);
-
-  useEffect(() => {
-    loadQRScanData();
-  }, []);
-
-  useEffect(() => {
-    filterJobs();
-  }, [jobs, searchTerm, statusFilter, serviceFilter]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const handleQRScan = (decodedText) => {
+  // Fetch all bubblers with travel preferences
+  const loadBubblers = async () => {
     try {
-      const jobData = JSON.parse(decodedText);
-      const job = jobs.find(j => j.jobId === jobData.jobId);
-      
-      if (job) {
-        setSelectedJob(job);
-        setShowPhotoModal(true);
-      } else {
-        toast.error('Job not found');
-      }
-    } catch {
-      toast.error('Invalid QR code');
+      const data = await fetchBubblersWithTravelPrefs();
+      setBubblers(data);
+    } catch (error) {
+      console.error('Error loading bubblers:', error);
+      toast.error('Failed to load bubblers');
     }
   };
 
-  const handlePhotoUpload = async (jobId, photoData) => {
-    const uploadPromise = new Promise((resolve, reject) => {
-      (async () => {
-        try {
-          // Upload photo to Supabase Storage
-          const fileName = `${jobId}_${Date.now()}.jpg`;
-          const { error } = await supabase.storage
-            .from('job-photos')
-            .upload(fileName, photoData);
+  useEffect(() => {
+    loadOrders();
+    loadBubblers();
+    loadMessageCounts(); // Load message counts on mount
+  }, []);
 
-          if (error) throw error;
-
-          // Get public URL
-          const { data: urlData } = supabase.storage
-            .from('job-photos')
-            .getPublicUrl(fileName);
-
-          // Update job with photo URL
-          const { error: updateError } = await supabase
-            .from('job_assignments')
-            .update({ 
-              photoUploadLink: urlData.publicUrl,
-              timestampCompleted: new Date().toISOString()
-            })
-            .eq('id', jobId);
-
-          if (updateError) throw updateError;
-
-          // Reload jobs
-        await loadJobs();
-          setShowPhotoModal(false);
-          setSelectedJob(null);
-          resolve();
-    } catch (error) {
-          console.error('Error uploading photo:', error);
-          reject(error);
+  // Set up real-time subscription for job status changes
+  useEffect(() => {
+    const subscription = supabase
+      .channel('job-status-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'Job_Assignments'
+        },
+        () => {
+          // Reload orders when job assignments change
+          loadOrders();
+          loadMessageCounts();
         }
-      })();
-    });
+      )
+      .subscribe();
 
-    toast.promise(uploadPromise, {
-      loading: 'Uploading photo...',
-      success: 'Photo uploaded successfully!',
-      error: 'Failed to upload photo'
-    });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  // Placeholder: Calculate travel time (returns minutes, real implementation would use a routing API)
+  const calculateTravelTime = (bubbler, jobAddress) => {
+    // For now, return a random value for demo
+    return Math.floor(Math.random() * 60) + 5;
   };
 
-  const handleLaundryPhotoUpload = async (jobId, photoData, mode) => {
-    const uploadPromise = new Promise((resolve, reject) => {
-      (async () => {
-        try {
-          const fileName = `${jobId}_${mode}_${Date.now()}.jpg`;
-          const { error } = await supabase.storage
-            .from('laundry-photos')
-            .upload(fileName, photoData);
-
-          if (error) throw error;
-
-          // Get public URL
-          const { data: urlData } = supabase.storage
-            .from('laundry-photos')
-            .getPublicUrl(fileName);
-
-          // Update job with photo URL based on mode
-          const updateData = mode === 'before' 
-            ? { beforePhotoLink: urlData.publicUrl }
-            : { afterPhotoLink: urlData.publicUrl };
-
-          const { error: updateError } = await supabase
-            .from('job_assignments')
-            .update(updateData)
-            .eq('id', jobId);
-
-          if (updateError) throw updateError;
-
-        await loadJobs();
-          setShowPhotoUploadModal(false);
-          setSelectedJobForPhoto(null);
-          resolve();
-    } catch (error) {
-          console.error('Error uploading laundry photo:', error);
-          reject(error);
-        }
-      })();
-    });
-
-    toast.promise(uploadPromise, {
-      loading: `Uploading ${mode} photo...`,
-      success: `${mode.charAt(0).toUpperCase() + mode.slice(1)} photo uploaded successfully!`,
-      error: `Failed to upload ${mode} photo`
-    });
-  };
-
-
-
-  const handleEditJob = (job) => {
-    setEditingJob({ ...job });
-    setShowEditModal(true);
-  };
-
-  const handleSaveJob = async () => {
-    if (!editingJob) return;
-
-    const savePromise = new Promise((resolve, reject) => {
-      (async () => {
-        try {
-          if (editingJob.id) {
-            // Update existing job
-            const { error } = await supabase
-              .from('job_assignments')
-              .update({
-                customerName: editingJob.customerName,
-                customerAddress: editingJob.customerAddress,
-                customerPhone: editingJob.customerPhone,
-                customerEmail: editingJob.customerEmail,
-                serviceType: editingJob.serviceType,
-                tier: editingJob.tier,
-                addons: editingJob.addons,
-                scheduledDateTime: editingJob.scheduledDateTime,
-                earningsEstimate: editingJob.earningsEstimate,
-                updated_at: new Date().toISOString()
-              })
-              .eq('id', editingJob.id);
-
-            if (error) throw error;
-      } else {
-            // Create new job
-            const { error } = await supabase
-              .from('job_assignments')
-              .insert([editingJob]);
-
-            if (error) throw error;
-          }
-
-        await loadJobs();
-          setShowEditModal(false);
-          setEditingJob(null);
-          resolve();
-    } catch (error) {
-          console.error('Error saving job:', error);
-          reject(error);
-        }
-      })();
-    });
-
-    toast.promise(savePromise, {
-      loading: 'Saving job...',
-      success: 'Job saved successfully!',
-      error: 'Failed to save job'
-    });
-  };
-
-  const handleDeclineJob = (job) => {
-    setJobToDecline(job);
-    setShowDeclineModal(true);
-  };
-
-  const confirmDeclineJob = async () => {
-    if (!jobToDecline) return;
-
-    const declinePromise = new Promise((resolve, reject) => {
-      (async () => {
-        try {
-          const { error } = await supabase
-            .from('job_assignments')
-            .update({ 
-              jobStatus: 'declined',
-              declinedAt: new Date().toISOString(),
-              declinedBy: user?.email || 'Unknown'
-            })
-            .eq('id', jobToDecline.id);
-
-          if (error) throw error;
-        await loadJobs();
-          setShowDeclineModal(false);
-          setJobToDecline(null);
-          resolve();
-    } catch (error) {
-          console.error('Error declining job:', error);
-          reject(error);
-        }
-      })();
-    });
-
-    toast.promise(declinePromise, {
-      loading: 'Declining job...',
-      success: 'Job declined successfully!',
-      error: 'Failed to decline job'
-    });
-  };
-
-  // Pagination
-  const indexOfLastJob = currentPage * jobsPerPage;
-  const indexOfFirstJob = indexOfLastJob - jobsPerPage;
-  const currentJobs = filteredJobs.slice(indexOfFirstJob, indexOfLastJob);
-  const totalPages = Math.ceil(filteredJobs.length / jobsPerPage);
-
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
-
-  const getPhotoRequirementsForJob = (job) => {
-    const serviceType = job.serviceType;
-    const tier = job.tier || '';
-    const addons = job.addons ? job.addons.split(',').map(a => a.trim()) : [];
-    
-    return getPhotoRequirements(serviceType, tier, addons);
-  };
-
-  getPhotoRequirementsForJob.propTypes = {
-    job: PropTypes.shape({
-      serviceType: PropTypes.string.isRequired,
-      tier: PropTypes.string,
-      addons: PropTypes.oneOfType([
-        PropTypes.string,
-        PropTypes.arrayOf(PropTypes.string)
-      ])
-    }).isRequired
-  };
-
-  const getPerksForJob = (job) => {
-    const serviceType = job.serviceType;
-    const tier = job.tier || '';
-    const isFirstTime = job.isFirstTime || false;
-    const refreshCleanCount = job.refreshCleanCount || 0;
-    
-    return getPerks(serviceType, tier, isFirstTime, refreshCleanCount);
-  };
-
-  getPerksForJob.propTypes = {
-    job: PropTypes.shape({
-      serviceType: PropTypes.string.isRequired,
-      tier: PropTypes.string,
-      isFirstTime: PropTypes.bool,
-      refreshCleanCount: PropTypes.number
-    }).isRequired
-  };
-
-  const getPayoutForJob = (job) => {
-    const serviceType = job.serviceType;
-    const tier = job.tier || '';
-    const addons = job.addons ? job.addons.split(',').map(a => a.trim()) : [];
-    
-    return getPayoutRules(serviceType, tier, addons);
-  };
-
-  getPayoutForJob.propTypes = {
-    job: PropTypes.shape({
-      serviceType: PropTypes.string.isRequired,
-      tier: PropTypes.string,
-      addons: PropTypes.oneOfType([
-        PropTypes.string,
-        PropTypes.arrayOf(PropTypes.string)
-      ])
-    }).isRequired
-  };
-
-  const JobCard = ({ job }) => {
-    const photoRequirements = getPhotoRequirementsForJob(job);
-    const perks = getPerksForJob(job);
-    const payout = getPayoutForJob(job);
-    const isActiveJob = job.jobStatus === 'assigned' || job.jobStatus === 'in-progress';
-    
-    return (
-      <div className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow">
-        <div className="flex justify-between items-start mb-4">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900">{job.customerName}</h3>
-            <p className="text-sm text-gray-600">{job.customerAddress}</p>
-            <p className="text-xs text-gray-500">Job ID: {job.jobId}</p>
-          </div>
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-            job.jobStatus === 'completed' ? 'bg-green-100 text-green-800' :
-            job.jobStatus === 'in-progress' ? 'bg-blue-100 text-blue-800' :
-            job.jobStatus === 'assigned' ? 'bg-yellow-100 text-yellow-800' :
-            job.jobStatus === 'declined' ? 'bg-red-100 text-red-800' :
-            'bg-gray-100 text-gray-800'
-          }`}>
-            {job.jobStatus.replace('-', ' ').toUpperCase()}
-          </span>
-        </div>
-        
-        <div className="space-y-3 mb-4">
-          <div>
-            <p className="text-sm font-medium text-gray-900">{job.serviceType}</p>
-            {job.tier && <p className="text-sm text-gray-600">Tier: {job.tier}</p>}
-              </div>
-            
-            {job.addons && job.addons.length > 0 && (
+  // Render each order and its services (updated to show timer/status)
+  const renderOrderServices = (order) => {
+    if (!order.order_service || order.order_service.length === 0) return null;
+    return order.order_service.map((service, idx) => {
+      // Find job assignment for this service (if any)
+      const assignment = isAdmin
+        ? (service.job_assignments || [])[0]
+        : (service.job_assignments || []).find(a => a.bubbler_id === user?.id);
+      // If assigned, check for timer/expiration
+      if (assignment && assignment.status === 'assigned') {
+        expireJobIfNeeded(assignment);
+      }
+      // Address visibility logic
+      let showAddress = true;
+      if (!isAdmin) {
+        showAddress = isTodayAssignmentDay(assignment) && !isJobCompleted(assignment);
+      }
+      return (
+        <div key={service.id} className="bg-white rounded-lg shadow p-4 mb-4">
+          <div className="flex justify-between items-center mb-2">
             <div>
-              <p className="text-sm text-gray-600">Add-ons: {job.addons}</p>
-            </div>
-            )}
-            
-          {job.bubblerAssigned && (
-            <div>
-              <p className="text-sm text-gray-600">Assigned to: {job.bubblerAssigned}</p>
-              </div>
-            )}
-            
-          {job.scheduledDateTime && (
-            <div>
-              <p className="text-sm text-gray-600">Scheduled: {job.scheduledDateTime}</p>
-              </div>
-            )}
-
-          {job.earningsEstimate && (
-            <div>
-              <p className="text-sm font-medium text-green-600">Est. Earnings: ${job.earningsEstimate}</p>
-              </div>
-            )}
-        </div>
-
-        {/* Perks Display (only for Bubblers) */}
-        {!isAdmin && perks && perks.length > 0 && (
-          <div className="mb-4 p-3 bg-purple-50 rounded-lg">
-            <p className="text-sm font-medium text-purple-900 mb-2">Perks:</p>
-            <div className="flex flex-wrap gap-1">
-              {perks.map((perk) => (
-                <span key={`perk-${perk}`} className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded">
-                      {perk}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-        {/* Payout Rules (only for Bubblers in expanded view) */}
-        {!isAdmin && payout && (
-          <div className="mb-4 p-3 bg-green-50 rounded-lg">
-            <p className="text-sm font-medium text-green-900 mb-2">Payout Structure:</p>
-            <div className="text-sm text-green-800">
-              <p>Base: ${payout.base}</p>
-              {payout.addons && payout.addons.length > 0 && (
-                <p>Add-ons: ${payout.addons.join(', ')}</p>
+              <h3 className="text-lg font-semibold text-gray-900">{order.customer_name}</h3>
+              {showAddress ? (
+                <p className="text-sm text-gray-600">{order.address}</p>
+              ) : (
+                !isAdmin && <p className="text-sm text-gray-400 italic">Address will be visible on the day of assignment</p>
               )}
-              <p className="font-medium">Total: ${payout.total}</p>
-          </div>
-          </div>
-          )}
-          
-        {/* Photo Requirements */}
-        {photoRequirements && photoRequirements.length > 0 && (
-          <div className="mb-4">
-            <p className="text-sm font-medium text-gray-900 mb-2">Photo Requirements:</p>
-            <div className="flex flex-wrap gap-1">
-              {photoRequirements.map((req) => (
-                <span key={`req-${req}`} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
-                  {req}
+              <p className="text-xs text-gray-500">Order ID: {order.id}</p>
+              <p className="text-xs text-gray-500">Service: {service.service_type}</p>
+            </div>
+            <div>
+              <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                {assignment ? assignment.status.toUpperCase() : (service.status ? service.status.toUpperCase() : 'UNASSIGNED')}
+              </span>
+              {/* Timer preview for admin */}
+              {assignment && assignment.status === 'assigned' && (
+                <span className="ml-2 px-2 py-1 rounded bg-yellow-100 text-yellow-800 text-xs font-mono">
+                  ⏳ {getRemainingTime(assignment)}
                 </span>
-              ))}
+              )}
+              {assignment && assignment.status === 'expired' && (
+                <span className="ml-2 px-2 py-1 rounded bg-red-100 text-red-800 text-xs font-mono">
+                  Expired
+                </span>
+              )}
             </div>
+          </div>
+          {/* Service-specific details */}
+          {service.service_type === 'Home Cleaning' && service.order_cleaning_details && (
+            <div className="text-sm text-gray-700 mb-2">
+              Bedrooms: {service.order_cleaning_details[0]?.bedrooms_count}, Bathrooms: {service.order_cleaning_details[0]?.bathrooms_count}
             </div>
           )}
-          
-        {/* Action Buttons */}
-          <div className="flex space-x-2">
-          {isActiveJob && (
-              <button 
-              onClick={() => {
-                setSelectedJob(job);
-                setShowPhotoModal(true);
-              }}
-              className="flex-1 bg-blue-600 text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors flex items-center justify-center"
-            >
-              <FiCamera className="mr-1" />
-              Upload Photo
+          {service.service_type === 'Laundry' && service.order_laundry_bags && (
+            <div className="text-sm text-gray-700 mb-2">
+              Bags: {service.order_laundry_bags.map(bag => `${bag.bag_type} x${bag.quantity}`).join(', ')}
+            </div>
+          )}
+          {service.service_type === 'Vehicles' && service.order_vehicles && (
+            <div className="text-sm text-gray-700 mb-2">
+              Vehicles: {service.order_vehicles.map(v => `${v.vehicle_type} (${v.tier})`).join(', ')}
+            </div>
+          )}
+          {/* Action buttons */}
+          <div className="flex gap-2 mt-2 flex-wrap">
+            {/* Messages button - only show if job is assigned */}
+            {assignment && assignment.status !== 'expired' && assignment.status !== 'declined' && (
+              <button
+                className="bg-green-600 text-white px-3 py-2 rounded hover:bg-green-700 transition-colors flex items-center gap-1 relative"
+                onClick={() => setMessageModal({ open: true, assignment })}
+              >
+                <FiMessageCircle className="w-4 h-4" />
+                Messages
+                {messageCounts[assignment.id] > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
+                    {messageCounts[assignment.id] > 99 ? '99+' : messageCounts[assignment.id]}
+                  </span>
+                )}
               </button>
             )}
             
-          {job.serviceType === 'Laundry Service' && isActiveJob && (
-                <button 
-              onClick={() => {
-                setSelectedJobForPhoto(job);
-                setPhotoUploadMode('before');
-                setShowPhotoUploadModal(true);
-              }}
-              className="flex-1 bg-purple-600 text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-purple-700 transition-colors"
-            >
-              Before Photo
-                </button>
-          )}
-
-          {job.serviceType === 'Laundry Service' && isActiveJob && (
-              <button 
-              onClick={() => {
-                setSelectedJobForPhoto(job);
-                setPhotoUploadMode('after');
-                setShowPhotoUploadModal(true);
-              }}
-              className="flex-1 bg-green-600 text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-green-700 transition-colors"
-            >
-              After Photo
-              </button>
+            {/* Job Status Management - for bubblers only */}
+            {!isAdmin && assignment && (
+              <div className="flex gap-1">
+                {/* Accept/Decline buttons for assigned jobs */}
+                {assignment.status === 'assigned' && (
+                  <>
+                    <button
+                      className="bg-green-600 text-white px-3 py-2 rounded hover:bg-green-700 transition-colors text-sm"
+                      onClick={() => updateJobStatus(assignment.id, 'accepted')}
+                    >
+                      Accept
+                    </button>
+                    <button
+                      className="bg-red-600 text-white px-3 py-2 rounded hover:bg-red-700 transition-colors text-sm"
+                      onClick={() => updateJobStatus(assignment.id, 'declined')}
+                    >
+                      Decline
+                    </button>
+                  </>
+                )}
+                
+                {/* Start job button for accepted jobs */}
+                {assignment.status === 'accepted' && (
+                  <button
+                    className="bg-blue-600 text-white px-3 py-2 rounded hover:bg-blue-700 transition-colors text-sm"
+                    onClick={() => updateJobStatus(assignment.id, 'in-progress')}
+                  >
+                    Start Job
+                  </button>
+                )}
+                
+                {/* Complete job button for in-progress jobs */}
+                {assignment.status === 'in-progress' && (
+                  <button
+                    className="bg-purple-600 text-white px-3 py-2 rounded hover:bg-purple-700 transition-colors text-sm"
+                    onClick={() => updateJobStatus(assignment.id, 'completed')}
+                  >
+                    Complete Job
+                  </button>
+                )}
+              </div>
             )}
             
-            {isAdmin && (
-              <>
-                <button 
-                  onClick={() => handleEditJob(job)} 
-                className="flex-1 bg-yellow-600 text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-yellow-700 transition-colors"
-                >
-                Edit
-                </button>
-                <button 
-                onClick={() => handleDeclineJob(job)}
-                className="flex-1 bg-red-600 text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-red-700 transition-colors"
-                >
-                Decline
-                </button>
-              </>
-          )}
+            {/* Assignment button (only if not assigned or expired) - only for admin */}
+            {isAdmin && (!assignment || assignment.status === 'expired' || assignment.status === 'declined') && (
+              <button
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+                onClick={() => setAssignModal({ open: true, service, order })}
+                disabled={service.status && service.status !== 'unassigned'}
+              >
+                Assign Job
+              </button>
+            )}
+          </div>
         </div>
-      </div>
+      );
+    });
+  };
+
+  // Assignment Modal (updated)
+  const AssignModal = ({ open, service, order, onClose }) => {
+    if (!open || !service || !order) return null;
+    // Filter eligible bubblers
+    const eligibleBubblers = bubblers.filter(bubbler => {
+      if (!bubbler.is_active) return false;
+      const travelTime = calculateTravelTime(bubbler, order.address);
+      return travelTime <= (bubbler.preferred_travel_minutes || 30);
+    });
+    return (
+      <Modal title="Assign Job to Bubbler" onClose={onClose} size="lg">
+        <div className="mb-4">
+          <div className="font-semibold mb-2">Job: {service.service_type} for {order.customer_name}</div>
+          <div className="text-sm text-gray-600 mb-2">{order.address}</div>
+        </div>
+        <div className="mb-4">
+          <div className="font-semibold mb-2">Eligible Bubblers:</div>
+          {eligibleBubblers.length === 0 && <div className="text-red-500">No eligible bubblers within travel range.</div>}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {eligibleBubblers.map(bubbler => {
+              const travelTime = calculateTravelTime(bubbler, order.address);
+              return (
+                <div key={bubbler.id} className="border rounded-lg p-3 flex flex-col gap-2 bg-gray-50">
+                  <div className="font-semibold">{bubbler.name}</div>
+                  <div className="text-xs text-gray-600">{bubbler.email}</div>
+                  <div className="text-xs text-gray-600">{bubbler.phone}</div>
+                  <span className="inline-block px-2 py-1 rounded bg-blue-100 text-blue-800 text-xs font-medium">
+                    Travel Radius: {bubbler.preferred_travel_minutes || 30} min
+                  </span>
+                  <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${travelTime > bubbler.preferred_travel_minutes ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
+                    Est. Travel: {travelTime} min
+                  </span>
+                  {travelTime > bubbler.preferred_travel_minutes && (
+                    <span className="text-xs text-yellow-700 bg-yellow-100 rounded px-2 py-1 mt-1">⚠️ Out of preferred range</span>
+                  )}
+                  <button
+                    className="mt-2 bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition-colors"
+                    disabled={assigning}
+                    onClick={async () => {
+                      setAssignError('');
+                      setAssigning(true);
+                      try {
+                        // Insert into job_assignments with timer fields
+                        const acceptance_window_minutes = getAcceptanceWindow(service);
+                        const { error } = await supabase
+                          .from('Job_Assignments')
+                          .insert({
+                            order_service_id: service.id,
+                            bubbler_id: bubbler.id,
+                            status: 'assigned',
+                            assigned_at: new Date().toISOString(),
+                            offer_sent_at: new Date().toISOString(),
+                            acceptance_window_minutes,
+                          });
+                        if (error) throw error;
+                        toast.success('Job assigned!');
+                        setAssignModal({ open: false, service: null, order: null });
+                        loadOrders();
+                      } catch (err) {
+                        setAssignError(err.message);
+                      } finally {
+                        setAssigning(false);
+                      }
+                    }}
+                  >
+                    Assign to {bubbler.name}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+          {assignError && <div className="text-red-500 mt-2">{assignError}</div>}
+        </div>
+      </Modal>
     );
   };
 
-  JobCard.propTypes = {
-    job: PropTypes.shape({
-      addons: PropTypes.oneOfType([
-        PropTypes.string,
-        PropTypes.arrayOf(PropTypes.string)
-      ]),
-      bagTypes: PropTypes.oneOfType([
-        PropTypes.string,
-        PropTypes.arrayOf(PropTypes.string)
-      ]),
-      bubblerAssigned: PropTypes.string,
-      customerAddress: PropTypes.string,
-      customerEmail: PropTypes.string,
-      customerName: PropTypes.string,
-      customerPhone: PropTypes.string,
-      deliveryRequired: PropTypes.oneOfType([
-        PropTypes.string,
-        PropTypes.bool
-      ]),
-      earningsEstimate: PropTypes.oneOfType([
-        PropTypes.string,
-        PropTypes.number
-      ]),
-      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-      includedPerks: PropTypes.string,
-      isFirstTime: PropTypes.oneOfType([
-        PropTypes.string,
-        PropTypes.bool
-      ]),
-      jobId: PropTypes.string,
-      jobStatus: PropTypes.string,
-      orderId: PropTypes.string,
-      photoUploadLink: PropTypes.string,
-      refreshCleanCount: PropTypes.oneOfType([
-        PropTypes.string,
-        PropTypes.number
-      ]),
-      scheduledDateTime: PropTypes.string,
-      serviceType: PropTypes.string,
-      tier: PropTypes.string,
-      timestampCompleted: PropTypes.string
-    }).isRequired
-  };
-
   if (loading) {
-    return (
-      <div className="p-6">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/4 mb-6" />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-white rounded-lg shadow p-6">
-                <div className="h-6 bg-gray-200 rounded w-3/4 mb-4" />
-                <div className="space-y-2">
-                  <div className="h-4 bg-gray-200 rounded w-1/2" />
-                  <div className="h-4 bg-gray-200 rounded w-2/3" />
-                  <div className="h-4 bg-gray-200 rounded w-1/3" />
-      </div>
-        </div>
-            ))}
-          </div>
-                </div>
-              </div>
-            );
+    return <div className="p-6">Loading orders...</div>;
   }
-          
-            return (
-    <div className="p-6">
-      <Toaster position="top-right" />
-      
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Job Management</h1>
-        <div className="flex space-x-2">
-            <button 
-            onClick={() => setShowQRScanner(true)}
-            className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors flex items-center"
-            >
-            <FiCamera className="mr-2" />
-            Scan QR
-            </button>
-          {isAdmin && (
-            <button 
-              onClick={() => handleEditJob({})}
-              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors flex items-center"
-            >
-              <FiPlus className="mr-2" />
-              New Job
-            </button>
-          )}
-          </div>
-        </div>
-
-      {/* Filters */}
-      <div className="bg-white rounded-lg shadow p-4 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="relative">
-            <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search jobs..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-          <div className="relative">
-            <FiFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="all">All Status</option>
-              {JOB_STATUSES.map(status => (
-                <option key={status} value={status}>
-                  {status.replace('-', ' ').toUpperCase()}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="relative">
-            <FiFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <select
-              value={serviceFilter}
-              onChange={(e) => setServiceFilter(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="all">All Services</option>
-              {SERVICE_TYPES.map(service => (
-                <option key={service} value={service}>{service}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-      </div>
-
-      {/* Jobs Grid with Pagination */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-        {currentJobs.map((job) => (
-          <JobCard key={job.id} job={job} />
-        ))}
-      </div>
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex justify-center items-center space-x-2 mb-6">
-          <button
-            onClick={() => paginate(currentPage - 1)}
-            disabled={currentPage === 1}
-            className="px-3 py-2 border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-          >
-            Previous
-          </button>
-          
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map(number => (
-            <button
-              key={number}
-              onClick={() => paginate(number)}
-              className={`px-3 py-2 border rounded-md ${
-                currentPage === number
-                  ? 'bg-blue-600 text-white border-blue-600'
-                  : 'border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              {number}
-            </button>
-          ))}
-          
-          <button
-            onClick={() => paginate(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className="px-3 py-2 border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-          >
-            Next
-          </button>
-        </div>
-      )}
-
-      {filteredJobs.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-gray-500 text-lg">No jobs found matching your criteria.</p>
-        </div>
-      )}
-
-      {/* QR Scanner Modal */}
-      {showQRScanner && (
-        <Modal title="Scan QR Code" onClose={() => setShowQRScanner(false)}>
-          <QRScanner
-            onScanSuccess={handleQRScan}
-            onScanError={(error) => console.error('QR Scan error:', error)}
-            onClose={() => setShowQRScanner(false)}
-          />
-        </Modal>
-      )}
-
-      {/* Photo Upload Modal */}
-      {showPhotoModal && selectedJob && (
-        <PhotoUploadModal 
-          job={selectedJob}
-          onUpload={handlePhotoUpload}
-          onClose={() => { setShowPhotoModal(false); setSelectedJob(null); }}
-        />
-      )}
-
-      {/* Laundry Photo Upload Modal */}
-      {showPhotoUploadModal && selectedJobForPhoto && (
-        <LaundryPhotoUploadModal 
-          job={selectedJobForPhoto}
-          mode={photoUploadMode}
-          onUpload={handleLaundryPhotoUpload}
-          onClose={() => { setShowPhotoUploadModal(false); setSelectedJobForPhoto(null); }}
-        />
-      )}
-
-      {/* Job Edit Modal */}
-      {showEditModal && editingJob && (
-        <JobEditModal
-          job={editingJob}
-          onSave={handleSaveJob}
-          onClose={() => { setShowEditModal(false); setEditingJob(null); }}
-        />
-      )}
-
-      {/* Decline Confirmation Modal */}
-      {showDeclineModal && jobToDecline && (
-        <Modal title="Confirm Job Decline" onClose={() => { setShowDeclineModal(false); setJobToDecline(null); }}>
-          <div className="space-y-4">
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <h3 className="font-semibold text-red-900 mb-2">Decline Job</h3>
-              <p className="text-red-800"><strong>Customer:</strong> {jobToDecline.customerName}</p>
-              <p className="text-red-800"><strong>Job ID:</strong> {jobToDecline.jobId}</p>
-              <p className="text-red-800"><strong>Service:</strong> {jobToDecline.serviceType}</p>
-            </div>
-            
-            <p className="text-gray-600">Are you sure you want to decline this job? This action cannot be undone.</p>
-            
-            <div className="flex space-x-2 pt-4">
-              <button 
-                onClick={confirmDeclineJob}
-                className="flex-1 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors"
-              >
-                Confirm Decline
-              </button>
-              <button 
-                onClick={() => { setShowDeclineModal(false); setJobToDecline(null); }}
-                className="flex-1 bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </Modal>
-      )}
-    </div>
-  );
-};
-
-// Photo Upload Modal Component
-const PhotoUploadModal = ({ job, onUpload, onClose }) => (
-  <Modal title={`Upload Photo for ${job.customerName}`} onClose={onClose}>
-          <div className="space-y-4">
-      <p className="text-gray-600">Upload a photo for job completion verification.</p>
-      <input
-        type="file"
-        accept="image/*"
-        onChange={(e) => {
-          const file = e.target.files[0];
-          if (file) {
-            onUpload(job.id, file);
-          }
-        }}
-        className="w-full p-2 border border-gray-300 rounded-md"
-      />
-          </div>
-        </Modal>
-);
-
-PhotoUploadModal.propTypes = {
-  job: PropTypes.shape({
-    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-    customerName: PropTypes.string.isRequired
-  }).isRequired,
-  onClose: PropTypes.func.isRequired,
-  onUpload: PropTypes.func.isRequired
-};
-
-// Laundry Photo Upload Modal Component
-const LaundryPhotoUploadModal = ({ job, mode, onUpload, onClose }) => (
-  <Modal title={`Upload ${mode.charAt(0).toUpperCase() + mode.slice(1)} Photo for ${job.customerName}`} onClose={onClose}>
-          <div className="space-y-4">
-      <p className="text-gray-600">Upload a {mode} photo for laundry service verification.</p>
-              <input
-                type="file"
-                accept="image/*"
-        onChange={(e) => {
-          const file = e.target.files[0];
-          if (file) {
-            onUpload(job.id, file, mode);
-          }
-        }}
-        className="w-full p-2 border border-gray-300 rounded-md"
-      />
-          </div>
-        </Modal>
-);
-
-LaundryPhotoUploadModal.propTypes = {
-  job: PropTypes.shape({
-    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-    customerName: PropTypes.string.isRequired
-  }).isRequired,
-  mode: PropTypes.oneOf(['before', 'after']).isRequired,
-  onClose: PropTypes.func.isRequired,
-  onUpload: PropTypes.func.isRequired
-};
-
-// Job Edit Modal Component
-const JobEditModal = ({ job, onSave, onClose }) => {
-  const [formData, setFormData] = useState({
-    customerName: job.customerName || '',
-    customerAddress: job.customerAddress || '',
-    customerPhone: job.customerPhone || '',
-    customerEmail: job.customerEmail || '',
-    serviceType: job.serviceType || '',
-    tier: job.tier || '',
-    addons: job.addons || '',
-    scheduledDateTime: job.scheduledDateTime || '',
-    earningsEstimate: job.earningsEstimate || ''
-  });
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSave({ ...job, ...formData });
-  };
 
   return (
-    <Modal title={job.id ? "Edit Job" : "Create New Job"} onClose={onClose}>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Customer Name</label>
+    <div className="p-6">
+      <Toaster position="top-right" />
+      <h1 className="text-3xl font-bold text-gray-900 mb-6">Order Management</h1>
+      
+      {/* Search and Filter Controls */}
+      <div className="mb-6 flex flex-col sm:flex-row gap-4">
+        {/* Search */}
+        <div className="flex-1">
+          <div className="relative">
+            <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <input
               type="text"
-              name="customerName"
-              value={formData.customerName}
-              onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-md"
-              required
-            />
-            </div>
-            
-            <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Customer Address</label>
-            <input
-              type="text"
-              name="customerAddress"
-              value={formData.customerAddress}
-              onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-md"
-              required
-            />
-              </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Customer Phone</label>
-            <input
-              type="tel"
-              name="customerPhone"
-              value={formData.customerPhone}
-              onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-md"
-            />
-            </div>
-            
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Customer Email</label>
-            <input
-              type="email"
-              name="customerEmail"
-              value={formData.customerEmail}
-              onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-md"
-            />
-            </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Service Type</label>
-            <select
-              name="serviceType"
-              value={formData.serviceType}
-              onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-md"
-              required
-            >
-              <option value="">Select Service</option>
-              {SERVICE_TYPES.map(service => (
-                <option key={service} value={service}>{service}</option>
-              ))}
-            </select>
-            </div>
-            
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Tier</label>
-            <select
-              name="tier"
-              value={formData.tier}
-              onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-md"
-            >
-              <option value="">Select Tier</option>
-              {TIERS.map(tier => (
-                <option key={tier} value={tier}>{tier}</option>
-              ))}
-            </select>
-            </div>
-            
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Add-ons</label>
-            <input
-              type="text"
-              name="addons"
-              value={formData.addons}
-              onChange={handleChange}
-              placeholder="Comma-separated add-ons"
-              className="w-full p-2 border border-gray-300 rounded-md"
-            />
-            </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Scheduled Date/Time</label>
-            <input
-              type="datetime-local"
-              name="scheduledDateTime"
-              value={formData.scheduledDateTime}
-              onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-md"
-            />
-            </div>
-            
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Estimated Earnings</label>
-              <input
-              type="number"
-              name="earningsEstimate"
-              value={formData.earningsEstimate}
-              onChange={handleChange}
-              step="0.01"
-              className="w-full p-2 border border-gray-300 rounded-md"
+              placeholder="Search by customer name, address, or service type..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
-            </div>
-            
-            <div className="flex space-x-2 pt-4">
-          <button type="submit" className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
-            {job.id ? 'Update Job' : 'Create Job'}
-          </button>
-          <button type="button" onClick={onClose} className="flex-1 bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors">
-            Cancel
-          </button>
-            </div>
-      </form>
-        </Modal>
+        </div>
+        
+        {/* Status Filter */}
+        <div className="sm:w-48">
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="all">All Statuses</option>
+            <option value="assigned">Assigned</option>
+            <option value="accepted">Accepted</option>
+            <option value="in-progress">In Progress</option>
+            <option value="completed">Completed</option>
+            <option value="expired">Expired</option>
+            <option value="declined">Declined</option>
+          </select>
+        </div>
+      </div>
+      
+      {/* Results */}
+      {loading ? (
+        <div className="text-center py-8">Loading jobs...</div>
+      ) : getVisibleOrders().length === 0 ? (
+        <div className="text-center py-8 text-gray-500">
+          {searchTerm || statusFilter !== 'all' ? 'No jobs match your filters.' : 'No jobs found.'}
+        </div>
+      ) : (
+        getVisibleOrders().map(order => (
+          <div key={order.id} className="mb-8">
+            {renderOrderServices(order)}
+          </div>
+        ))
+      )}
+      <AssignModal {...assignModal} onClose={() => setAssignModal({ open: false, service: null, order: null })} />
+      
+              {/* Message Thread Modal */}
+        {messageModal.open && (
+          <MessageThread
+            jobAssignment={messageModal.assignment}
+            onClose={() => {
+              setMessageModal({ open: false, assignment: null });
+              loadMessageCounts(); // Refresh message counts when modal closes
+            }}
+          />
+        )}
+    </div>
   );
-};
-
-JobEditModal.propTypes = {
-  job: PropTypes.shape({
-    addons: PropTypes.string,
-    customerAddress: PropTypes.string,
-    customerEmail: PropTypes.string,
-    customerName: PropTypes.string,
-    customerPhone: PropTypes.string,
-    earningsEstimate: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    scheduledDateTime: PropTypes.string,
-    serviceType: PropTypes.string,
-    tier: PropTypes.string
-  }).isRequired,
-  onClose: PropTypes.func.isRequired,
-  onSave: PropTypes.func.isRequired
 };
 
 export default Jobs;

@@ -34,29 +34,37 @@ const Login = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-cyan-50 to-blue-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white rounded-xl shadow-lg p-8">
-        <div className="flex flex-col items-center">
-          <img src="/Bubblerlogotransparent.PNG" alt="Bubbler Logo" className="h-16 mb-2 drop-shadow-lg" />
-          <h2 className="mt-2 text-center text-3xl font-extrabold text-cyan-700 font-poppins">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-primary py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full bg-white rounded-3xl shadow-card p-8 md:p-10">
+        <div className="flex flex-col items-center mb-8">
+          <img 
+            src="/Bubblerlogotransparent.PNG" 
+            alt="Bubbler Logo" 
+            className="h-20 mb-4 logo-float drop-shadow-lg" 
+          />
+          <h2 className="text-center text-2xl md:text-3xl font-bold text-gray-800 font-poppins mb-2">
             Sign in to your account
           </h2>
-          <p className="text-center text-cyan-500 font-semibold tracking-wide">GoGoBubbles Bubbler Dashboard</p>
+          <p className="text-center text-brand-blue font-semibold text-lg">
+            GoGoBubbles Bubbler Dashboard
+          </p>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleLogin}>
+        
+        <form className="space-y-6" onSubmit={handleLogin}>
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+            <div className="bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-xl font-medium">
               {error}
             </div>
           )}
-          <div className="space-y-4">
+          
+          <div className="space-y-5">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="email" className="form-label">
                 Email address
               </label>
-              <div className="mt-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiMail className="h-5 w-5 text-cyan-400" />
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <FiMail className="h-5 w-5 text-brand-aqua" />
                 </div>
                 <input
                   id="email"
@@ -66,18 +74,19 @@ const Login = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-cyan-500 focus:border-cyan-500 sm:text-sm bg-cyan-50"
+                  className="form-input pl-12"
                   placeholder="Enter your email"
                 />
               </div>
             </div>
+            
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="password" className="form-label">
                 Password
               </label>
-              <div className="mt-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiLock className="h-5 w-5 text-cyan-400" />
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <FiLock className="h-5 w-5 text-brand-aqua" />
                 </div>
                 <input
                   id="password"
@@ -87,33 +96,47 @@ const Login = () => {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="appearance-none block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-cyan-500 focus:border-cyan-500 sm:text-sm bg-cyan-50"
+                  className="form-input pl-12 pr-12"
                   placeholder="Enter your password"
                 />
                 <button
                   type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-brand-aqua hover:text-brand-aqua-dark transition-colors"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
-                    <FiEyeOff className="h-5 w-5 text-cyan-400" />
+                    <FiEyeOff className="h-5 w-5" />
                   ) : (
-                    <FiEye className="h-5 w-5 text-cyan-400" />
+                    <FiEye className="h-5 w-5" />
                   )}
                 </button>
               </div>
             </div>
           </div>
-          <div>
+          
+          <div className="pt-4">
             <button
               type="submit"
               disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-cyan-600 hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+              className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Signing in...' : 'Sign in'}
+              {loading ? (
+                <div className="flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                  Signing in...
+                </div>
+              ) : (
+                'Sign in'
+              )}
             </button>
           </div>
         </form>
+        
+        <div className="mt-8 text-center">
+          <p className="text-gray-600 text-sm">
+            Need help? Contact your administrator
+          </p>
+        </div>
       </div>
     </div>
   );

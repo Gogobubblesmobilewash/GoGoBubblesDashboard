@@ -1,9 +1,5 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-}
+/* GoGoBubbles Dashboard Styles */
+/* Removed conflicting styles that were breaking the layout */
 
 .logo {
   height: 6em;
