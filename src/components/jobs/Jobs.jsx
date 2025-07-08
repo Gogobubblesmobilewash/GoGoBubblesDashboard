@@ -121,9 +121,12 @@ const Jobs = () => {
       
       if (error) throw error;
       
+      // Ensure data is an array, default to empty array if null/undefined
+      const messagesArray = Array.isArray(data) ? data : [];
+      
       // Count messages per job assignment
       const counts = {};
-      data?.forEach(msg => {
+      messagesArray.forEach(msg => {
         counts[msg.job_assignment_id] = (counts[msg.job_assignment_id] || 0) + 1;
       });
       
