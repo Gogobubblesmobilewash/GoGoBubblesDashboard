@@ -265,12 +265,12 @@ export const generateJobId = () => {
   const timestamp = Date.now();
   const random = Math.floor(Math.random() * 1000);
   return `JOB-${timestamp}${random}`;
-}; 
+};
 
 // Fetch all bubblers with travel preferences
 export const fetchBubblersWithTravelPrefs = async () => {
   const { data, error } = await supabase
-    .from('Bubblers')
+    .from('bubblers')
     .select('id, name, email, phone, home_location, preferred_travel_minutes, preferred_travel_type, is_active, travel_badge');
   if (error) throw error;
   return data || [];

@@ -16,6 +16,11 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Log whenever loading changes
+    console.log('AuthContext: loading state changed:', loading);
+  }, [loading]);
+
+  useEffect(() => {
     // Check for existing session
     const getSession = async () => {
       try {

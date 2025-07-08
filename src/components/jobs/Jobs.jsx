@@ -70,7 +70,7 @@ const Jobs = () => {
   const expireJobIfNeeded = async (assignment) => {
     if (assignment.status === 'assigned' && isOfferExpired(assignment)) {
       await supabase
-        .from('Job_Assignments')
+        .from('job_assignments')
         .update({ status: 'expired', expired_at: new Date().toISOString() })
         .eq('id', assignment.id);
       loadOrders();
@@ -92,7 +92,7 @@ const Jobs = () => {
   const updateJobStatus = async (assignmentId, newStatus) => {
     try {
       const { error } = await supabase
-        .from('Job_Assignments')
+        .from('job_assignments')
         .update({ 
           status: newStatus,
           ...(newStatus === 'accepted' && { accepted_at: new Date().toISOString() }),
@@ -193,7 +193,7 @@ const Jobs = () => {
         .select(`*, order_service(*, order_cleaning_details(*), order_laundry_bags(*), order_vehicles(*), job_assignments(*))`)
         .order('created_at', { ascending: false });
       if (error) throw error;
-      setOrders(data || []);
+      setOrders(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error loading orders:', error);
       toast.error('Failed to load orders');
@@ -206,7 +206,7 @@ const Jobs = () => {
   const loadBubblers = async () => {
     try {
       const data = await fetchBubblersWithTravelPrefs();
-      setBubblers(data);
+      setBubblers(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error loading bubblers:', error);
       toast.error('Failed to load bubblers');
@@ -228,7 +228,7 @@ const Jobs = () => {
         {
           event: '*',
           schema: 'public',
-          table: 'Job_Assignments'
+          table: 'job_assignments'
         },
         () => {
           // Reload orders when job assignments change
@@ -289,10 +289,10 @@ const Jobs = () => {
       if (!isAdmin) {
         showAddress = isTodayAssignmentDay(assignment) && !isJobCompleted(assignment);
       }
-      return (
+    return (
         <div key={service.id} className="bg-white rounded-lg shadow p-4 mb-4">
           <div className="flex justify-between items-center mb-2">
-            <div>
+          <div>
               <h3 className="text-lg font-semibold text-gray-900">{order.customer_name}</h3>
               {showAddress ? (
                 <p className="text-sm text-gray-600">{order.address}</p>
@@ -301,45 +301,45 @@ const Jobs = () => {
               )}
               <p className="text-xs text-gray-500">Order ID: {order.id}</p>
               <p className="text-xs text-gray-500">Service: {service.service_type}</p>
-            </div>
+          </div>
             <div>
               <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                 {assignment ? assignment.status.toUpperCase() : (service.status ? service.status.toUpperCase() : 'UNASSIGNED')}
-              </span>
+          </span>
               {/* Timer preview for admin */}
               {assignment && assignment.status === 'assigned' && (
                 <span className="ml-2 px-2 py-1 rounded bg-yellow-100 text-yellow-800 text-xs font-mono">
                   ⏳ {getRemainingTime(assignment)}
-                </span>
+                    </span>
               )}
               {assignment && assignment.status === 'expired' && (
                 <span className="ml-2 px-2 py-1 rounded bg-red-100 text-red-800 text-xs font-mono">
                   Expired
-                </span>
+                    </span>
               )}
-            </div>
-          </div>
+                  </div>
+                  </div>
           {/* Service-specific details */}
           {service.service_type === 'Home Cleaning' && service.order_cleaning_details && (
             <div className="text-sm text-gray-700 mb-2">
               Bedrooms: {service.order_cleaning_details[0]?.bedrooms_count}, Bathrooms: {service.order_cleaning_details[0]?.bathrooms_count}
-            </div>
-          )}
+              </div>
+            )}
           {service.service_type === 'Laundry' && service.order_laundry_bags && (
             <div className="text-sm text-gray-700 mb-2">
               Bags: {service.order_laundry_bags.map(bag => `${bag.bag_type} x${bag.quantity}`).join(', ')}
-            </div>
-          )}
+              </div>
+            )}
           {service.service_type === 'Vehicles' && service.order_vehicles && (
             <div className="text-sm text-gray-700 mb-2">
               Vehicles: {service.order_vehicles.map(v => `${v.vehicle_type} (${v.tier})`).join(', ')}
-            </div>
-          )}
+              </div>
+            )}
           {/* Action buttons */}
           <div className="flex gap-2 mt-2 flex-wrap">
             {/* Messages button - only show if job is assigned */}
             {assignment && assignment.status !== 'expired' && assignment.status !== 'declined' && (
-              <button
+              <button 
                 className="bg-green-600 text-white px-3 py-2 rounded hover:bg-green-700 transition-colors flex items-center gap-1 relative"
                 onClick={() => setMessageModal({ open: true, assignment })}
               >
@@ -350,7 +350,7 @@ const Jobs = () => {
                     {messageCounts[assignment.id] > 99 ? '99+' : messageCounts[assignment.id]}
                   </span>
                 )}
-              </button>
+                </button>
             )}
             
             {/* Job Status Management - for bubblers only */}
@@ -358,57 +358,57 @@ const Jobs = () => {
               <div className="flex gap-1">
                 {/* Accept/Decline buttons for assigned jobs */}
                 {assignment.status === 'assigned' && (
-                  <>
-                    <button
+              <>
+                <button 
                       className="bg-green-600 text-white px-3 py-2 rounded hover:bg-green-700 transition-colors text-sm"
                       onClick={() => updateJobStatus(assignment.id, 'accepted')}
-                    >
+                >
                       Accept
-                    </button>
-                    <button
+                </button>
+                <button 
                       className="bg-red-600 text-white px-3 py-2 rounded hover:bg-red-700 transition-colors text-sm"
                       onClick={() => updateJobStatus(assignment.id, 'declined')}
-                    >
+                >
                       Decline
-                    </button>
-                  </>
-                )}
-                
+                </button>
+              </>
+            )}
+
                 {/* Start job button for accepted jobs */}
                 {assignment.status === 'accepted' && (
-                  <button
+                <button 
                     className="bg-blue-600 text-white px-3 py-2 rounded hover:bg-blue-700 transition-colors text-sm"
                     onClick={() => updateJobStatus(assignment.id, 'in-progress')}
                   >
                     Start Job
-                  </button>
+                </button>
                 )}
                 
                 {/* Complete job button for in-progress jobs */}
                 {assignment.status === 'in-progress' && (
-                  <button
+                <button 
                     className="bg-purple-600 text-white px-3 py-2 rounded hover:bg-purple-700 transition-colors text-sm"
                     onClick={() => updateJobStatus(assignment.id, 'completed')}
-                  >
+                >
                     Complete Job
-                  </button>
-                )}
+                </button>
+            )}
               </div>
             )}
-            
+          
             {/* Assignment button (only if not assigned or expired) - only for admin */}
             {isAdmin && (!assignment || assignment.status === 'expired' || assignment.status === 'declined') && (
-              <button
+            <button 
                 className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
                 onClick={() => setAssignModal({ open: true, service, order })}
                 disabled={service.status && service.status !== 'unassigned'}
-              >
+            >
                 Assign Job
-              </button>
-            )}
-          </div>
+            </button>
+          )}
         </div>
-      );
+      </div>
+    );
     });
   };
 
@@ -426,14 +426,14 @@ const Jobs = () => {
         <div className="mb-4">
           <div className="font-semibold mb-2">Job: {service.service_type} for {order.customer_name}</div>
           <div className="text-sm text-gray-600 mb-2">{order.address}</div>
-        </div>
+      </div>
         <div className="mb-4">
           <div className="font-semibold mb-2">Eligible Bubblers:</div>
           {eligibleBubblers.length === 0 && <div className="text-red-500">No eligible bubblers within travel range.</div>}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {eligibleBubblers.map(bubbler => {
               const travelTime = calculateTravelTime(bubbler, order.address);
-              return (
+  return (
                 <div key={bubbler.id} className="border rounded-lg p-3 flex flex-col gap-2 bg-gray-50">
                   <div className="font-semibold">{bubbler.name}</div>
                   <div className="text-xs text-gray-600">{bubbler.email}</div>
@@ -457,7 +457,7 @@ const Jobs = () => {
                         // Insert into job_assignments with timer fields
                         const acceptance_window_minutes = getAcceptanceWindow(service);
                         const { error } = await supabase
-                          .from('Job_Assignments')
+                          .from('job_assignments')
                           .insert({
                             order_service_id: service.id,
                             bubbler_id: bubbler.id,
@@ -478,13 +478,13 @@ const Jobs = () => {
                     }}
                   >
                     Assign to {bubbler.name}
-                  </button>
-                </div>
-              );
+            </button>
+              </div>
+            );
             })}
-          </div>
+                </div>
           {assignError && <div className="text-red-500 mt-2">{assignError}</div>}
-        </div>
+                      </div>
       </Modal>
     );
   };
@@ -502,21 +502,21 @@ const Jobs = () => {
       <div className="mb-6 flex flex-col sm:flex-row gap-4">
         {/* Search */}
         <div className="flex-1">
-          <div className="relative">
+            <div className="relative">
             <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
+              <input
+                type="text"
               placeholder="Search by customer name, address, or service type..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
+              />
+            </div>
         </div>
         
         {/* Status Filter */}
         <div className="sm:w-48">
-          <select
+            <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -528,22 +528,22 @@ const Jobs = () => {
             <option value="completed">Completed</option>
             <option value="expired">Expired</option>
             <option value="declined">Declined</option>
-          </select>
+            </select>
         </div>
       </div>
-      
+
       {/* Results */}
       {loading ? (
         <div className="text-center py-8">Loading jobs...</div>
       ) : getVisibleOrders().length === 0 ? (
         <div className="text-center py-8 text-gray-500">
           {searchTerm || statusFilter !== 'all' ? 'No jobs match your filters.' : 'No jobs found.'}
-        </div>
+      </div>
       ) : (
         getVisibleOrders().map(order => (
           <div key={order.id} className="mb-8">
             {renderOrderServices(order)}
-          </div>
+        </div>
         ))
       )}
       <AssignModal {...assignModal} onClose={() => setAssignModal({ open: false, service: null, order: null })} />
@@ -557,7 +557,7 @@ const Jobs = () => {
               loadMessageCounts(); // Refresh message counts when modal closes
             }}
           />
-        )}
+      )}
     </div>
   );
 };

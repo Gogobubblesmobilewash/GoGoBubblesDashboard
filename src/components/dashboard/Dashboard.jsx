@@ -40,27 +40,27 @@ const Dashboard = () => {
         .from('job_assignments')
         .select('*');
       if (jobsError) throw jobsError;
-      setDailyJobs(jobs);
+      setDailyJobs(Array.isArray(jobs) ? jobs : []);
 
       // Calculate stats
-      const totalJobs = jobs.length;
-      const completedJobs = jobs.filter(j => j.jobStatus === 'completed').length;
-      const pendingJobs = jobs.filter(j => j.jobStatus === 'pending').length;
-      const totalEarnings = jobs.reduce((sum, j) => sum + (parseFloat(j.earningsEstimate) || 0), 0);
+      const totalJobs = Array.isArray(jobs) ? jobs.length : 0;
+      const completedJobs = Array.isArray(jobs) ? jobs.filter(j => j.jobStatus === 'completed').length : 0;
+      const pendingJobs = Array.isArray(jobs) ? jobs.filter(j => j.jobStatus === 'pending').length : 0;
+      const totalEarnings = Array.isArray(jobs) ? jobs.reduce((sum, j) => sum + (parseFloat(j.earningsEstimate) || 0), 0) : 0;
 
       // Fetch ratings (if available)
       const { data: ratings, error: ratingsError } = await supabase
         .from('ratings')
         .select('rating');
       if (ratingsError) throw ratingsError;
-      const averageRating = ratings.length > 0 ? (ratings.reduce((sum, r) => sum + (parseFloat(r.rating) || 0), 0) / ratings.length).toFixed(2) : 0;
+      const averageRating = Array.isArray(ratings) && ratings.length > 0 ? (ratings.reduce((sum, r) => sum + (parseFloat(r.rating) || 0), 0) / ratings.length).toFixed(2) : 0;
 
       // Fetch equipment (if available)
       const { data: equipment, error: equipmentError } = await supabase
         .from('equipment')
         .select('*');
       if (equipmentError) throw equipmentError;
-      const activeEquipment = equipment.filter(e => e.status === 'active').length;
+      const activeEquipment = Array.isArray(equipment) ? equipment.filter(e => e.status === 'active').length : 0;
 
       setStats({
         totalJobs,
@@ -72,7 +72,7 @@ const Dashboard = () => {
       });
 
       // Fetch recent activity (last 5 jobs)
-      const recent = jobs
+      const recent = Array.isArray(jobs) ? jobs
         .sort((a, b) => new Date(b.updated_at || b.created_at) - new Date(a.updated_at || a.created_at))
         .slice(0, 5)
         .map(j => ({
@@ -80,7 +80,7 @@ const Dashboard = () => {
           type: j.jobStatus,
           message: `${j.serviceType} for ${j.customerName} (${j.jobStatus})`,
           time: new Date(j.updated_at || j.created_at).toLocaleString()
-        }));
+        })) : [];
       setRecentActivity(recent);
     } catch (err) {
       console.error('Error loading dashboard data:', err);

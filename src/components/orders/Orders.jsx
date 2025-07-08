@@ -83,9 +83,9 @@ const Orders = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setOrders(data || []);
-      setFilteredOrders(data || []);
-      console.log('✅ Orders loaded successfully:', data.length);
+      setOrders(Array.isArray(data) ? data : []);
+      setFilteredOrders(Array.isArray(data) ? data : []);
+      console.log('✅ Orders loaded successfully:', Array.isArray(data) ? data.length : 0);
     } catch (error) {
       console.error('❌ Error loading orders:', error);
       setError('Error loading orders: ' + error.message);
