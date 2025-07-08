@@ -48,9 +48,13 @@ const Equipment = () => {
   const loadEquipment = async () => {
     setLoading(true);
     try {
-      const data = await supabase.from('equipment').select();
-      setEquipment(data);
-      setFilteredEquipment(data);
+      const { data, error } = await supabase.from('equipment').select();
+      if (error) throw error;
+      
+      // Ensure data is an array, default to empty array if null/undefined
+      const equipmentArray = Array.isArray(data) ? data : [];
+      setEquipment(equipmentArray);
+      setFilteredEquipment(equipmentArray);
     } catch (error) {
       console.error('Error loading equipment:', error);
     } finally {
@@ -59,7 +63,8 @@ const Equipment = () => {
   };
 
   const filterEquipment = () => {
-    let filtered = equipment;
+    // Ensure equipment is an array, default to empty array if null/undefined
+    let filtered = Array.isArray(equipment) ? equipment : [];
 
     // Apply search filter
     if (searchTerm) {

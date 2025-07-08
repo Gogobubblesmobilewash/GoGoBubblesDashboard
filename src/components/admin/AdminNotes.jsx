@@ -26,12 +26,15 @@ const AdminNotes = () => {
 
   // Filter notes when filterJobId changes
   useEffect(() => {
+    // Ensure notes is an array, default to empty array if null/undefined
+    const notesArray = Array.isArray(notes) ? notes : [];
+    
     if (filterJobId.trim()) {
-      setFilteredNotes(notes.filter(note => 
+      setFilteredNotes(notesArray.filter(note => 
         note.relatedJobId && note.relatedJobId.toLowerCase().includes(filterJobId.toLowerCase())
       ));
     } else {
-      setFilteredNotes(notes);
+      setFilteredNotes(notesArray);
     }
   }, [notes, filterJobId]);
 
