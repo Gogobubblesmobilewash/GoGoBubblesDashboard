@@ -18,8 +18,10 @@ import {
 import useStore from '../../store/useStore';
 import { supabase } from '../../services/api';
 import { useAuth } from '../../store/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const { setDailyJobs, loading, setLoading } = useStore();
   const { user, isAdmin } = useAuth();
   const [stats, setStats] = useState({
@@ -203,28 +205,28 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
           title="Total Jobs"
-          value={stats.totalJobs}
+          value={stats.totalJobs ?? 0}
           icon={FiList}
           change={12}
           color="brand-aqua"
         />
         <StatCard
           title="Completed"
-          value={stats.completedJobs}
+          value={stats.completedJobs ?? 0}
           icon={FiCheckCircle}
           change={8}
           color="green"
         />
         <StatCard
           title="Pending"
-          value={stats.pendingJobs}
+          value={stats.pendingJobs ?? 0}
           icon={FiClock}
           change={-3}
           color="brand-blue"
         />
         <StatCard
           title="Total Earnings"
-          value={`$${stats.totalEarnings.toFixed(2)}`}
+          value={`$${Number(stats.totalEarnings || 0).toFixed(2)}`}
           icon={FiDollarSign}
           change={15}
           color="brand-aqua"
@@ -237,31 +239,31 @@ const Dashboard = () => {
           <h2 className="text-xl font-bold text-gray-800 mb-4 font-poppins">Quick Actions</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <QuickAction
-              title="New Job"
-              description="Create a new job assignment"
-              icon={FiPlus}
-              onClick={() => {/* Handle new job */}}
+              title="Total Jobs"
+              description="View all jobs and their statuses"
+              icon={FiList}
+              onClick={() => navigate('/jobs?status=all')}
               color="brand-aqua"
             />
             <QuickAction
-              title="Scan QR"
-              description="Scan QR code for job verification"
-              icon={FiCamera}
-              onClick={() => {/* Handle QR scan */}}
+              title="Pending"
+              description="Jobs awaiting acceptance or assignment"
+              icon={FiClock}
+              onClick={() => navigate('/jobs?status=pending')}
               color="brand-blue"
             />
             <QuickAction
-              title="View Jobs"
-              description="See all active jobs"
-              icon={FiList}
-              onClick={() => {/* Handle view jobs */}}
+              title="Completed"
+              description="View all completed jobs"
+              icon={FiCheckCircle}
+              onClick={() => navigate('/jobs?status=completed')}
               color="green"
             />
-              <QuickAction
-                title="Manage Team"
-              description="View and manage bubblers"
-              icon={FiUsers}
-              onClick={() => {/* Handle team management */}}
+            <QuickAction
+              title="View Jobs"
+              description="See all active/in-progress jobs"
+              icon={FiBriefcase}
+              onClick={() => navigate('/jobs?status=active')}
               color="brand-aqua"
             />
           </div>
