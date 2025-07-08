@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
 import useStore from '../../store/useStore';
+import { useAuth } from '../../store/AuthContext';
 import { 
   FiMenu as Menu,
   FiX as X,
@@ -19,9 +20,13 @@ import {
 } from 'react-icons/fi';
 
 const Layout = () => {
-  const { user, isAdmin, logout, activeTab, setActiveTab } = useStore();
+  const { activeTab, setActiveTab } = useStore();
+  const { user, isAdmin, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+
+  // Debug logging
+  console.log('Layout render - user:', user, 'isAdmin:', isAdmin, 'activeTab:', activeTab);
 
   const bubblerNavItems = [
     { name: 'Dashboard', icon: Home, path: '/dashboard' },

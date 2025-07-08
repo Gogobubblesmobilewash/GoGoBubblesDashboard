@@ -18,9 +18,20 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     // Check for existing session
     const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
-      setLoading(false);
+      try {
+        console.log('AuthContext: Checking for existing session...');
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error('AuthContext: Error getting session:', error);
+        }
+        console.log('AuthContext: Session data:', session);
+        setUser(session?.user ?? null);
+        setLoading(false);
+      } catch (error) {
+        console.error('AuthContext: Exception getting session:', error);
+        setUser(null);
+        setLoading(false);
+      }
     };
 
     getSession();
@@ -28,6 +39,7 @@ export const AuthProvider = ({ children }) => {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('AuthContext: Auth state change:', event, 'session:', session);
         setUser(session?.user ?? null);
         setLoading(false);
       }
@@ -38,24 +50,29 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
+      console.log('AuthContext: Attempting login for:', email);
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
       if (error) throw error;
+      console.log('AuthContext: Login successful:', data);
       return { success: true, user: data.user };
     } catch (error) {
+      console.error('AuthContext: Login error:', error);
       return { success: false, error: error.message };
     }
   };
 
   const logout = async () => {
     try {
+      console.log('AuthContext: Attempting logout...');
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       setUser(null);
+      console.log('AuthContext: Logout successful');
     } catch (error) {
-      console.error('Error logging out:', error);
+      console.error('AuthContext: Logout error:', error);
     }
   };
 
@@ -67,6 +84,8 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated: !!user,
     isAdmin: user?.email?.includes('admin') || false,
   };
+
+  console.log('AuthContext: Current state:', { user, loading, isAuthenticated: !!user, isAdmin: user?.email?.includes('admin') || false });
 
   return (
     <AuthContext.Provider value={value}>
