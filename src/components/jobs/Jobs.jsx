@@ -59,6 +59,8 @@ const Jobs = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [qrNotifications, setQrNotifications] = useState([]);
+  const [pickupPhotos, setPickupPhotos] = useState({}); // assignmentId -> file
+  const [deliveryPhotos, setDeliveryPhotos] = useState({}); // assignmentId -> file
 
   // Helper to determine acceptance window (minutes) based on job type
   const getAcceptanceWindow = (service) => {
@@ -210,7 +212,7 @@ const Jobs = () => {
 
   // Fetch all orders with their related services
   const loadOrders = async () => {
-    setLoading(true);
+      setLoading(true);
     try {
       const { data, error } = await supabase
         .from('orders')
@@ -218,11 +220,11 @@ const Jobs = () => {
         .order('created_at', { ascending: false });
       if (error) throw error;
       setOrders(Array.isArray(data) ? data : []);
-    } catch (error) {
+      } catch (error) {
       console.error('Error loading orders:', error);
       toast.error('Failed to load orders');
-    } finally {
-      setLoading(false);
+      } finally {
+        setLoading(false);
     }
   };
 
@@ -231,7 +233,7 @@ const Jobs = () => {
     try {
       const data = await fetchBubblersWithTravelPrefs();
       setBubblers(Array.isArray(data) ? data : []);
-    } catch (error) {
+      } catch (error) {
       console.error('Error loading bubblers:', error);
       toast.error('Failed to load bubblers');
     }
@@ -273,6 +275,15 @@ const Jobs = () => {
     setQrNotifications(notifications);
   };
 
+  // Helper to upload photo and return public URL
+  const uploadPhoto = async (file, assignmentId, type) => {
+    const filePath = `laundry_photos/${assignmentId}_${type}_${Date.now()}`;
+    const { data, error } = await supabase.storage.from('job-photos').upload(filePath, file);
+    if (error) throw error;
+    const { publicURL } = supabase.storage.from('job-photos').getPublicUrl(filePath).data;
+    return publicURL;
+  };
+
   useEffect(() => {
     loadOrders();
     loadBubblers();
@@ -295,7 +306,7 @@ const Jobs = () => {
     const params = new URLSearchParams(location.search);
     if (newStatus === 'all') {
       params.delete('status');
-    } else {
+      } else {
       params.set('status', newStatus);
     }
     navigate({ search: params.toString() }, { replace: true });
@@ -424,20 +435,20 @@ const Jobs = () => {
                   Expired
                     </span>
               )}
-                  </div>
+            </div>
                   </div>
           {/* Service-specific details */}
           {service.service_type === 'Home Cleaning' && service.order_cleaning_details && (
             <div className="text-sm text-gray-700 mb-2">
               Bedrooms: {service.order_cleaning_details[0]?.bedrooms_count}, Bathrooms: {service.order_cleaning_details[0]?.bathrooms_count}
-              </div>
+            </div>
             )}
           {service.service_type === 'Laundry' && service.order_laundry_bags && (
             <div className="text-sm text-gray-700 mb-2">
               Bags: {service.order_laundry_bags.map(bag => `${bag.bag_type} x${bag.quantity}`).join(', ')}
-            </div>
-          )}
-          
+              </div>
+            )}
+            
           {/* QR Code Monitoring Section - Admin Only for Laundry Jobs */}
           {isAdmin && service.service_type === 'Laundry' && assignment && (
             <div className="bg-gray-50 rounded-lg p-4 mb-4">
@@ -447,7 +458,7 @@ const Jobs = () => {
                 {assignment.manual_override && (
                   <span className="ml-2 px-2 py-1 rounded bg-orange-100 text-orange-800 text-xs font-medium">
                     Manual Override Applied
-                  </span>
+                </span>
                 )}
               </h4>
               
@@ -463,7 +474,7 @@ const Jobs = () => {
                       <div className="text-xs">
                         <span className="font-medium">QR Code:</span> 
                         <span className="font-mono ml-1">{assignment.pickup_scan.qr_value}</span>
-                      </div>
+                  </div>
                       <div className="text-xs">
                         <span className="font-medium">Time:</span> 
                         <span className="ml-1">{new Date(assignment.pickup_scan.timestamp).toLocaleString()}</span>
@@ -476,15 +487,15 @@ const Jobs = () => {
                             : 'bg-red-100 text-red-800'
                         }`}>
                           {assignment.pickup_scan.matched ? '✅ Matched' : '❌ Not Matched'}
-                        </span>
-                      </div>
+                    </span>
+                  </div>
                       {assignment.pickup_scan.expected_value && (
                         <div className="text-xs">
                           <span className="font-medium">Expected:</span> 
                           <span className="font-mono ml-1">{assignment.pickup_scan.expected_value}</span>
-                        </div>
+                </div>
                       )}
-                    </div>
+              </div>
                   ) : (
                     <div className="text-xs text-gray-500 italic">No pickup scan recorded</div>
                   )}
@@ -501,7 +512,7 @@ const Jobs = () => {
                       <div className="text-xs">
                         <span className="font-medium">QR Code:</span> 
                         <span className="font-mono ml-1">{assignment.delivery_scan.qr_value}</span>
-                      </div>
+          </div>
                       <div className="text-xs">
                         <span className="font-medium">Time:</span> 
                         <span className="ml-1">{new Date(assignment.delivery_scan.timestamp).toLocaleString()}</span>
@@ -514,15 +525,15 @@ const Jobs = () => {
                             : 'bg-red-100 text-red-800'
                         }`}>
                           {assignment.delivery_scan.matched ? '✅ Matched' : '❌ Not Matched'}
-                        </span>
-                      </div>
+                    </span>
+                  </div>
                       {assignment.delivery_scan.expected_value && (
                         <div className="text-xs">
                           <span className="font-medium">Expected:</span> 
                           <span className="font-mono ml-1">{assignment.delivery_scan.expected_value}</span>
-                        </div>
+                </div>
                       )}
-                    </div>
+              </div>
                   ) : (
                     <div className="text-xs text-gray-500 italic">No delivery scan recorded</div>
                   )}
@@ -537,24 +548,24 @@ const Jobs = () => {
                       {assignment.pickup_scan?.matched === false && (
                         <span className="inline-flex items-center px-2 py-1 rounded bg-yellow-100 text-yellow-800 text-xs mr-2">
                           ⚠️ Pickup scan mismatch
-                        </span>
+                </span>
                       )}
                       {assignment.delivery_scan?.matched === false && (
                         <span className="inline-flex items-center px-2 py-1 rounded bg-yellow-100 text-yellow-800 text-xs">
                           ⚠️ Delivery scan mismatch
-                        </span>
-                      )}
-                    </div>
+                    </span>
+            )}
+          </div>
                     <button 
                       className="text-xs text-blue-600 hover:text-blue-800 font-medium"
                       onClick={() => handleManualOverride(assignment.id)}
                     >
                       Manual Override
                     </button>
-                  </div>
-                </div>
-              )}
-              
+        </div>
+          </div>
+          )}
+          
               {/* Manual Override Info */}
               {assignment.manual_override && (
                 <div className="mt-3 pt-3 border-t border-gray-200">
@@ -566,21 +577,21 @@ const Jobs = () => {
                       By: {assignment.override_by} | 
                       Time: {new Date(assignment.override_timestamp).toLocaleString()}
                     </span>
-                  </div>
-                </div>
-              )}
             </div>
+            </div>
+          )}
+          </div>
           )}
           {service.service_type === 'Vehicles' && service.order_vehicles && (
             <div className="text-sm text-gray-700 mb-2">
               Vehicles: {service.order_vehicles.map(v => `${v.vehicle_type} (${v.tier})`).join(', ')}
-              </div>
+        </div>
             )}
           {/* Action buttons */}
           <div className="flex gap-2 mt-2 flex-wrap">
             {/* Messages button - only show if job is assigned */}
             {assignment && assignment.status !== 'expired' && assignment.status !== 'declined' && (
-              <button 
+                <button 
                 className="bg-green-600 text-white px-3 py-2 rounded hover:bg-green-700 transition-colors flex items-center gap-1 relative"
                 onClick={() => setMessageModal({ open: true, assignment })}
               >
@@ -591,7 +602,7 @@ const Jobs = () => {
                     {messageCounts[assignment.id] > 99 ? '99+' : messageCounts[assignment.id]}
                   </span>
                 )}
-                </button>
+              </button>
             )}
             
             {/* Job Status Management - for bubblers only */}
@@ -790,23 +801,23 @@ const Jobs = () => {
                       notification.type === 'pickup' ? 'bg-blue-500' : 'bg-green-500'
                     }`}></span>
                     <span className="text-yellow-700">{notification.message}</span>
-                  </div>
-                  <button 
+      </div>
+                  <button
                     className="text-xs text-blue-600 hover:text-blue-800 font-medium"
                     onClick={() => handleManualOverride(notification.assignment.id)}
                   >
                     Override
                   </button>
                 </div>
-              ))}
+                ))}
               {qrNotifications.length > 3 && (
                 <div className="text-xs text-yellow-600 italic">
                   +{qrNotifications.length - 3} more scan issues...
-                </div>
+              </div>
               )}
             </div>
+            </div>
           </div>
-        </div>
       )}
 
       {/* Results */}
@@ -815,12 +826,12 @@ const Jobs = () => {
       ) : getVisibleOrders().length === 0 ? (
         <div className="text-center py-8 text-gray-500">
           {searchTerm || statusFilter !== 'all' ? 'No jobs match your filters.' : 'No jobs found.'}
-      </div>
+            </div>
       ) : (
         getVisibleOrders().map(order => (
           <div key={order.id} className="mb-8">
             {renderOrderServices(order)}
-        </div>
+            </div>
         ))
       )}
       <AssignModal {...assignModal} onClose={() => setAssignModal({ open: false, service: null, order: null })} />
