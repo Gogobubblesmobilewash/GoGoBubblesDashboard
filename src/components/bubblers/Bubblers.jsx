@@ -3,7 +3,7 @@ import { mockData } from '../../services/api';
 import Modal from '../shared/Modal';
 
 const Bubblers = () => {
-  const bubblers = mockData.users.filter(u => u.role === 'bubbler');
+  const bubblers = mockData.bubblers;
   const [selectedBubbler, setSelectedBubbler] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
