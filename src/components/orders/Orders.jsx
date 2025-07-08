@@ -617,8 +617,8 @@ const Orders = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Orders Management</h1>
-          <p className="text-gray-600 mt-1">Manage incoming orders from Formspree - split multi-service orders to create jobs</p>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Orders Management</h2>
+          <p className="text-gray-600">Manage incoming orders from Supabase — split multi-service orders to create jobs.</p>
         </div>
         <div className="flex space-x-2 mt-4 sm:mt-0">
           <button className="btn-secondary" onClick={() => window.location.href = '/jobs'}>
