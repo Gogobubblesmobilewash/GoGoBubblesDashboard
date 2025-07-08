@@ -242,6 +242,33 @@ const Jobs = () => {
     };
   }, []);
 
+  // Check for expired jobs periodically
+  useEffect(() => {
+    const checkExpiredJobs = () => {
+      orders.forEach(order => {
+        if (order.order_service) {
+          order.order_service.forEach(service => {
+            const assignment = isAdmin
+              ? (service.job_assignments || [])[0]
+              : (service.job_assignments || []).find(a => a.bubbler_id === user?.id);
+            
+            if (assignment && assignment.status === 'assigned') {
+              expireJobIfNeeded(assignment);
+            }
+          });
+        }
+      });
+    };
+
+    // Check immediately
+    checkExpiredJobs();
+    
+    // Set up interval to check every 30 seconds
+    const interval = setInterval(checkExpiredJobs, 30000);
+    
+    return () => clearInterval(interval);
+  }, [orders, isAdmin, user?.id]);
+
   // Placeholder: Calculate travel time (returns minutes, real implementation would use a routing API)
   const calculateTravelTime = (bubbler, jobAddress) => {
     // For now, return a random value for demo
@@ -256,10 +283,6 @@ const Jobs = () => {
       const assignment = isAdmin
         ? (service.job_assignments || [])[0]
         : (service.job_assignments || []).find(a => a.bubbler_id === user?.id);
-      // If assigned, check for timer/expiration
-      if (assignment && assignment.status === 'assigned') {
-        expireJobIfNeeded(assignment);
-      }
       // Address visibility logic
       let showAddress = true;
       if (!isAdmin) {
