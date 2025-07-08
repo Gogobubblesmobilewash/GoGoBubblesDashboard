@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useStore from '../../store/useStore';
 import { FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
@@ -9,6 +9,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const hasNavigated = useRef(false);
   
   const { login, isAuthenticated } = useStore();
   const navigate = useNavigate();
@@ -28,9 +29,10 @@ const Login = () => {
     }
   };
 
-  // Redirect if already authenticated
-  React.useEffect(() => {
-    if (isAuthenticated) {
+  // Redirect if already authenticated (only once)
+  useEffect(() => {
+    if (isAuthenticated && !hasNavigated.current) {
+      hasNavigated.current = true;
       navigate('/dashboard');
     }
   }, [isAuthenticated, navigate]);
