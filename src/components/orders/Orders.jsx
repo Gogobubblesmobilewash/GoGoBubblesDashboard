@@ -615,10 +615,10 @@ const Orders = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-2 mb-2">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-4 mb-4">
         <div>
-          {/* Removed duplicate heading here. Only subheading remains. */}
-          <p className="text-gray-600 mb-2">Manage incoming orders from Supabase — split multi-service orders to create jobs.</p>
+          {/* No duplicate heading here. Only subheading remains. */}
+          <p className="text-gray-600 mb-4">Manage incoming orders from Supabase — split multi-service orders to create jobs.</p>
         </div>
         <div className="flex space-x-2 mt-4 sm:mt-0">
           <button className="btn-secondary" onClick={() => window.location.href = '/jobs'}>
