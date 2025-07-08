@@ -27,6 +27,23 @@ const ACCEPTANCE_WINDOWS = {
   standard: 30,
 };
 
+// Laundry-specific statuses
+const LAUNDRY_STATUSES = [
+  'pending',
+  'assigned',
+  'accepted',
+  'en_route_to_pickup',
+  'picked_up',
+  'in_wash',
+  'in_dry',
+  'folding_ironing',
+  'en_route_to_deliver',
+  'delivered',
+  'cancelled',
+  'reassigned',
+  'no_show',
+];
+
 const Jobs = () => {
   const { user, isAdmin } = useAuth();
   const location = useLocation();
