@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { FiSearch, FiFilter, FiPlus, FiEdit, FiTrash2, FiCheck, FiX, FiCamera, FiUpload, FiDownload, FiMessageCircle } from 'react-icons/fi';
+import { FiSearch, FiFilter, FiPlus, FiEdit, FiTrash2, FiCheck, FiX, FiCamera, FiUpload, FiDownload, FiMessageCircle, FiCpu } from 'react-icons/fi';
 import toast, { Toaster } from 'react-hot-toast';
 import useStore from '../../store/useStore';
 import { supabase } from '../../services/api';
@@ -38,6 +38,7 @@ const Jobs = () => {
   const [messageCounts, setMessageCounts] = useState({});
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [qrNotifications, setQrNotifications] = useState([]);
 
   // Helper to determine acceptance window (minutes) based on job type
   const getAcceptanceWindow = (service) => {
@@ -216,11 +217,54 @@ const Jobs = () => {
     }
   };
 
+  // Check for QR code mismatches and create notifications
+  const checkQrMismatches = () => {
+    const notifications = [];
+    orders.forEach(order => {
+      if (order.order_service) {
+        order.order_service.forEach(service => {
+          if (service.service_type === 'Laundry' && service.job_assignments) {
+            service.job_assignments.forEach(assignment => {
+              if (assignment.pickup_scan?.matched === false && !assignment.manual_override) {
+                notifications.push({
+                  id: `pickup-${assignment.id}`,
+                  type: 'pickup',
+                  assignment,
+                  order,
+                  service,
+                  message: `Pickup scan mismatch for ${order.customer_name} - Laundry job`
+                });
+              }
+              if (assignment.delivery_scan?.matched === false && !assignment.manual_override) {
+                notifications.push({
+                  id: `delivery-${assignment.id}`,
+                  type: 'delivery',
+                  assignment,
+                  order,
+                  service,
+                  message: `Delivery scan mismatch for ${order.customer_name} - Laundry job`
+                });
+              }
+            });
+          }
+        });
+      }
+    });
+    setQrNotifications(notifications);
+  };
+
   useEffect(() => {
     loadOrders();
     loadBubblers();
     loadMessageCounts(); // Load message counts on mount
   }, []);
+
+  // Check for QR mismatches when orders change
+  useEffect(() => {
+    if (isAdmin) {
+      checkQrMismatches();
+    }
+  }, [orders, isAdmin]);
 
   // Set up real-time subscription for job status changes
   useEffect(() => {
@@ -273,10 +317,28 @@ const Jobs = () => {
     return () => clearInterval(interval);
   }, [orders, isAdmin, user?.id]);
 
-  // Placeholder: Calculate travel time (returns minutes, real implementation would use a routing API)
-  const calculateTravelTime = (bubbler, jobAddress) => {
-    // For now, return a random value for demo
-    return Math.floor(Math.random() * 60) + 5;
+  // Handle manual override for QR code mismatches
+  const handleManualOverride = async (assignmentId) => {
+    if (window.confirm('Are you sure you want to manually override the QR code validation? This should only be used in rare cases (e.g., label worn off).')) {
+      try {
+        const { error } = await supabase
+          .from('job_assignments')
+          .update({ 
+            manual_override: true,
+            override_timestamp: new Date().toISOString(),
+            override_by: user?.email || 'Admin'
+          })
+          .eq('id', assignmentId);
+        
+        if (error) throw error;
+        
+        toast.success('Manual override applied successfully');
+        loadOrders(); // Refresh to show updated status
+      } catch (error) {
+        console.error('Error applying manual override:', error);
+        toast.error('Failed to apply manual override');
+      }
+    }
   };
 
   // Render each order and its services (updated to show timer/status)
@@ -331,8 +393,142 @@ const Jobs = () => {
           {service.service_type === 'Laundry' && service.order_laundry_bags && (
             <div className="text-sm text-gray-700 mb-2">
               Bags: {service.order_laundry_bags.map(bag => `${bag.bag_type} x${bag.quantity}`).join(', ')}
+            </div>
+          )}
+          
+          {/* QR Code Monitoring Section - Admin Only for Laundry Jobs */}
+          {isAdmin && service.service_type === 'Laundry' && assignment && (
+            <div className="bg-gray-50 rounded-lg p-4 mb-4">
+              <h4 className="text-sm font-semibold text-gray-800 mb-3 flex items-center">
+                <FiCpu className="h-4 w-4 mr-2" />
+                QR Code Monitoring
+                {assignment.manual_override && (
+                  <span className="ml-2 px-2 py-1 rounded bg-orange-100 text-orange-800 text-xs font-medium">
+                    Manual Override Applied
+                  </span>
+                )}
+              </h4>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Pickup Scan */}
+                <div className="bg-white rounded-lg p-3 border">
+                  <h5 className="text-xs font-semibold text-gray-700 mb-2 flex items-center">
+                    <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                    Pickup Scan
+                  </h5>
+                  {assignment.pickup_scan ? (
+                    <div className="space-y-1">
+                      <div className="text-xs">
+                        <span className="font-medium">QR Code:</span> 
+                        <span className="font-mono ml-1">{assignment.pickup_scan.qr_value}</span>
+                      </div>
+                      <div className="text-xs">
+                        <span className="font-medium">Time:</span> 
+                        <span className="ml-1">{new Date(assignment.pickup_scan.timestamp).toLocaleString()}</span>
+                      </div>
+                      <div className="text-xs">
+                        <span className="font-medium">Result:</span> 
+                        <span className={`ml-1 px-2 py-0.5 rounded text-xs font-medium ${
+                          assignment.pickup_scan.matched 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-red-100 text-red-800'
+                        }`}>
+                          {assignment.pickup_scan.matched ? '✅ Matched' : '❌ Not Matched'}
+                        </span>
+                      </div>
+                      {assignment.pickup_scan.expected_value && (
+                        <div className="text-xs">
+                          <span className="font-medium">Expected:</span> 
+                          <span className="font-mono ml-1">{assignment.pickup_scan.expected_value}</span>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-xs text-gray-500 italic">No pickup scan recorded</div>
+                  )}
+                </div>
+                
+                {/* Delivery Scan */}
+                <div className="bg-white rounded-lg p-3 border">
+                  <h5 className="text-xs font-semibold text-gray-700 mb-2 flex items-center">
+                    <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                    Delivery Scan
+                  </h5>
+                  {assignment.delivery_scan ? (
+                    <div className="space-y-1">
+                      <div className="text-xs">
+                        <span className="font-medium">QR Code:</span> 
+                        <span className="font-mono ml-1">{assignment.delivery_scan.qr_value}</span>
+                      </div>
+                      <div className="text-xs">
+                        <span className="font-medium">Time:</span> 
+                        <span className="ml-1">{new Date(assignment.delivery_scan.timestamp).toLocaleString()}</span>
+                      </div>
+                      <div className="text-xs">
+                        <span className="font-medium">Result:</span> 
+                        <span className={`ml-1 px-2 py-0.5 rounded text-xs font-medium ${
+                          assignment.delivery_scan.matched 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-red-100 text-red-800'
+                        }`}>
+                          {assignment.delivery_scan.matched ? '✅ Matched' : '❌ Not Matched'}
+                        </span>
+                      </div>
+                      {assignment.delivery_scan.expected_value && (
+                        <div className="text-xs">
+                          <span className="font-medium">Expected:</span> 
+                          <span className="font-mono ml-1">{assignment.delivery_scan.expected_value}</span>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-xs text-gray-500 italic">No delivery scan recorded</div>
+                  )}
+                </div>
               </div>
-            )}
+              
+              {/* Manual Override Section */}
+              {(assignment.pickup_scan?.matched === false || assignment.delivery_scan?.matched === false) && !assignment.manual_override && (
+                <div className="mt-3 pt-3 border-t border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <div className="text-xs text-gray-600">
+                      {assignment.pickup_scan?.matched === false && (
+                        <span className="inline-flex items-center px-2 py-1 rounded bg-yellow-100 text-yellow-800 text-xs mr-2">
+                          ⚠️ Pickup scan mismatch
+                        </span>
+                      )}
+                      {assignment.delivery_scan?.matched === false && (
+                        <span className="inline-flex items-center px-2 py-1 rounded bg-yellow-100 text-yellow-800 text-xs">
+                          ⚠️ Delivery scan mismatch
+                        </span>
+                      )}
+                    </div>
+                    <button 
+                      className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                      onClick={() => handleManualOverride(assignment.id)}
+                    >
+                      Manual Override
+                    </button>
+                  </div>
+                </div>
+              )}
+              
+              {/* Manual Override Info */}
+              {assignment.manual_override && (
+                <div className="mt-3 pt-3 border-t border-gray-200">
+                  <div className="text-xs text-gray-600">
+                    <span className="inline-flex items-center px-2 py-1 rounded bg-orange-100 text-orange-800 text-xs mr-2">
+                      🔧 Manual Override Applied
+                    </span>
+                    <span className="text-gray-500">
+                      By: {assignment.override_by} | 
+                      Time: {new Date(assignment.override_timestamp).toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
           {service.service_type === 'Vehicles' && service.order_vehicles && (
             <div className="text-sm text-gray-700 mb-2">
               Vehicles: {service.order_vehicles.map(v => `${v.vehicle_type} (${v.tier})`).join(', ')}
@@ -534,6 +730,41 @@ const Jobs = () => {
             </select>
         </div>
       </div>
+
+      {/* QR Code Notifications - Admin Only */}
+      {isAdmin && qrNotifications.length > 0 && (
+        <div className="mb-6">
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <h3 className="text-sm font-semibold text-yellow-800 mb-2 flex items-center">
+              <FiCpu className="h-4 w-4 mr-2" />
+              QR Code Scan Issues ({qrNotifications.length})
+            </h3>
+            <div className="space-y-2">
+              {qrNotifications.slice(0, 3).map((notification) => (
+                <div key={notification.id} className="flex items-center justify-between text-sm">
+                  <div className="flex items-center">
+                    <span className={`w-2 h-2 rounded-full mr-2 ${
+                      notification.type === 'pickup' ? 'bg-blue-500' : 'bg-green-500'
+                    }`}></span>
+                    <span className="text-yellow-700">{notification.message}</span>
+                  </div>
+                  <button 
+                    className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                    onClick={() => handleManualOverride(notification.assignment.id)}
+                  >
+                    Override
+                  </button>
+                </div>
+              ))}
+              {qrNotifications.length > 3 && (
+                <div className="text-xs text-yellow-600 italic">
+                  +{qrNotifications.length - 3} more scan issues...
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Results */}
       {loading ? (
