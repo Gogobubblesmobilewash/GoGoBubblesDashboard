@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FiSend, FiMessageCircle } from 'react-icons/fi';
 import { supabase } from '../../services/api';
-import useStore from '../../store/useStore';
+import { useAuth } from '../../store/AuthContext';
 import dayjs from 'dayjs';
 
 const MessageThread = ({ jobAssignment, onClose }) => {
-  const { user, isAdmin } = useStore();
+  const { user, isAdmin } = useAuth();
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);

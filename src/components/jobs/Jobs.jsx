@@ -19,6 +19,7 @@ import Modal from '../shared/Modal';
 import MessageThread from './MessageThread';
 import { parseServicesForSplitting, fetchBubblersWithTravelPrefs } from '../../services/api';
 import dayjs from 'dayjs';
+import { useAuth } from '../../store/AuthContext';
 
 const ACCEPTANCE_WINDOWS = {
   urgent: 15,
@@ -26,7 +27,7 @@ const ACCEPTANCE_WINDOWS = {
 };
 
 const Jobs = () => {
-  const { user, isAdmin } = useStore();
+  const { user, isAdmin } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [bubblers, setBubblers] = useState([]);

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import useStore from '../../store/useStore';
+import { useAuth } from '../../store/AuthContext';
 import { FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
 
 const Login = () => {
@@ -11,7 +11,7 @@ const Login = () => {
   const [error, setError] = useState('');
   const hasNavigated = useRef(false);
   
-  const { login, isAuthenticated } = useStore();
+  const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {

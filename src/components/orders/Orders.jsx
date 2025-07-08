@@ -39,11 +39,13 @@ import {
   generateOrderId,
   supabase
 } from '../../services/api';
+import { useAuth } from '../../store/AuthContext';
 
 const GOLD = '#FFD700'; // Brand gold for perk icon
 
 const Orders = () => {
-  const { user, isAdmin, orders, setOrders, loading, setLoading } = useStore();
+  const { orders, setOrders, loading, setLoading } = useStore();
+  const { user, isAdmin } = useAuth();
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');

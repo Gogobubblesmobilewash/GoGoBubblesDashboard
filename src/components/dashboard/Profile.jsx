@@ -1,8 +1,8 @@
 import React from 'react';
-import useStore from '../../store/useStore';
+import { useAuth } from '../../store/AuthContext';
 
 const Profile = () => {
-  const { user } = useStore();
+  const { user } = useAuth();
 
   return (
     <div className="space-y-4">

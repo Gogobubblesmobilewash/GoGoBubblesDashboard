@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Html5QrcodeScanner } from 'html5-qrcode';
 import useStore from '../../store/useStore';
+import { useAuth } from '../../store/AuthContext';
 
 const QRScanner = ({ onScanSuccess, onScanError, onClose }) => {
   const [scanning, setScanning] = useState(false);
-  const { isAdmin } = useStore();
+  const { isAdmin } = useAuth();
 
   const handleScanSuccess = (decodedText) => {
     if (onScanSuccess) {

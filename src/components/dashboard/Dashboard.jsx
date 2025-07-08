@@ -17,9 +17,11 @@ import {
 } from 'react-icons/fi';
 import useStore from '../../store/useStore';
 import { supabase } from '../../services/api';
+import { useAuth } from '../../store/AuthContext';
 
 const Dashboard = () => {
-  const { user, isAdmin, setDailyJobs, loading, setLoading } = useStore();
+  const { setDailyJobs, loading, setLoading } = useStore();
+  const { user, isAdmin } = useAuth();
   const [stats, setStats] = useState({
     totalJobs: 0,
     completedJobs: 0,

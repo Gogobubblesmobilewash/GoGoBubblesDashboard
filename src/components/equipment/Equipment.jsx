@@ -18,9 +18,11 @@ import {
 import useStore from '../../store/useStore';
 import Modal from '../shared/Modal';
 import { supabase } from '../../services/api';
+import { useAuth } from '../../store/AuthContext';
 
 const Equipment = () => {
-  const { user, isAdmin, equipment, setEquipment, loading, setLoading } = useStore();
+  const { equipment, setEquipment, loading, setLoading } = useStore();
+  const { user, isAdmin } = useAuth();
   const [filteredEquipment, setFilteredEquipment] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
