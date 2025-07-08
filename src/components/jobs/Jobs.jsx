@@ -20,6 +20,7 @@ import MessageThread from './MessageThread';
 import { parseServicesForSplitting, fetchBubblersWithTravelPrefs } from '../../services/api';
 import dayjs from 'dayjs';
 import { useAuth } from '../../store/AuthContext';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const ACCEPTANCE_WINDOWS = {
   urgent: 15,
@@ -28,6 +29,8 @@ const ACCEPTANCE_WINDOWS = {
 
 const Jobs = () => {
   const { user, isAdmin } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [bubblers, setBubblers] = useState([]);
@@ -258,6 +261,28 @@ const Jobs = () => {
     loadBubblers();
     loadMessageCounts(); // Load message counts on mount
   }, []);
+
+  // Sync statusFilter with URL query param
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const status = params.get('status');
+    if (status && status !== statusFilter) {
+      setStatusFilter(status);
+    }
+  }, [location.search]);
+
+  // When statusFilter changes, update the URL
+  const handleStatusChange = (e) => {
+    const newStatus = e.target.value;
+    setStatusFilter(newStatus);
+    const params = new URLSearchParams(location.search);
+    if (newStatus === 'all') {
+      params.delete('status');
+    } else {
+      params.set('status', newStatus);
+    }
+    navigate({ search: params.toString() }, { replace: true });
+  };
 
   // Check for QR mismatches when orders change
   useEffect(() => {
@@ -717,12 +742,13 @@ const Jobs = () => {
         <div className="sm:w-48">
             <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+            onChange={handleStatusChange}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="all">All Statuses</option>
             <option value="assigned">Assigned</option>
             <option value="accepted">Accepted</option>
+            <option value="en_route">En Route</option>
             <option value="in-progress">In Progress</option>
             <option value="completed">Completed</option>
             <option value="expired">Expired</option>
