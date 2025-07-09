@@ -6,7 +6,7 @@ import { useAuth } from '../../store/AuthContext';
 
 const QRScanner = ({ onScanSuccess, onScanError, onClose }) => {
   const [scanning, setScanning] = useState(false);
-  const { isAdmin } = useAuth();
+  const { isAdmin, canDoLaundry } = useAuth();
 
   const handleScanSuccess = (decodedText) => {
     if (onScanSuccess) {
@@ -35,6 +35,22 @@ const QRScanner = ({ onScanSuccess, onScanError, onClose }) => {
       scanner.clear().catch(console.error);
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Only allow access to bubblers who can do laundry or admins
+  if (!canDoLaundry && !isAdmin) {
+    return (
+      <div className="text-center py-8">
+        <div className="text-lg font-medium text-gray-900 mb-2">Access Restricted</div>
+        <div className="text-gray-600 mb-4">QR Scanner is only available for laundry service bubblers.</div>
+        <button
+          onClick={onClose}
+          className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
+        >
+          Close
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">

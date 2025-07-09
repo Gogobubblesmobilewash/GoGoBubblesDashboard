@@ -15,12 +15,13 @@ import {
   FiFileText as FileText,
   FiDollarSign as DollarSign,
   FiUsers as Users,
-  FiBarChart2 as BarChart3
+  FiBarChart2 as BarChart3,
+  FiCamera as Camera
 } from 'react-icons/fi';
 
 const Layout = () => {
   const { activeTab, setActiveTab } = useStore();
-  const { user, isAdmin, logout } = useAuth();
+  const { user, isAdmin, isBubbler, canDoLaundry, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
 
@@ -31,6 +32,7 @@ const Layout = () => {
     { name: 'Dashboard', icon: Home, path: '/dashboard' },
     { name: 'Daily Jobs', icon: Calendar, path: '/jobs' },
     { name: 'Equipment', icon: Briefcase, path: '/equipment' },
+    ...(canDoLaundry ? [{ name: 'QR Scanner', icon: Camera, path: '/qr-scanner' }] : []),
     { name: 'Earnings', icon: DollarSign, path: '/earnings' },
     { name: 'Profile', icon: User, path: '/profile' },
   ];
@@ -153,6 +155,11 @@ const Layout = () => {
                 {isAdmin && (
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-brand-red text-white">
                     Admin
+                  </span>
+                )}
+                {isBubbler && !isAdmin && (
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-brand-aqua text-white">
+                    Bubbler
                   </span>
                 )}
               </div>

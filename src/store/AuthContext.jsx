@@ -88,6 +88,16 @@ export const AuthProvider = ({ children }) => {
     logout,
     isAuthenticated: !!user,
     isAdmin: user?.email?.includes('admin') || false,
+    isBubbler: user?.email?.includes('bubbler') || user?.email?.includes('@gogobubbles.com') || false,
+    // Role-specific permissions
+    isShineBubbler: user?.email?.includes('shine') || false,
+    isSparkleBubbler: user?.email?.includes('sparkle') || false,
+    isFreshBubbler: user?.email?.includes('fresh') || false,
+    isEliteBubbler: user?.email?.includes('elite') || false,
+    // Permission checks
+    canDoLaundry: user?.email?.includes('fresh') || user?.email?.includes('elite') || false,
+    canDoCarWash: user?.email?.includes('shine') || user?.email?.includes('elite') || false,
+    canDoHomeCleaning: user?.email?.includes('sparkle') || user?.email?.includes('elite') || false,
   };
 
   console.log('AuthContext: Current state:', { user, loading, isAuthenticated: !!user, isAdmin: user?.email?.includes('admin') || false });

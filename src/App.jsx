@@ -5,6 +5,7 @@ import useStore from './store/useStore';
 import Login from './components/auth/Login';
 import Layout from './components/shared/Layout';
 import Dashboard from './components/dashboard/Dashboard';
+import BubblerDashboard from './components/dashboard/BubblerDashboard';
 import Jobs from './components/jobs/Jobs';
 import QRScanner from './components/jobs/QRScanner';
 import Equipment from './components/equipment/Equipment';
@@ -16,7 +17,7 @@ import Analytics from './components/admin/Analytics';
 import Orders from './components/orders/Orders';
 import Bubblers from './components/bubblers/Bubblers';
 import BookingForm from './components/booking/BookingForm';
-import LandingPage from './components/LandingPage';
+
 import { useAuth } from './store/AuthContext';
 import { SpeedInsights } from "@vercel/speed-insights/react";
 
@@ -71,8 +72,8 @@ class ErrorBoundary extends React.Component {
 }
 
 // Protected Route wrapper
-const ProtectedRoute = ({ children, requireAdmin = false }) => {
-  const { isAuthenticated, isAdmin, loading } = useAuth();
+const ProtectedRoute = ({ children, requireAdmin = false, requireBubbler = false }) => {
+  const { isAuthenticated, isAdmin, isBubbler, loading } = useAuth();
 
   // Show loading spinner while checking authentication
   if (loading) {
@@ -85,17 +86,20 @@ const ProtectedRoute = ({ children, requireAdmin = false }) => {
 
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   if (requireAdmin && !isAdmin) return <Navigate to="/dashboard" replace />;
+  if (requireBubbler && !isBubbler) return <Navigate to="/dashboard" replace />;
 
   return children;
 };
 
 ProtectedRoute.propTypes = {
   children: PropTypes.node.isRequired,
-  requireAdmin: PropTypes.bool
+  requireAdmin: PropTypes.bool,
+  requireBubbler: PropTypes.bool
 };
 
 ProtectedRoute.defaultProps = {
-  requireAdmin: false
+  requireAdmin: false,
+  requireBubbler: false
 };
 
 function App() {
@@ -120,7 +124,7 @@ function App() {
           {/* Public routes */}
           <Route 
             path="/" 
-            element={<LandingPage />}
+            element={<Navigate to="/login" replace />}
           />
           <Route 
             path="/login" 
@@ -145,10 +149,40 @@ function App() {
             {/* Routes inside the layout */}
             <Route index element={<Navigate to="/dashboard" replace />} />
             <Route path="dashboard" element={<Dashboard />} />
-            <Route path="jobs" element={<Jobs />} />
-            <Route path="equipment" element={<Equipment />} />
-            <Route path="profile" element={<Profile />} />
-            <Route path="earnings" element={<Earnings />} />
+            
+            {/* Bubbler-specific routes */}
+            <Route 
+              path="jobs" 
+              element={
+                <ProtectedRoute requireBubbler>
+                  <Jobs />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
+              path="equipment" 
+              element={
+                <ProtectedRoute requireBubbler>
+                  <Equipment />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
+              path="profile" 
+              element={
+                <ProtectedRoute requireBubbler>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
+              path="earnings" 
+              element={
+                <ProtectedRoute requireBubbler>
+                  <Earnings />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Admin-specific routes */}
             <Route 
@@ -172,6 +206,22 @@ function App() {
               element={
                 <ProtectedRoute requireAdmin>
                   <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
+              path="orders"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <Orders />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
+              path="bubblers"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <Bubblers />
                 </ProtectedRoute>
               }
             />

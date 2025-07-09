@@ -19,11 +19,12 @@ import useStore from '../../store/useStore';
 import { supabase } from '../../services/api';
 import { useAuth } from '../../store/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import BubblerDashboard from './BubblerDashboard';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { setDailyJobs, loading, setLoading } = useStore();
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, isBubbler } = useAuth();
   const [stats, setStats] = useState({
     totalJobs: 0,
     completedJobs: 0,
@@ -190,6 +191,11 @@ const Dashboard = () => {
       </div>
     </div>
   );
+
+  // Render bubbler dashboard for bubblers
+  if (isBubbler && !isAdmin) {
+    return <BubblerDashboard />;
+  }
 
   if (loading) {
     return (

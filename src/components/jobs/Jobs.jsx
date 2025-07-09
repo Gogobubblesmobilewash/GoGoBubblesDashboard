@@ -45,7 +45,7 @@ const LAUNDRY_STATUSES = [
 ];
 
 const Jobs = () => {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, isShineBubbler, isSparkleBubbler, isFreshBubbler, isEliteBubbler, canDoLaundry, canDoCarWash, canDoHomeCleaning } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
@@ -110,6 +110,51 @@ const Jobs = () => {
 
   // Helper to check if job is completed
   const isJobCompleted = (assignment) => assignment?.status === 'completed';
+
+  // Helper to determine photo requirements based on role and service
+  const getPhotoRequirementsForJob = (service, assignment) => {
+    const requirements = [];
+    
+    // Laundry services always require pickup and delivery photos
+    if (canDoLaundry && service.service_type === 'Laundry Service') {
+      if (assignment.status === 'en_route_to_pickup' || assignment.status === 'picked_up') {
+        requirements.push('Pickup Photo');
+      }
+      if (assignment.status === 'en_route_to_deliver' || assignment.status === 'delivered') {
+        requirements.push('Delivery Photo');
+      }
+    }
+    
+    // Shine bubblers (car wash) need photos when perks are delivered
+    if (isShineBubbler && service.service_type === 'Mobile Car Wash') {
+      if (assignment.status === 'completed') {
+        requirements.push('Perk Delivery Photo');
+      }
+    }
+    
+    // Sparkle bubblers (home cleaning) need photos when perks are delivered
+    if (isSparkleBubbler && service.service_type === 'Home Cleaning') {
+      if (assignment.status === 'completed') {
+        requirements.push('Perk Delivery Photo');
+      }
+    }
+    
+    // Elite bubblers need photos for both laundry and perk delivery
+    if (isEliteBubbler) {
+      if (service.service_type === 'Laundry Service') {
+        if (assignment.status === 'en_route_to_pickup' || assignment.status === 'picked_up') {
+          requirements.push('Pickup Photo');
+        }
+        if (assignment.status === 'en_route_to_deliver' || assignment.status === 'delivered') {
+          requirements.push('Delivery Photo');
+        }
+      } else if (assignment.status === 'completed') {
+        requirements.push('Perk Delivery Photo');
+      }
+    }
+    
+    return requirements;
+  };
 
   // Handle job status updates
   const updateJobStatus = async (assignmentId, newStatus) => {
