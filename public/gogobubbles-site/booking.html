@@ -177,6 +177,40 @@
       background: #1fc2a7;
       outline: 2px solid #38b2ac;
     }
+    
+    /* Blinking warning effect for deposit button */
+    .blinking-warning {
+      animation: blink-warning 1s infinite;
+      box-shadow: 0 0 20px #ffc107, 0 0 40px #ffc107, 0 0 60px #ffc107;
+    }
+    
+    @keyframes blink-warning {
+      0%, 50% {
+        background: #ffc107;
+        color: #000;
+        box-shadow: 0 0 20px #ffc107, 0 0 40px #ffc107, 0 0 60px #ffc107;
+      }
+      51%, 100% {
+        background: #2ed8c3;
+        color: #fff;
+        box-shadow: 0 0 10px #ffc107, 0 0 20px #ffc107;
+      }
+    }
+    
+    /* Hourglass animation */
+    .hourglass-animation {
+      animation: hourglass-flip 2s infinite;
+      display: inline-block;
+    }
+    
+    @keyframes hourglass-flip {
+      0%, 100% {
+        transform: rotate(0deg);
+      }
+      50% {
+        transform: rotate(180deg);
+      }
+    }
     .bundle-offer-msg {
       background: #e0f7fa;
       color: #00796b;
@@ -396,10 +430,46 @@
       <button type="button" id="apply-promo" style="background:#4299e1; color:#fff; border:none; border-radius:1em; padding:0.7em 1.5em; font-weight:600; cursor:pointer;">Apply</button>
     </div>
     <div id="summary"></div>
-    <div style="text-align: center; margin: 2rem 0; padding: 1.5rem; background: #f8fafd; border-radius: 1.2rem; border: 2px solid #4fd1c5;">
+    
+    <!-- Success Message (hidden by default) -->
+    <div id="booking-success" style="display: none; text-align: center; margin: 2rem 0; padding: 2rem; background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); border-radius: 1.2rem; border: 2px solid #28a745; box-shadow: 0 4px 16px rgba(40, 167, 69, 0.2);">
+      <div style="font-size: 3rem; margin-bottom: 1rem;">✅</div>
+      <h3 style="margin-bottom: 1rem; color: #155724; font-size: 1.5rem;">Booking Submitted Successfully!</h3>
+      <p style="margin-bottom: 1.5rem; color: #155724; font-size: 1.1rem; line-height: 1.6;">
+        Great! Your service request has been saved. Now it's time to secure your spot and pay your deposit.
+      </p>
+      <div style="background: #fff; padding: 1.5rem; border-radius: 1rem; margin: 1rem 0; border: 1px solid #28a745;">
+        <h4 style="color: #155724; margin-bottom: 1rem;">Next Steps:</h4>
+        <ol style="text-align: left; color: #155724; line-height: 1.8;">
+          <li><strong>Schedule Your Appointment:</strong> Choose your preferred date and time below</li>
+          <li><strong>Pay Your Deposit:</strong> Complete the deposit payment to confirm your booking</li>
+          <li><strong>Get Confirmation:</strong> You'll receive a confirmation email with all details</li>
+        </ol>
+      </div>
+      <button onclick="scrollToScheduling()" style="background: #28a745; color: #fff; border: none; border-radius: 1rem; padding: 1rem 2rem; font-weight: 600; cursor: pointer; font-size: 1.1rem; margin-top: 1rem;">
+        📅 Schedule Now & Pay Deposit
+      </button>
+    </div>
+    
+    <div id="scheduling-section" style="text-align: center; margin: 2rem 0; padding: 1.5rem; background: #f8fafd; border-radius: 1.2rem; border: 2px solid #4fd1c5;">
       <h3 style="margin-bottom: 1rem; color: #2d3748;">Ready to Schedule Your Appointment?</h3>
       <p style="margin-bottom: 1.5rem; color: #4a5568;">Choose your preferred date and time for your service below. Your GoGoBubbles services provider will arrive within the 45-minute window you select. Actual service time may vary depending on your booking.</p>
+      
       <iframe src="https://tidycal.com/gogobubblesmobilewash/gogobubbles-booking" width="100%" height="600" frameborder="0" style="border-radius: 0.8rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1);"></iframe>
+      
+      <!-- Post-Booking Reminder (hidden by default) -->
+      <div id="post-booking-reminder" style="display: none; margin-top: 2rem; padding: 2rem; background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%); border-radius: 1.2rem; border: 2px solid #ffc107; box-shadow: 0 4px 16px rgba(255, 193, 7, 0.2);">
+        <div style="text-align: center; margin-bottom: 1.5rem;">
+          <div style="font-size: 4rem; margin-bottom: 1rem;">⚠️</div>
+          <h3 style="margin-bottom: 1rem; color: #856404; font-size: 1.8rem;">Final Step: Secure Your Spot</h3>
+          <p style="margin-bottom: 1.5rem; color: #856404; font-size: 1.3rem; line-height: 1.6; font-weight: 600;">
+            A deposit is required to keep this booking
+          </p>
+          <p style="color: #856404; font-size: 1.1rem; line-height: 1.6;">
+            Limited-time hold in progress <span class="hourglass-animation" style="font-size: 1.2rem;">⏳</span>
+          </p>
+        </div>
+      </div>
     </div>
   </form>
   <button type="submit" class="sticky-btn" form="gogoBookingForm">
@@ -1287,7 +1357,8 @@
           alert('There was an error submitting your booking. Please try again or contact us directly.');
           console.error('Supabase error:', error);
         } else {
-          alert('Your booking has been submitted!');
+          // Show success message and scroll to scheduling section
+          showBookingSuccess();
           bookingForm.reset();
           state = {
             activeService: 'carwash',
@@ -1316,11 +1387,57 @@
     if (stickyBtn) {
       stickyBtn.addEventListener('click', function(e) {
         console.log('Sticky button clicked!');
+        // Stop the blinking effect when button is clicked
+        stopBlinkingDepositButton();
         // Don't trigger form submission here since the button already has form="gogoBookingForm"
         // The form submission will be handled by the form's submit event listener
       });
     }
   });
+
+  // --- SUCCESS MESSAGE FUNCTIONS ---
+  function showBookingSuccess() {
+    const successDiv = document.getElementById('booking-success');
+    if (successDiv) {
+      successDiv.style.display = 'block';
+      // Scroll to success message
+      successDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  function scrollToScheduling() {
+    const schedulingSection = document.getElementById('scheduling-section');
+    if (schedulingSection) {
+      schedulingSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  function showPostBookingReminder() {
+    const reminderDiv = document.getElementById('post-booking-reminder');
+    if (reminderDiv) {
+      reminderDiv.style.display = 'block';
+      // Scroll to the reminder message
+      reminderDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Start the blinking effect on the deposit button
+      highlightDepositButton();
+    }
+  }
+
+  function highlightDepositButton() {
+    const depositButton = document.querySelector('.sticky-btn');
+    if (depositButton) {
+      // Add blinking yellow light effect
+      depositButton.classList.add('blinking-warning');
+    }
+  }
+
+  function stopBlinkingDepositButton() {
+    const depositButton = document.querySelector('.sticky-btn');
+    if (depositButton) {
+      // Remove blinking effect
+      depositButton.classList.remove('blinking-warning');
+    }
+  }
 
   // --- DEPOSIT CALCULATION FUNCTION ---
   function calculateDeposit(subtotal) {
@@ -1399,6 +1516,11 @@
     // The actual listeners are already attached in attachDynamicListeners()
     console.log('Attaching floating tab listeners...');
   }
+
+  // Global function for TidyCal to call after booking completion
+  window.showDepositReminder = function() {
+    showPostBookingReminder();
+  };
   </script>
 </body>
 </html> 
