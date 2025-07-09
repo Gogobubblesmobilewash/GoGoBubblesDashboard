@@ -83,9 +83,48 @@ const Orders = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setOrders(Array.isArray(data) ? data : []);
-      setFilteredOrders(Array.isArray(data) ? data : []);
-      console.log('✅ Orders loaded successfully:', Array.isArray(data) ? data.length : 0);
+      
+      // Enhance orders with customer history for perk calculation
+      const enhancedOrders = await Promise.all((Array.isArray(data) ? data : []).map(async (order) => {
+        // Get customer's previous orders count
+        const { count: previousOrders } = await supabase
+          .from('orders')
+          .select('*', { count: 'exact', head: true })
+          .eq('email', order.email)
+          .lt('created_at', order.created_at);
+        
+        // Get refresh clean count for home cleaning customers (within the last year)
+        const oneYearAgo = new Date();
+        oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+        
+        const { count: refreshCleanCount } = await supabase
+          .from('orders')
+          .select('*', { count: 'exact', head: true })
+          .eq('email', order.email)
+          .contains('services', [{ service: 'Home Cleaning', tier: 'Refresh Clean' }])
+          .gte('created_at', oneYearAgo.toISOString())
+          .lt('created_at', order.created_at);
+        
+        // Get Signature wash count for car wash customers (within the last year)
+        const { count: signatureWashCount } = await supabase
+          .from('orders')
+          .select('*', { count: 'exact', head: true })
+          .eq('email', order.email)
+          .contains('services', [{ service: 'Mobile Car Wash', tier: 'Signature Shine' }])
+          .gte('created_at', oneYearAgo.toISOString())
+          .lt('created_at', order.created_at);
+        
+        return {
+          ...order,
+          previousOrders: previousOrders || 0,
+          refreshCleanCount: refreshCleanCount || 0,
+          signatureWashCount: signatureWashCount || 0
+        };
+      }));
+      
+      setOrders(enhancedOrders);
+      setFilteredOrders(enhancedOrders);
+      console.log('✅ Orders loaded successfully:', enhancedOrders.length);
     } catch (error) {
       console.error('❌ Error loading orders:', error);
       setError('Error loading orders: ' + error.message);
@@ -474,9 +513,20 @@ const Orders = () => {
                         Bags: {service.totalBags} ({service.bagTypes.map((b, i) => <span key={b.type + '-' + i}>{`${b.quantity} ${b.type}`}</span>)})
                       </p>
                     )}
+                    {/* Show perks from jobs array if available */}
                     {showPerk && perkName && (
                       <PerkDisplay perks={[perkName]} />
                     )}
+                    {/* Show perks calculated from service data */}
+                    {(() => {
+                      const isFirstTime = !order.previousOrders || order.previousOrders === 0;
+                      const refreshCleanCount = order.refreshCleanCount || 0;
+                      const signatureWashCount = order.signatureWashCount || 0;
+                      const perks = getPerks(service.service, service.tier, isFirstTime, signatureWashCount, refreshCleanCount, order.email);
+                      return perks && perks.length > 0 ? (
+                        <PerkDisplay perks={perks} />
+                      ) : null;
+                    })()}
                   </div>
                 </div>
                 <div className="text-right">
@@ -486,6 +536,39 @@ const Orders = () => {
             ))}
           </div>
         </div>
+        
+        {/* Perks Summary */}
+        {(() => {
+          const isFirstTime = !order.previousOrders || order.previousOrders === 0;
+          const refreshCleanCount = order.refreshCleanCount || 0;
+          const signatureWashCount = order.signatureWashCount || 0;
+          const allPerks = [];
+          
+          services.forEach(service => {
+            const perks = getPerks(service.service, service.tier, isFirstTime, signatureWashCount, refreshCleanCount, order.email);
+            allPerks.push(...perks);
+          });
+          
+          const uniquePerks = [...new Set(allPerks)];
+          
+          return uniquePerks.length > 0 ? (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
+              <div className="flex items-center mb-2">
+                <Gift className="h-4 w-4 mr-2" style={{ color: GOLD }} />
+                <h4 className="font-semibold text-yellow-800">Order Perks</h4>
+              </div>
+              <div className="space-y-1">
+                {uniquePerks.map((perk, index) => (
+                  <div key={index} className="text-sm text-yellow-700 flex items-center">
+                    <span className="w-2 h-2 bg-yellow-400 rounded-full mr-2"></span>
+                    {perk}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null;
+        })()}
+        
         {/* Order Details */}
         <div className="space-y-2 mb-4">
           <div className="flex items-center text-sm text-gray-600">
@@ -858,7 +941,13 @@ const Orders = () => {
                         )}
                         {/* Perks */}
                         {(() => {
-                          const perks = getPerks(service.service, service.tier);
+                          // Determine if this is a first-time customer
+                          const isFirstTime = !selectedOrder.previousOrders || selectedOrder.previousOrders === 0;
+                          // Get refresh clean count for home cleaning
+                          const refreshCleanCount = selectedOrder.refreshCleanCount || 0;
+                          // Get Signature wash count for car wash
+                          const signatureWashCount = selectedOrder.signatureWashCount || 0;
+                          const perks = getPerks(service.service, service.tier, isFirstTime, signatureWashCount, refreshCleanCount, selectedOrder.email);
                           return perks && perks.length > 0 ? (
                             <PerkDisplay perks={perks} />
                           ) : null;

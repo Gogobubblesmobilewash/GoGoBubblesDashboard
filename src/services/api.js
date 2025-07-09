@@ -126,23 +126,43 @@ export const getPhotoRequirements = (serviceType, tier, addons = []) => {
 };
 
 // Helper function to determine perks for a service
-export const getPerks = (serviceType, tier, isFirstTime = false, refreshCleanCount = 0) => {
-  const config = SERVICE_CONFIG[serviceType];
-  if (!config || !config.perks || !config.perks[tier]) return [];
-  
+export const getPerks = (serviceType, tier, isFirstTime = false, signatureWashCount = 0, refreshCleanCount = 0, customerEmail = null) => {
   const perks = [];
-  const tierPerks = config.perks[tier];
   
-  if (tierPerks.always) {
-    perks.push(tierPerks.always);
+  // Mobile Car Wash Perks
+  if (serviceType === 'Mobile Car Wash') {
+    // First-time car wash customers get free air freshener regardless of tier
+    if (isFirstTime) {
+      perks.push('Free air freshener (First-time customer)');
+    }
+    
+    // Signature and Supreme tiers get free air freshener
+    if (tier === 'Signature Shine' || tier === 'Supreme Shine') {
+      perks.push('Free air freshener');
+    }
+    
+    // Every 3rd Signature wash within a year gets free tire shine
+    if (tier === 'Signature Shine' && signatureWashCount > 0 && signatureWashCount % 3 === 0) {
+      perks.push('Free tire shine (Every 3rd Signature wash)');
+    }
   }
   
-  if (tierPerks.firstTime && isFirstTime) {
-    perks.push(tierPerks.firstTime);
+  // Home Cleaning Perks
+  if (serviceType === 'Home Cleaning') {
+    // Every Signature Deep Clean gets a free candle
+    if (tier === 'Signature Deep Clean') {
+      perks.push('Free candle');
+    }
+    
+    // Every 3rd Refresh Clean within a year gets a free candle
+    if (tier === 'Refresh Clean' && refreshCleanCount > 0 && refreshCleanCount % 3 === 0) {
+      perks.push('Free candle (Every 3rd Refresh Clean)');
+    }
   }
   
-  if (tierPerks.everyThird && refreshCleanCount > 0 && refreshCleanCount % 3 === 0) {
-    perks.push(tierPerks.everyThird);
+  // Laundry Service Perks (no specific perks mentioned, but keeping structure)
+  if (serviceType === 'Laundry Service') {
+    // Could add laundry-specific perks in the future
   }
   
   return perks;
