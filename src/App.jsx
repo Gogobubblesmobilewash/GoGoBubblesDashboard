@@ -15,6 +15,8 @@ import Ratings from './components/admin/Ratings';
 import Analytics from './components/admin/Analytics';
 import Orders from './components/orders/Orders';
 import Bubblers from './components/bubblers/Bubblers';
+import BookingForm from './components/booking/BookingForm';
+import LandingPage from './components/LandingPage';
 import { useAuth } from './store/AuthContext';
 import { SpeedInsights } from "@vercel/speed-insights/react";
 
@@ -115,12 +117,20 @@ function App() {
     <ErrorBoundary>
       <Router>
         <Routes>
-          {/* Public Login */}
+          {/* Public routes */}
+          <Route 
+            path="/" 
+            element={<LandingPage />}
+          />
           <Route 
             path="/login" 
             element={
               isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />
             }
+          />
+          <Route 
+            path="/booking" 
+            element={<BookingForm />}
           />
 
           {/* All authenticated routes share the same layout */}

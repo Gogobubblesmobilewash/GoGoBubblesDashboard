@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GoGoBubbles Booking</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    html, body {
+      box-sizing: border-box;
+      width: 100vw;
+      overflow-x: hidden;
+    }
+    *, *:before, *:after {
+      box-sizing: inherit;
+    }
+    body {
+      min-height: 100vh;
+      margin: 0;
+      font-family: 'Poppins', Arial, sans-serif;
+      background: linear-gradient(120deg, #4fd1c5 0%, #4299e1 100%);
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      font-size: 1rem;
+      width: 100vw;
+      overflow-x: hidden;
+    }
+    .booking-card {
+      background: #fff;
+      border-radius: 2rem;
+      box-shadow: 0 4px 24px rgba(44,62,80,0.10);
+      margin: 2.5rem auto 6rem auto;
+      padding: 2.2rem 1.2rem 7.5rem 1.2rem;
+      max-width: 430px;
+      width: 100%;
+      position: relative;
+      z-index: 1;
+      padding-bottom: 100px;
+      font-size: 1rem;
+      box-sizing: border-box;
+      display: block;
+    }
+    .logo-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+    .logo-float-large {
+      max-width: 200px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin: 0 auto 1.2rem auto;
+      box-shadow: 0 2px 8px (44,62,80,0.08);
+      animation: logo-float 3.2s ease-in-out infinite;
+      will-change: transform;
+    }
+    @keyframes logo-float {
+      0% { transform: translateY(0);}
+      50% { transform: translateY(-16px);}
+      100% { transform: translateY(0);}
+    }
+    .form-section {
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+      margin-bottom: 1.2rem;
+    }
+    .form-section label {
+      font-weight: 600;
+      margin-bottom: 0.2rem;
+    }
+    .form-section input, .form-section select {
+      padding: 0.9rem 1rem;
+      border-radius: 1.2rem;
+      border: 1.5px solid #e0e0e0;
+      background: #f7f7f7;
+      font-size: 1rem;
+      font-family: inherit;
+      color: #222;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .service-list {
+      margin-bottom: 0.7rem;
+    }
+    .service-list label {
+      font-weight: 500;
+      color: #222;
+      cursor: pointer;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+    .service-card {
+      background: #f8fafd;
+      border-radius: 1.2rem;
+      padding: 1.2rem;
+      margin-bottom: 1.2rem;
+      box-shadow: 0 1px 4px rgba(44,62,80,0.04);
+    }
+    .service-card label, .service-card select, .service-card input {
+      display: block;
+      margin-bottom: 0.7em;
+      width: 100%;
+      font-size: 1em;
+    }
+    .service-card button {
+      margin-top: 0.5em;
+      background: #2ed8c3;
+      color: #fff;
+      border: none;
+      border-radius: 1em;
+      padding: 0.5em 1.2em;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .vehicle-block {
+      background: #f0f8ff;
+      border-radius: 0.8rem;
+      padding: 1rem;
+      margin: 0.8rem 0;
+      border: 1px solid #e0e0e0;
+    }
+    .summary-card {
+      background: linear-gradient(135deg, #f8fafd 0%, #e6f3ff 100%);
+      border-radius: 1.2rem;
+      padding: 1.2rem;
+      margin-bottom: 4.5rem;
+      font-size: 1.05rem;
+      min-height: 200px;
+      border: 2px solid #4fd1c5;
+      box-shadow: 0 4px 16px rgba(44,62,80,0.08);
+      position: relative;
+      z-index: 10;
+    }
+    .sticky-btn {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      max-width: 430px;
+      margin: 0 auto;
+      z-index: 100;
+      background: #2ed8c3;
+      color: #fff;
+      font-weight: 600;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 2rem 2rem 0 0;
+      padding: 1.1rem 0;
+      box-shadow: 0 -2px 12px rgba(44,62,80,0.10);
+      transition: background 0.2s;
+      cursor: pointer;
+      display: block;
+    }
+    @media (min-width: 601px) and (max-width: 900px) {
+      .sticky-btn {
+        max-width: 600px;
+        font-size: 1.15rem;
+      }
+    }
+    @media (min-width: 901px) and (max-width: 1200px) {
+      .sticky-btn {
+        max-width: 700px;
+        font-size: 1.18rem;
+      }
+    }
+    @media (min-width: 1201px) {
+      .sticky-btn {
+        max-width: 850px;
+        font-size: 1.22rem;
+      }
+    }
+    .sticky-btn:focus, .sticky-btn:hover {
+      background: #1fc2a7;
+      outline: 2px solid #38b2ac;
+    }
+    .bundle-offer-msg {
+      background: #e0f7fa;
+      color: #00796b;
+      border-radius: 1em;
+      padding: 0.7em 1em;
+      margin-bottom: 1em;
+      font-size: 1.05em;
+      text-align: center;
+      font-weight: 500;
+    }
+    .info-msg {
+      background: #e0f7fa;
+      color: #00796b;
+      border-radius: 0.5rem;
+      padding: 0.5rem;
+      margin: 0.5rem 0;
+      font-size: 0.9rem;
+    }
+    .whats-included {
+      background: #e6faf7;
+      border-radius: 0.7rem;
+      padding: 0.7rem 1rem;
+      margin: 0.7rem 0;
+      font-size: 0.98em;
+      display: none;
+    }
+    .whats-included.active {
+      display: block;
+    }
+    @media (max-width: 600px) {
+      .booking-card {
+        padding: 1.2rem 0.3rem 7.5rem 0.3rem;
+        margin: 0.7rem 0 6rem 0;
+        max-width: 100vw;
+        font-size: 0.98rem;
+      }
+      .logo-float-large {
+        max-width: 140px;
+      }
+    }
+    @media (min-width: 601px) and (max-width: 900px) {
+      .booking-card {
+        max-width: 600px;
+        padding: 2.5rem 2rem 8rem 2rem;
+        font-size: 1.08rem;
+      }
+    }
+    @media (min-width: 901px) and (max-width: 1200px) {
+      .booking-card {
+        max-width: 700px;
+        padding: 2.8rem 2.5rem 8.5rem 2.5rem;
+        font-size: 1.12rem;
+      }
+    }
+    @media (min-width: 1201px) {
+      .booking-card {
+        max-width: 850px;
+        padding: 3rem 3rem 9rem 3rem;
+        font-size: 1.15rem;
+      }
+    }
+    .service-tab {
+      background: #e0e0e0;
+      color: #666;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      position: relative;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .service-tab:hover {
+      background: #d0d0d0;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    .service-tab.active {
+      background: linear-gradient(135deg, #4fd1c5 0%, #38b2ac 100%);
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(79, 209, 197, 0.3);
+      font-weight: 600;
+    }
+    .service-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80%;
+      height: 3px;
+      background: #2ed8c3;
+      border-radius: 2px;
+    }
+    
+    /* Floating Service Navigation */
+    .floating-service-nav {
+      position: fixed;
+      right: 5px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: white;
+      border-radius: 0.4rem;
+      padding: 0.4rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      min-width: 60px;
+      max-width: 70px;
+    }
+    
+    .floating-service-nav h4 {
+      margin: 0 0 0.2rem 0;
+      font-size: 0.6rem;
+      color: #666;
+      text-align: center;
+      font-weight: 600;
+    }
+    
+    .floating-service-tab {
+      background: #f8f8f8;
+      color: #555;
+      border: none;
+      border-radius: 0.2rem;
+      padding: 0.3rem 0.4rem;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 0.6rem;
+      transition: all 0.3s ease;
+      text-align: center;
+      line-height: 1;
+    }
+    
+    .floating-service-tab:hover {
+      background: #e8e8e8;
+      transform: translateY(-1px);
+    }
+    
+    .floating-service-tab.active {
+      background: linear-gradient(135deg, #4fd1c5 0%, #38b2ac 100%);
+      color: white;
+      transform: translateY(-1px);
+      box-shadow: 0 1px 4px rgba(79, 209, 197, 0.3);
+      font-weight: 600;
+    }
+    
+    @media (max-width: 768px) {
+      .floating-service-nav {
+        position: fixed;
+        bottom: 80px;
+        right: 5px;
+        top: auto;
+        transform: none;
+        flex-direction: column;
+        min-width: 55px;
+        max-width: 65px;
+        padding: 0.3rem;
+        gap: 0.15rem;
+      }
+      
+      .floating-service-nav h4 {
+        display: none;
+      }
+      
+      .floating-service-tab {
+        padding: 0.25rem 0.3rem;
+        font-size: 0.55rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <form class="booking-card" id="gogoBookingForm" autocomplete="off">
+    <div class="logo-container">
+      <img src="GoGoBubbleslogotransparent.png" alt="GoGoBubbles Logo" class="logo-float-large" />
+    </div>
+    <h2 style="text-align:center; font-weight:700; margin-bottom:1.2rem;">Book Your Service</h2>
+    <div class="bundle-offer-msg">
+      <strong>Bundle & Save:</strong> Book any 2+ services and get <b>10% off your total!</b>
+    </div>
+    <div class="form-section">
+      <label for="name">Full Name</label>
+      <input type="text" id="name" name="name" required placeholder="Enter your full name" />
+      <label for="phone">Phone Number</label>
+      <input type="tel" id="phone" name="phone" required placeholder="Enter your phone number" />
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" required placeholder="Enter your email" />
+      <label for="address">Service Address</label>
+      <input type="text" id="address" name="address" required placeholder="Enter your service address" />
+    </div>
+    <div id="promo-error" style="color:#e53e3e; font-size:0.98em; min-height:1.2em;"></div>
+    <div class="form-section">
+      <label for="notes">Notes for Your Service Request</label>
+      <textarea id="notes" name="notes" rows="3" placeholder="Let us know about gate codes, pet instructions, special requests, language preference, or anything else we should know!" style="padding:0.9rem 1rem; border-radius:1.2rem; border:1.5px solid #e0e0e0; background:#f7f7f7; font-size:1rem; font-family:inherit; color:#222; width:100%; box-sizing:border-box; resize:vertical;"></textarea>
+    </div>
+    <!-- Service Selector (now always visible) -->
+    <div id="service-selector" style="margin: 1rem 0;">
+      <div style="background: #f8fafd; border-radius: 1rem; padding: 1rem; text-align: center;">
+        <div style="font-weight: 600; margin-bottom: 0.5rem;">
+          Choose a Service to Get Started:
+          <span style="font-size: 0.95em; font-style: italic; font-weight: 400;">Tap between tabs to add more.</span>
+        </div>
+        <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
+          <button type="button" class="service-tab" data-service="carwash">Car Wash</button>
+          <button type="button" class="service-tab" data-service="homeclean">Home Cleaning</button>
+          <button type="button" class="service-tab" data-service="laundry">Laundry</button>
+        </div>
+      </div>
+    </div>
+    <div id="service-selections"></div>
+    <div id="promo-section" style="margin:1.2rem 0; display:flex; align-items:center; gap:0.5em;">
+      <input type="text" id="promo-code" placeholder="Promo code" style="flex:1; padding:0.7em 1em; border-radius:1em; border:1.5px solid #e0e0e0; font-size:1em;" />
+      <button type="button" id="apply-promo" style="background:#4299e1; color:#fff; border:none; border-radius:1em; padding:0.7em 1.5em; font-weight:600; cursor:pointer;">Apply</button>
+    </div>
+    <div id="summary"></div>
+    <div style="text-align: center; margin: 2rem 0; padding: 1.5rem; background: #f8fafd; border-radius: 1.2rem; border: 2px solid #4fd1c5;">
+      <h3 style="margin-bottom: 1rem; color: #2d3748;">Ready to Schedule Your Appointment?</h3>
+      <p style="margin-bottom: 1.5rem; color: #4a5568;">Choose your preferred date and time for your service below. Your GoGoBubbles services provider will arrive within the 45-minute window you select. Actual service time may vary depending on your booking.</p>
+      <iframe src="https://tidycal.com/gogobubblesmobilewash/gogobubbles-booking" width="100%" height="600" frameborder="0" style="border-radius: 0.8rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1);"></iframe>
+    </div>
+  </form>
+  <button type="submit" class="sticky-btn" form="gogoBookingForm">
+    Secure Spot Now & Pay Deposit
+  </button>
+
+  <!-- Floating Service Navigation -->
+  <div class="floating-service-nav">
+    <button type="button" class="floating-service-tab" data-service="carwash">Car Wash</button>
+    <button type="button" class="floating-service-tab" data-service="homeclean">Home Cleaning</button>
+    <button type="button" class="floating-service-tab" data-service="laundry">Laundry</button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script>
+    const supabaseUrl = 'https://hombfzdgmtbbaahglclv.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvbWJmemRnbXRiYmFhaGdsY2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE2NTk5MzcsImV4cCI6MjA2NzIzNTkzN30.j9fdl-oYCYUbRigNFmzriKKrFNZTqG5h9hPXdJmbRWQ';
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+  </script>
+  <script>
+  // --- DATA ---
+  const carwashPrices = {
+    express: {car:35, suv:45, truck:50, minivan:50},
+    signature: {car:55, suv:65, truck:70, minivan:70},
+    supreme: {car:75, suv:85, truck:90, minivan:90}
+  };
+  const carwashAddons = {
+    clay: {price:25, desc:"Clay Bar Treatment", details:"Removes surface contaminants from the paint, leaving it smooth before waxing."},
+    bug: {price:20, desc:"Bug & Tar Removal", details:"Targeted treatment for sticky residue and buildup."},
+    plastic: {price:18, desc:"Plastic Trim Restoration", details:"Restores faded exterior plastic trim."},
+    upholstery: {price:40, desc:"Upholstery Shampoo", details:"Deep cleans fabric seats and upholstery."},
+    shampoo: {price:50, desc:"Interior Shampoo", details:"Deep cleans carpets and mats."}
+  };
+
+  const homecleanBase = {
+    refreshed: {base: 90, bedPrice: 15, bathPrice: 15},
+    deep: {base: 130, bedPrice: 20, bathPrice: 20}
+  };
+  const homecleanAddons = {
+    deepdust: {price:25, desc:"Deep Dusting", details:"Thorough dusting of all surfaces, including fans, vents, blinds, furniture, and clean light fixtures."},
+    deepbed: {price:25, desc:"Deep Clean Bedroom", details:"Detailed cleaning of bedroom(s). Dusting, vacuum, organize, wipe down."},
+    fridge: {price:30, desc:"Refrigerator Cleaning", details:"Interior and exterior fridge cleaning."},
+    oven: {price:30, desc:"Oven Cleaning", details:"Deep oven cleaning."},
+    freezer: {price:15, desc:"Freezer Cleaning", details:"Interior and exterior freezer cleaning."},
+    cabinet: {price:15, desc:"Cabinet Cleaning", details:"Wipe down and clean cabinet exteriors."},
+    steam: {price:15, desc:"Steam Mopping", details:"Sanitizes floors with steam mop."}
+  };
+
+  const laundryBags = [
+    {value: 'essentials', label: 'Essentials', price: 35, first: 8, replace: 6, desc: "Wash, dry, fold (10–15 lbs)"},
+    {value: 'family', label: 'Family', price: 55, first: 12, replace: 10, desc: "Wash, dry, fold (25–30 lbs)"},
+    {value: 'delicates', label: 'Delicates', price: 25, first: 6, replace: 5, desc: "Delicates bag (8-10 lbs)"},
+    {value: 'ironing', label: 'Ironing', price: 35, first: 10, replace: 8, desc: "Ironing kit (10 garments)"}
+  ];
+  const laundryAddons = {
+    eco: {price:5, desc:"Eco-Friendly Detergent", details:"Plant-based, hypoallergenic detergent."},
+    sameday: {price:15, desc:"Same-Day Service", details:"Pickup and delivery on the same day (orders before 10am). Orders after 10am may still be fulfilled based on driver availability."}
+  };
+
+  const TAX_RATE = 0.0825;
+  const DEPOSIT_RATE = 0.3;
+  const DEPOSIT_CAP = 75;
+
+  // --- PROMO CODES ---
+  const promoCodes = {
+    SUMMER10: {type: 'percent', value: 10},
+    WELCOME20: {type: 'fixed', value: 20}
+  };
+
+  let appliedPromo = null;
+
+  // --- STATE ---
+  let state = {
+    activeService: 'carwash', // Only one active at a time
+    selectedServices: ['carwash'], // Track which services are selected
+    carwash: [],
+    homeclean: {tier:'refreshed', bedrooms:0, bathrooms:0, addons:[], deepbedCount: 0},
+    laundry: {
+      essentials: {qty: 0, newKits: 0, replacements: 0},
+      family: {qty: 0, newKits: 0, replacements: 0},
+      delicates: {qty: 0, newKits: 0, replacements: 0},
+      ironing: {qty: 0, newKits: 0, replacements: 0},
+      addons: []
+    },
+    promo: null
+  };
+
+  function attachDynamicListeners() {
+    // Service tab navigation (main tabs)
+    document.querySelectorAll('.service-tab').forEach(tab => {
+      tab.onclick = function() {
+        const service = this.dataset.service;
+        state.activeService = service;
+        renderServiceSections();
+        // Update tab UI
+        document.querySelectorAll('.service-tab').forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+      };
+    });
+    // Floating service tab navigation
+    document.querySelectorAll('.floating-service-tab').forEach(tab => {
+      tab.onclick = function() {
+        const service = this.dataset.service;
+        state.activeService = service;
+        renderServiceSections();
+        // Update floating tab UI
+        document.querySelectorAll('.floating-service-tab').forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        // Update main tab UI
+        document.querySelectorAll('.service-tab').forEach(t => {
+          if (t.dataset.service === service) t.classList.add('active');
+          else t.classList.remove('active');
+        });
+        // Scroll to service section
+        const serviceSection = document.getElementById(`${service}-section`);
+        if (serviceSection) {
+          serviceSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      };
+    });
+    
+    // Carwash
+    document.querySelectorAll('.add-vehicle').forEach(btn => {
+      btn.onclick = () => {
+        state.carwash.push({type:'car', tier:'express', addons:[]});
+        renderServiceSections();
+      };
+    });
+    document.querySelectorAll('.remove-vehicle').forEach(btn => {
+      btn.onclick = (e) => {
+        const idx = +btn.closest('.vehicle-block').dataset.idx;
+        state.carwash.splice(idx,1);
+        renderServiceSections();
+      };
+    });
+    document.querySelectorAll('.cw-type').forEach((sel, i) => {
+      sel.onchange = e => {
+        state.carwash[i].type = sel.value;
+        renderServiceSections();
+      };
+    });
+    document.querySelectorAll('.cw-tier').forEach((sel, i) => {
+      sel.onchange = e => {
+        state.carwash[i].tier = sel.value;
+        renderServiceSections();
+      };
+    });
+    document.querySelectorAll('.cw-addon').forEach((cb, i) => {
+      cb.onchange = e => {
+        const idx = +cb.closest('.vehicle-block').dataset.idx;
+        const val = cb.value;
+        const arr = state.carwash[idx].addons;
+        if (cb.checked && !arr.includes(val)) arr.push(val);
+        if (!cb.checked && arr.includes(val)) arr.splice(arr.indexOf(val),1);
+        renderServiceSections();
+      };
+    });
+    document.querySelectorAll('.cw-includes-btn').forEach((btn, i) => {
+      btn.onclick = () => {
+        const block = btn.closest('.vehicle-block');
+        const idx = +block.dataset.idx;
+        const tier = state.carwash[idx].tier;
+        const div = block.querySelector('.cw-includes');
+        div.innerHTML = getCarwashIncludes(tier);
+        div.style.display = div.style.display === 'block' ? 'none' : 'block';
+      };
+    });
+    // Home Cleaning
+    const hcTier = document.querySelector('.hc-tier');
+    if (hcTier) {
+      hcTier.onchange = e => {
+        state.homeclean.tier = e.target.value;
+        renderServiceSections();
+      };
+    }
+    const hcBedrooms = document.querySelector('.hc-bedrooms');
+    if (hcBedrooms) {
+      hcBedrooms.onchange = e => {
+        const newBedrooms = +e.target.value;
+        state.homeclean.bedrooms = newBedrooms;
+        if (state.homeclean.deepbedCount > newBedrooms) state.homeclean.deepbedCount = newBedrooms;
+        renderServiceSections();
+      };
+    }
+    const hcBathrooms = document.querySelector('.hc-bathrooms');
+    if (hcBathrooms) {
+      hcBathrooms.onchange = e => {
+        state.homeclean.bathrooms = +e.target.value;
+        renderServiceSections();
+      };
+    }
+      document.querySelectorAll('.hc-addon').forEach(cb => {
+        cb.onchange = e => {
+          const val = cb.value;
+          if (cb.checked && !state.homeclean.addons.includes(val)) {
+            state.homeclean.addons.push(val);
+            if (val === 'deepbed' && !state.homeclean.deepbedCount) {
+              state.homeclean.deepbedCount = 1;
+            }
+          }
+          if (!cb.checked && state.homeclean.addons.includes(val)) {
+            state.homeclean.addons.splice(state.homeclean.addons.indexOf(val),1);
+            if (val === 'deepbed') state.homeclean.deepbedCount = 0;
+          }
+          renderServiceSections();
+        };
+      });
+    const hcIncludesBtn = document.querySelector('.hc-includes-btn');
+    if (hcIncludesBtn) {
+      hcIncludesBtn.onclick = () => {
+        const div = document.querySelector('.hc-includes');
+        if (div) {
+        div.innerHTML = getHomecleanIncludes(state.homeclean.tier);
+        div.style.display = div.style.display === 'block' ? 'none' : 'block';
+        }
+      };
+    }
+      const deepbedCountInput = document.querySelector('.deepbed-count');
+      if (deepbedCountInput) {
+        deepbedCountInput.onchange = function() {
+          let val = +deepbedCountInput.value;
+          if (val < 1) val = 1;
+          if (val > state.homeclean.bedrooms) val = state.homeclean.bedrooms;
+          state.homeclean.deepbedCount = val;
+          deepbedCountInput.value = val;
+          calculateSummary();
+        };
+    }
+    // Laundry
+      document.querySelectorAll('.ld-bag').forEach(inp => {
+        inp.onchange = e => {
+          const type = inp.dataset.type;
+          state.laundry[type].qty = +inp.value;
+        // Adjust newKits and replacements if needed
+        if (state.laundry[type].newKits > state.laundry[type].qty) state.laundry[type].newKits = state.laundry[type].qty;
+        if (state.laundry[type].replacements > (state.laundry[type].qty - state.laundry[type].newKits)) state.laundry[type].replacements = state.laundry[type].qty - state.laundry[type].newKits;
+          renderServiceSections();
+        };
+      });
+    document.querySelectorAll('.ld-newkit').forEach(inp => {
+      inp.onchange = e => {
+        const type = inp.dataset.type;
+        let val = +inp.value;
+        if (val < 0) val = 0;
+        if (val > state.laundry[type].qty) val = state.laundry[type].qty;
+        state.laundry[type].newKits = val;
+        // Adjust replacements if needed
+        if (state.laundry[type].replacements > (state.laundry[type].qty - val)) state.laundry[type].replacements = state.laundry[type].qty - val;
+        inp.value = val;
+          renderServiceSections();
+        };
+      });
+      document.querySelectorAll('.ld-replace').forEach(inp => {
+        inp.onchange = e => {
+          const type = inp.dataset.type;
+          let val = +inp.value;
+        const max = state.laundry[type].qty - state.laundry[type].newKits;
+        if (val < 0) val = 0;
+        if (val > max) val = max;
+        state.laundry[type].replacements = val;
+          inp.value = val;
+          renderServiceSections();
+        };
+      });
+      document.querySelectorAll('.ld-addon').forEach(cb => {
+        cb.onchange = e => {
+          const val = cb.value;
+          if (cb.checked && !state.laundry.addons.includes(val)) state.laundry.addons.push(val);
+          if (!cb.checked && state.laundry.addons.includes(val)) state.laundry.addons.splice(state.laundry.addons.indexOf(val),1);
+          renderServiceSections();
+        };
+      });
+    const ldIncludesBtn = document.querySelector('.ld-includes-btn');
+    if (ldIncludesBtn) {
+      ldIncludesBtn.onclick = () => {
+        const div = document.querySelector('.ld-includes');
+        if (div) {
+        div.innerHTML = getLaundryIncludes();
+        div.style.display = div.style.display === 'block' ? 'none' : 'block';
+        }
+      };
+    }
+  }
+
+  function getCarwashIncludes(tier) {
+    if (tier === 'express') return `
+      <ul>
+        <li>Exterior hand wash</li>
+        <li>Rim wipe-down</li>
+        <li>Tire shine</li>
+        <li>Exterior window cleaning only</li>
+        <li><b>No interior work</b></li>
+      </ul>`;
+    if (tier === 'signature') return `
+      <ul>
+        <li>All Express services</li>
+        <li>Interior wipe down</li>
+        <li>Dashboard cleaning</li>
+        <li>Vacuum</li>
+        <li>Door jams</li>
+        <li><b>Interior scent</b></li>
+      </ul>`;
+    if (tier === 'supreme') return `
+      <ul>
+        <li>All Signature services</li>
+        <li>Deep rim & tire wash</li>
+        <li>Wax sealant</li>
+        <li>Vent dusting</li>
+        <li>Cupholder scrubbing</li>
+        <li>Floor mat shampooing</li>
+        <li><b>Interior scent</b></li>
+      </ul>`;
+    return '';
+  }
+  function getHomecleanIncludes(tier) {
+    if (tier === 'refreshed') return `
+      <ul>
+        <li>General dusting</li>
+        <li>Mopping, sweeping, vacuuming</li>
+        <li>Tidying up kitchen, living room, bathrooms and bedrooms</li>
+      </ul>`;
+    if (tier === 'deep') return `
+      <ul>
+        <li>All Refresher services</li>
+        <li>Baseboards</li>
+        <li>Wall spots</li>
+        <li>Deep bathroom scrub</li>
+        <li>Microwave interior</li>
+        <li>Trash removal</li>
+      </ul>`;
+    return '';
+  }
+  function getLaundryIncludes() {
+    return `
+      <ul>
+        <li>Wash, dry, fold (Essentials: 10–15 lbs, Family: 25–30 lbs, Delicates: 8-10 lbs)</li>
+        <li>Standard detergent</li>
+        <li>Pickup & delivery included with 36 hour turnaround</li>
+        <li>Ironing kit: 10 garments, 2 bags (dirty + hanger bag w/ hangers)</li>
+      </ul>`;
+  }
+
+  function renderServiceSections() {
+    const container = document.getElementById('service-selections');
+    const serviceSelector = document.getElementById('service-selector');
+    let html = '';
+    // Always show the service selector since we're using tabs
+    serviceSelector.style.display = 'block';
+    // Update service tab styles based on activeService
+    document.querySelectorAll('.service-tab').forEach(tab => {
+      if (tab.dataset.service === state.activeService) {
+        tab.classList.add('active');
+      } else {
+        tab.classList.remove('active');
+      }
+    });
+    document.querySelectorAll('.floating-service-tab').forEach(tab => {
+      if (tab.dataset.service === state.activeService) {
+        tab.classList.add('active');
+      } else {
+        tab.classList.remove('active');
+      }
+    });
+    // Show only the active service card
+    if (state.activeService === 'carwash') {
+      html += `<div class="service-card" id="carwash-section">`;
+      html += `<div class="bundle-offer-msg" style="margin-bottom:1rem;">
+        <strong>Save 5%</strong> when booking 2 Signature/Supreme washes, <strong>10%</strong> for 3+!
+      </div>
+      <b>Mobile Car Wash</b>
+      <div id="carwash-vehicles">`;
+        if (state.carwash && state.carwash.length > 0) {
+      state.carwash.forEach((vehicle, idx) => {
+        const price = carwashPrices[vehicle.tier][vehicle.type];
+        html += `<div class="vehicle-block" data-idx="${idx}">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+            <b>Vehicle #${idx + 1}</b>
+              ${state.carwash.length > 1 ? `<button type="button" onclick="removeCarWash(${idx})" style="background:#ff6b6b; color:white; border:none; border-radius:0.5rem; padding:0.3rem 0.6rem; cursor:pointer;">Remove</button>` : ''}
+          </div>
+          <label>Vehicle Type:
+            <select class="cw-type">`;
+        ['car','suv','truck','minivan'].forEach(type => {
+          html += `<option value="${type}" ${vehicle.type === type ? 'selected' : ''}>${type.charAt(0).toUpperCase()+type.slice(1)} ($${carwashPrices[vehicle.tier][type]})</option>`;
+        });
+        html += `</select>
+          </label>
+          <label>Tier:
+            <select class="cw-tier">`;
+            const tierLabels = {
+              express: "Express Shine",
+              signature: "Signature Shine",
+              supreme: "Supreme Shine"
+            };
+        ['express','signature','supreme'].forEach(tier => {
+              html += `<option value="${tier}" ${vehicle.tier === tier ? 'selected' : ''}>${tierLabels[tier]}</option>`;
+        });
+        html += `</select>
+          </label>
+          <button type="button" class="cw-includes-btn" style="background:#4fd1c5; color:white; border:none; border-radius:0.5rem; padding:0.5rem 1rem; margin:0.5rem 0; cursor:pointer;">What's Included?</button>
+          <div class="cw-includes" style="display:none; background:#e6faf7; border-radius:0.5rem; padding:0.8rem; margin:0.5rem 0;"></div>
+          <div style="margin:1rem 0;">
+            <b>Add-ons:</b>`;
+        Object.entries(carwashAddons).forEach(([key, addon]) => {
+          html += `<label><input type="checkbox" class="cw-addon" value="${key}" ${vehicle.addons.includes(key) ? 'checked' : ''}/> ${addon.desc} ($${addon.price})</label>`;
+          if (vehicle.addons.includes(key)) {
+            html += `<div class="info-msg" style="margin-left:1.5em;">${addon.details}</div>`;
+          }
+        });
+        html += `</div></div>`;
+      });
+        } else {
+          html += `<div style="text-align:center; padding:2rem; color:#666;">
+            <p>No vehicles added yet.</p>
+            <p>Click "Add Vehicle" below to get started.</p>
+          </div>`;
+        }
+      html += `</div>
+        <button type="button" class="add-vehicle" style="background:#2ed8c3; color:white; border:none; border-radius:0.8rem; padding:0.6rem 1.2rem; margin:0.5rem 0; cursor:pointer; font-weight:600;">+ Add Vehicle</button>
+      </div>`;
+    } else if (state.activeService === 'homeclean') {
+      html += `<div class="service-card" id="homeclean-section">
+        <b>Home Cleaning</b>
+        <label>Tier:
+          <select class="hc-tier">
+              <option value="refreshed" ${state.homeclean.tier === 'refreshed' ? 'selected' : ''}>Refresher Clean (Starting at $${homecleanBase.refreshed.base})</option>
+              <option value="deep" ${state.homeclean.tier === 'deep' ? 'selected' : ''}>Signature Deep Clean (Starting at $${homecleanBase.deep.base})</option>
+          </select>
+        </label>
+          <label>Bedrooms: <input type="number" class="hc-bedrooms" min="0" max="5" value="${state.homeclean.bedrooms}" /></label>
+          <label>Bathrooms: <input type="number" class="hc-bathrooms" min="0" max="4" value="${state.homeclean.bathrooms}" /></label>
+        <button type="button" class="hc-includes-btn" style="background:#4fd1c5; color:white; border:none; border-radius:0.5rem; padding:0.5rem 1rem; margin:0.5rem 0; cursor:pointer;">What's Included?</button>
+        <div class="hc-includes" style="display:none; background:#e6faf7; border-radius:0.5rem; padding:0.8rem; margin:0.5rem 0;"></div>
+        <div style="margin:1rem 0;">
+          <b>Add-ons:</b>`;
+      Object.entries(homecleanAddons).forEach(([key, addon]) => {
+        html += `<label><input type="checkbox" class="hc-addon" value="${key}" ${state.homeclean.addons.includes(key) ? 'checked' : ''}/> ${addon.desc} ($${addon.price})</label>`;
+        if (state.homeclean.addons.includes(key)) {
+          html += `<div class="info-msg" style="margin-left:1.5em;">${addon.details}</div>`;
+        }
+      });
+      if (state.homeclean.addons.includes('deepbed')) {
+        html += `<label>How many bedrooms for deep clean? <input type="number" class="deepbed-count" min="1" max="${state.homeclean.bedrooms}" value="${state.homeclean.deepbedCount || 1}" /></label>`;
+      }
+      html += `</div></div>`;
+    } else if (state.activeService === 'laundry') {
+      html += `<div class="service-card" id="laundry-section">
+        <b>Laundry Service</b>`;
+      laundryBags.forEach(bag => {
+        const bagState = state.laundry[bag.value];
+        html += `<div style="margin:1rem 0; padding:1rem; background:#f8f9fa; border-radius:0.5rem;">
+          <label><b>${bag.label} Bag:</b> <input type="number" class="ld-bag" data-type="${bag.value}" min="0" max="5" value="${bagState.qty}" /> ($${bag.price} each)</label>
+          <div class="info-msg" style="margin-top:0.5rem;">${bag.desc}</div>`;
+        if (bagState.qty > 0) {
+            // New Kits
+          html += `<div style="margin:0.5rem 0;">
+              <label><b>How many are new kits (first time)?</b> <input type="number" class="ld-newkit" data-type="${bag.value}" min="0" max="${bagState.qty}" value="${bagState.newKits || 0}" /></label>
+          </div>`;
+            // Replacements
+            const maxReplacements = bagState.qty - (bagState.newKits || 0);
+            html += `<div style="margin:0.5rem 0;">
+              <label><b>How many are replacements?</b> <input type="number" class="ld-replace" data-type="${bag.value}" min="0" max="${maxReplacements}" value="${bagState.replacements || 0}" /></label>
+            </div>`;
+            // Info: The rest are existing/good shape
+            const existingGood = bagState.qty - (bagState.newKits || 0) - (bagState.replacements || 0);
+            if (existingGood > 0) {
+              html += `<div class="info-msg">${existingGood} bag(s) are existing and in good shape.</div>`;
+          }
+        }
+        html += `</div>`;
+      });
+      html += `<div style="margin:1rem 0;">
+        <b>Add-ons:</b>`;
+      Object.entries(laundryAddons).forEach(([key, addon]) => {
+        html += `<label><input type="checkbox" class="ld-addon" value="${key}" ${state.laundry.addons.includes(key) ? 'checked' : ''}/> ${addon.desc} ($${addon.price}/bag)</label>`;
+        if (state.laundry.addons.includes(key)) {
+          html += `<div class="info-msg" style="margin-left:1.5em;">${addon.details}</div>`;
+        }
+      });
+      html += `</div>
+      <button type="button" class="ld-includes-btn" style="background:#4fd1c5; color:white; border:none; border-radius:0.5rem; padding:0.5rem 1rem; margin:0.5rem 0; cursor:pointer;">What's Included?</button>
+      <div class="ld-includes" style="display:none; background:#e6faf7; border-radius:0.5rem; padding:0.8rem; margin:0.5rem 0;"></div>
+      <div style="background:#e0f7fa; color:#00796b; border-radius:0.7rem; padding:0.8rem; margin:0.8rem 0; font-size:0.95em;">
+        <strong>Pickup & Delivery Info:</strong> For laundry service, the 45-minute window you select is your pickup window. Your Bubbler will arrive during this window to collect your laundry. Standard turnaround is 24-36 hours unless same-day service was selected.
+      </div>
+    </div>`;
+    }
+    container.innerHTML = html;
+    attachDynamicListeners();
+    calculateSummary();
+  }
+
+  function calculateSummary() {
+    // Ensure summary container exists
+    let summaryDiv = document.getElementById('summary');
+    if (!summaryDiv) {
+      summaryDiv = document.createElement('div');
+      summaryDiv.id = 'summary';
+      const serviceSelections = document.getElementById('service-selections');
+      serviceSelections.parentNode.insertBefore(summaryDiv, serviceSelections.nextSibling);
+    }
+    let summaryLines = [];
+    let subtotal = 0;
+    // Car Wash
+    if (state.carwash && state.carwash.length > 0) {
+      state.carwash.forEach((vehicle, idx) => {
+        const price = carwashPrices[vehicle.tier][vehicle.type];
+        subtotal += price;
+        summaryLines.push(`<div style="display:flex; justify-content:space-between; align-items:center;">
+          <span>Car Wash #${idx + 1} (${vehicle.tier.charAt(0).toUpperCase()+vehicle.tier.slice(1)}, ${vehicle.type.charAt(0).toUpperCase()+vehicle.type.slice(1)}): $${price.toFixed(2)}</span>
+          <button type="button" onclick="removeCarWash(${idx})" style="background:#ff6b6b; color:white; border:none; border-radius:0.3rem; padding:0.2rem 0.5rem; cursor:pointer; font-size:0.8rem;">Remove</button>
+        </div>`);
+        vehicle.addons.forEach(addon => {
+          const addonPrice = carwashAddons[addon].price;
+          subtotal += addonPrice;
+          summaryLines.push(`<span style="margin-left:1.5em;">${carwashAddons[addon].desc}: $${addonPrice.toFixed(2)}</span>`);
+        });
+      });
+    }
+    // Home Cleaning
+    if (state.homeclean && (state.homeclean.bedrooms > 0 && state.homeclean.bathrooms > 0)) {
+      const tier = state.homeclean.tier;
+      const basePrice = homecleanBase[tier].base;
+      const bedPrice = homecleanBase[tier].bedPrice;
+      const bathPrice = homecleanBase[tier].bathPrice;
+      // Calculate additional bedrooms and bathrooms beyond the first
+      const additionalBeds = Math.max(0, state.homeclean.bedrooms - 1);
+      const additionalBaths = Math.max(0, state.homeclean.bathrooms - 1);
+      const additionalBedTotal = additionalBeds * bedPrice;
+      const additionalBathTotal = additionalBaths * bathPrice;
+      const total = basePrice + additionalBedTotal + additionalBathTotal;
+      subtotal += total;
+      summaryLines.push(`<div style="display:flex; justify-content:space-between; align-items:center;">
+        <span>Home Cleaning (${tier === 'refreshed' ? 'Refresher' : 'Signature Deep'}): $${basePrice.toFixed(2)}</span>
+        <button type="button" onclick="removeHomeClean()" style="background:#ff6b6b; color:white; border:none; border-radius:0.3rem; padding:0.2rem 0.5rem; cursor:pointer; font-size:0.8rem;">Remove</button>
+      </div>`);
+      if (additionalBeds > 0) {
+        summaryLines.push(`<span style="margin-left:1.5em;">Additional Bedrooms (${additionalBeds} x $${bedPrice}): $${additionalBedTotal.toFixed(2)}</span>`);
+      }
+      if (additionalBaths > 0) {
+        summaryLines.push(`<span style="margin-left:1.5em;">Additional Bathrooms (${additionalBaths} x $${bathPrice}): $${additionalBathTotal.toFixed(2)}</span>`);
+      }
+      state.homeclean.addons.forEach(addon => {
+        if (addon === 'deepbed' && state.homeclean.deepbedCount > 0) {
+          const deepbedTotal = 25 * state.homeclean.deepbedCount;
+          subtotal += deepbedTotal;
+          summaryLines.push(`<span style="margin-left:1.5em;">Deep Clean Bedroom (${state.homeclean.deepbedCount}): $${deepbedTotal.toFixed(2)}</span>`);
+        } else if (addon !== 'deepbed') {
+          const addonPrice = homecleanAddons[addon].price;
+          subtotal += addonPrice;
+          summaryLines.push(`<span style="margin-left:1.5em;">${homecleanAddons[addon].desc}: $${addonPrice.toFixed(2)}</span>`);
+        }
+      });
+    }
+    // Laundry
+    let hasLaundryItems = false;
+    if (state.laundry) {
+      hasLaundryItems = Object.values(state.laundry).some(v => v && typeof v === 'object' && v.qty > 0);
+      if (hasLaundryItems) {
+      laundryBags.forEach(bag => {
+        const bagState = state.laundry[bag.value];
+        if (bagState.qty > 0) {
+          const bagPrice = bag.price * bagState.qty;
+          subtotal += bagPrice;
+          summaryLines.push(`<div style="display:flex; justify-content:space-between; align-items:center;">
+            <span>${bag.label} Bag x${bagState.qty}: $${bagPrice.toFixed(2)}</span>
+            <button type="button" onclick="removeLaundryBag('${bag.value}')" style="background:#ff6b6b; color:white; border:none; border-radius:0.3rem; padding:0.2rem 0.5rem; cursor:pointer; font-size:0.8rem;">Remove</button>
+          </div>`);
+            if (bagState.newKits > 0) {
+              const kitPrice = bag.first * bagState.newKits;
+            subtotal += kitPrice;
+              summaryLines.push(`<span style="margin-left:1.5em;">${bag.label} Bag Kit (first time) x${bagState.newKits}: $${kitPrice.toFixed(2)}</span>`);
+          }
+            if (bagState.replacements > 0) {
+              const replacePrice = bag.replace * bagState.replacements;
+            subtotal += replacePrice;
+              summaryLines.push(`<span style="margin-left:1.5em;">${bag.label} Bag Replacement x${bagState.replacements}: $${replacePrice.toFixed(2)}</span>`);
+          }
+        }
+      });
+        const bagsWithQty = Object.values(state.laundry).filter(v => v && typeof v === 'object' && v.qty > 0).length;
+      state.laundry.addons.forEach(addon => {
+        const addonPrice = laundryAddons[addon].price;
+        const totalAddonPrice = addonPrice * bagsWithQty;
+        if (totalAddonPrice > 0) {
+          subtotal += totalAddonPrice;
+          summaryLines.push(`<span style="margin-left:1.5em;">${laundryAddons[addon].desc}: $${totalAddonPrice.toFixed(2)}</span>`);
+        }
+      });
+    }
+    }
+    
+    // Calculate deposit on original subtotal (before discounts)
+    const deposit = calculateDeposit(subtotal);
+    
+    // Car Wash Multi-Vehicle Discount
+    let carwashDiscount = 0;
+    if (state.carwash && state.carwash.length >= 2) {
+      const signatureSupremeWashes = state.carwash.filter(vehicle => 
+        vehicle.tier === 'signature' || vehicle.tier === 'supreme'
+      );
+      
+      if (signatureSupremeWashes.length >= 2) {
+        const carwashSubtotal = state.carwash.reduce((total, vehicle) => {
+          const price = carwashPrices[vehicle.tier][vehicle.type];
+          const addonsTotal = vehicle.addons.reduce((addonTotal, addon) => 
+            addonTotal + carwashAddons[addon].price, 0
+          );
+          return total + price + addonsTotal;
+        }, 0);
+        
+        if (signatureSupremeWashes.length >= 3) {
+          carwashDiscount = carwashSubtotal * 0.10;
+        } else {
+          carwashDiscount = carwashSubtotal * 0.05;
+        }
+      }
+    }
+    
+    // Bundling Discount: 10% off if 2+ distinct services
+    const servicesSelected = [
+      (state.carwash && state.carwash.length > 0),
+      (state.homeclean && state.homeclean.bedrooms > 0 && state.homeclean.bathrooms > 0),
+      hasLaundryItems
+    ].filter(Boolean).length;
+    let bundleDiscount = 0;
+    if (servicesSelected >= 2) {
+      bundleDiscount = subtotal * 0.10;
+    }
+    
+    // Promo discount calculation
+    let promoDiscount = 0;
+    let promoLine = '';
+    if (state.promo) {
+      if (state.promo.type === 'percent') {
+        promoDiscount = subtotal * (state.promo.value / 100);
+      } else if (state.promo.type === 'fixed') {
+        promoDiscount = Math.min(subtotal, state.promo.value);
+      }
+    }
+    
+    // Apply the greatest discount only (no stacking)
+    const allDiscounts = [
+      { type: 'carwash', amount: carwashDiscount, label: carwashDiscount > 0 ? (carwashDiscount / (subtotal + carwashDiscount) * 100).toFixed(0) + '% Car Wash Discount' : '' },
+      { type: 'bundle', amount: bundleDiscount, label: 'Bundling Discount (10% off)' },
+      { type: 'promo', amount: promoDiscount, label: state.promo ? `Promo (${state.promo.code})` : '' }
+    ];
+    
+    const greatestDiscount = allDiscounts.reduce((max, discount) => 
+      discount.amount > max.amount ? discount : max
+    );
+    
+    if (greatestDiscount.amount > 0) {
+      summaryLines.push(`<span style="color:#00796b; font-weight:600;">${greatestDiscount.label}: -$${greatestDiscount.amount.toFixed(2)}</span>`);
+      subtotal -= greatestDiscount.amount;
+    }
+    
+    const tax = Math.round(subtotal * TAX_RATE * 100) / 100;
+    const balance = Math.round((subtotal + tax - deposit) * 100) / 100;
+    let html = `<div class="summary-card">`;
+    html += `<div style="font-size:1.1rem; font-weight:600; margin-bottom:1rem;">Order Summary</div>`;
+    if (summaryLines.length > 0) {
+      summaryLines.forEach(line => {
+        html += `<div style="margin:0.3rem 0;">${line}</div>`;
+      });
+    } else {
+      html += `<div style="color:#666; font-style:italic;">No services selected yet. Select a service above to see pricing.</div>`;
+    }
+    html += `<hr style="margin:1rem 0; border:none; border-top:1px solid #ddd;">`;
+    html += `<div style="font-weight:600;"><b>Subtotal:</b> $${subtotal.toFixed(2)}</div>`;
+    if (summaryLines.length > 0) {
+    html += `<div style="font-weight:600;"><b>Deposit (due now):</b> $${deposit.toFixed(2)}</div>`;
+    html += `<div style="font-weight:600;"><b>Tax (TX 8.25%):</b> $${tax.toFixed(2)}</div>`;
+    html += `<div style="font-weight:600; color:#00796b;"><b>Remaining Balance (due at service):</b> $${balance.toFixed(2)}</div>`;
+    }
+    html += `</div>`;
+    summaryDiv.innerHTML = html;
+    
+    // Add event handlers for remove buttons in summary
+    document.querySelectorAll('.remove-service').forEach(btn => {
+      btn.onclick = function() {
+        const service = this.dataset.service;
+        const index = this.dataset.index;
+        const bag = this.dataset.bag;
+        
+        removeService(service, index, bag);
+      };
+    });
+  }
+
+  // Promo code apply logic
+  function applyPromoCode() {
+    const code = document.getElementById('promo-code').value.trim().toUpperCase();
+    const errorDiv = document.getElementById('promo-error');
+    if (!code) {
+      errorDiv.textContent = '';
+      state.promo = null;
+      renderServiceSections();
+      return;
+    }
+    if (promoCodes[code]) {
+      state.promo = { code, ...promoCodes[code] };
+      errorDiv.textContent = '';
+    } else {
+      state.promo = null;
+      errorDiv.textContent = 'Invalid promo code.';
+    }
+    renderServiceSections();
+  }
+
+  // Initial render
+  document.addEventListener('DOMContentLoaded', function() {
+    // Keep all original initialization for tabs and UI
+    renderServiceSections();
+    syncFloatingTabs();
+    attachFloatingTabListeners();
+
+    // Add debug logging ONLY inside the submit handler
+    const bookingForm = document.getElementById('gogoBookingForm');
+    if (bookingForm) {
+      bookingForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        // --- Collect all your form and service data as before ---
+        const name = document.getElementById('name').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const address = document.getElementById('address').value.trim();
+        const notes = document.getElementById('notes').value.trim();
+
+        // Validate required fields
+        if (!name || !phone || !email || !address) {
+          alert('Please fill in all required fields (Name, Phone, Email, and Address).');
+          return;
+        }
+
+        // Check if any services are selected
+        const hasCarWash = state.carwash && state.carwash.length > 0;
+        const hasHomeClean = state.homeclean && state.homeclean.bedrooms > 0 && state.homeclean.bathrooms > 0;
+        const hasLaundry = state.laundry && Object.values(state.laundry).some(v => v && typeof v === 'object' && v.qty > 0);
+
+        if (!hasCarWash && !hasHomeClean && !hasLaundry) {
+          alert('Please select at least one service before submitting.');
+          return;
+        }
+
+        // --- Prepare service data as before ---
+        let servicesData = [];
+        let totalSubtotal = 0;
+
+        // Car Wash data
+        if (hasCarWash) {
+          state.carwash.forEach((vehicle, idx) => {
+            const price = carwashPrices[vehicle.tier][vehicle.type];
+            totalSubtotal += price;
+            const vehicleData = {
+              service: 'Car Wash',
+              vehicle: idx + 1,
+              type: vehicle.type,
+              tier: vehicle.tier,
+              price: price,
+              addons: vehicle.addons.map(addon => ({
+                name: carwashAddons[addon].desc,
+                price: carwashAddons[addon].price
+              }))
+            };
+            servicesData.push(vehicleData);
+            totalSubtotal += vehicle.addons.reduce((sum, addon) => sum + carwashAddons[addon].price, 0);
+          });
+        }
+
+        // Home Cleaning data
+        if (hasHomeClean) {
+          const tier = state.homeclean.tier;
+          const basePrice = homecleanBase[tier].base;
+          const bedPrice = homecleanBase[tier].bedPrice;
+          const bathPrice = homecleanBase[tier].bathPrice;
+          const additionalBeds = Math.max(0, state.homeclean.bedrooms - 1);
+          const additionalBaths = Math.max(0, state.homeclean.bathrooms - 1);
+          const additionalBedTotal = additionalBeds * bedPrice;
+          const additionalBathTotal = additionalBaths * bathPrice;
+          const total = basePrice + additionalBedTotal + additionalBathTotal;
+          totalSubtotal += total;
+
+          const homeData = {
+            service: 'Home Cleaning',
+            tier: tier,
+            bedrooms: state.homeclean.bedrooms,
+            bathrooms: state.homeclean.bathrooms,
+            basePrice: basePrice,
+            additionalBedrooms: additionalBedTotal,
+            additionalBathrooms: additionalBathTotal,
+            total: total,
+            addons: state.homeclean.addons.map(addon => ({
+              name: addon === 'deepbed' ? `Deep Clean Bedroom (${state.homeclean.deepbedCount})` : homecleanAddons[addon].desc,
+              price: addon === 'deepbed' ? 25 * state.homeclean.deepbedCount : homecleanAddons[addon].price
+            }))
+          };
+          servicesData.push(homeData);
+          totalSubtotal += state.homeclean.addons.reduce((sum, addon) => {
+            if (addon === 'deepbed' && state.homeclean.deepbedCount > 0) return sum + (25 * state.homeclean.deepbedCount);
+            return sum + homecleanAddons[addon].price;
+          }, 0);
+        }
+
+        // Laundry data
+        if (hasLaundry) {
+          laundryBags.forEach(bag => {
+            const bagState = state.laundry[bag.value];
+            if (bagState.qty > 0) {
+              const bagPrice = bag.price * bagState.qty;
+              totalSubtotal += bagPrice;
+              const laundryData = {
+                service: 'Laundry',
+                bagType: bag.label,
+                quantity: bagState.qty,
+                price: bagPrice,
+                newKits: bagState.newKits,
+                replacements: bagState.replacements
+              };
+              servicesData.push(laundryData);
+
+              if (bagState.newKits > 0) {
+                totalSubtotal += bag.first * bagState.newKits;
+              }
+              if (bagState.replacements > 0) {
+                totalSubtotal += bag.replace * bagState.replacements;
+              }
+            }
+          });
+
+          const bagsWithQty = Object.values(state.laundry).filter(v => v && typeof v === 'object' && v.qty > 0).length;
+          state.laundry.addons.forEach(addon => {
+            const addonPrice = laundryAddons[addon].price;
+            const totalAddonPrice = addonPrice * bagsWithQty;
+            if (totalAddonPrice > 0) {
+              totalSubtotal += totalAddonPrice;
+            }
+          });
+        }
+
+        // --- Calculate totals ---
+        const TAX_RATE = 0.0825;
+        const tax = Math.round(totalSubtotal * TAX_RATE * 100) / 100;
+        const deposit = calculateDeposit(totalSubtotal);
+        const balance = Math.round((totalSubtotal + tax - deposit) * 100) / 100;
+
+        // --- Prepare order data for Supabase ---
+        const orderData = {
+          name,
+          phone,
+          email,
+          address,
+          notes,
+          services: JSON.stringify(servicesData),
+          subtotal: totalSubtotal,
+          tax: tax,
+          deposit: deposit,
+          balance: balance,
+          total: totalSubtotal + tax,
+          promo_code: state.promo ? state.promo.code : null,
+          created_at: new Date().toISOString()
+        };
+
+        // --- Insert into Supabase ---
+        const { data, error } = await supabase
+          .from('orders')
+          .insert([orderData]);
+
+        if (error) {
+          alert('There was an error submitting your booking. Please try again or contact us directly.');
+          console.error('Supabase error:', error);
+        } else {
+          alert('Your booking has been submitted!');
+          bookingForm.reset();
+          state = {
+            activeService: 'carwash',
+            selectedServices: ['carwash'],
+            carwash: [],
+            homeclean: {tier:'refreshed', bedrooms:0, bathrooms:0, addons:[], deepbedCount: 0},
+            laundry: {
+              essentials: {qty: 0, newKits: 0, replacements: 0},
+              family: {qty: 0, newKits: 0, replacements: 0},
+              delicates: {qty: 0, newKits: 0, replacements: 0},
+              ironing: {qty: 0, newKits: 0, replacements: 0},
+              addons: []
+            },
+            promo: null
+          };
+          renderServiceSections();
+        }
+      });
+    }
+
+    // Add event listener to apply promo code
+    document.getElementById('apply-promo').onclick = applyPromoCode;
+    
+    // Add direct click event listener to sticky button as backup
+    const stickyBtn = document.querySelector('.sticky-btn');
+    if (stickyBtn) {
+      stickyBtn.addEventListener('click', function(e) {
+        console.log('Sticky button clicked!');
+        // Don't trigger form submission here since the button already has form="gogoBookingForm"
+        // The form submission will be handled by the form's submit event listener
+      });
+    }
+  });
+
+  // --- DEPOSIT CALCULATION FUNCTION ---
+  function calculateDeposit(subtotal) {
+    if (subtotal < 60) {
+      return 20;
+    } else if (subtotal >= 60 && subtotal < 150) {
+      return 30;
+    } else if (subtotal >= 150 && subtotal < 250) {
+      return 50;
+    } else if (subtotal >= 250 && subtotal < 400) {
+      return 65;
+    } else {
+      return 75; // Maximum deposit for bookings $400 and above
+    }
+  }
+
+  // --- REMOVE SERVICE FUNCTION ---
+  function removeService(service, index, bag) {
+    if (service === 'carwash' && index !== undefined) {
+      // Remove specific vehicle
+      state.carwash.splice(parseInt(index), 1);
+      if (state.carwash.length === 0) {
+        // Remove service from selected services if no vehicles left
+        state.selectedServices = state.selectedServices.filter(s => s !== 'carwash');
+      }
+    } else if (service === 'homeclean') {
+      // Clear home cleaning data and remove from selected services
+      state.homeclean = {tier:'refreshed', bedrooms:0, bathrooms:0, addons:[], deepbedCount: 0};
+      state.selectedServices = state.selectedServices.filter(s => s !== 'homeclean');
+    } else if (service === 'laundry' && bag) {
+      // Remove specific laundry bag
+      state.laundry[bag] = {qty: 0, newKits: 0, replacements: 0};
+      // Check if any laundry bags have quantity > 0
+      const hasAnyLaundry = Object.values(state.laundry).some(v => v && typeof v === 'object' && v.qty > 0);
+      if (!hasAnyLaundry) {
+        state.selectedServices = state.selectedServices.filter(s => s !== 'laundry');
+      }
+    }
+    
+    renderServiceSections();
+  }
+
+  // Global remove functions for onclick handlers
+  function removeCarWash(index) {
+    state.carwash.splice(parseInt(index), 1);
+    if (state.carwash.length === 0) {
+      state.selectedServices = state.selectedServices.filter(s => s !== 'carwash');
+    }
+    renderServiceSections();
+  }
+
+  function removeHomeClean() {
+    state.homeclean = {tier:'refreshed', bedrooms:0, bathrooms:0, addons:[], deepbedCount: 0};
+    state.selectedServices = state.selectedServices.filter(s => s !== 'homeclean');
+    renderServiceSections();
+  }
+
+  function removeLaundryBag(bag) {
+    state.laundry[bag] = {qty: 0, newKits: 0, replacements: 0};
+    const hasAnyLaundry = Object.values(state.laundry).some(v => v && typeof v === 'object' && v.qty > 0);
+    if (!hasAnyLaundry) {
+      state.selectedServices = state.selectedServices.filter(s => s !== 'laundry');
+    }
+    renderServiceSections();
+  }
+
+  // Floating tab synchronization functions
+  function syncFloatingTabs() {
+    // This function ensures floating tabs are in sync with main tabs
+    // It's called during initialization
+    console.log('Syncing floating tabs...');
+  }
+
+  function attachFloatingTabListeners() {
+    // This function attaches listeners to floating tabs
+    // The actual listeners are already attached in attachDynamicListeners()
+    console.log('Attaching floating tab listeners...');
+  }
+  </script>
+</body>
+</html> 

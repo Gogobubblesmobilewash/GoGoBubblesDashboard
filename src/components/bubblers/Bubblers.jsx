@@ -1,11 +1,25 @@
-import React, { useState } from 'react';
-import { mockData } from '../../services/api';
+import React, { useEffect, useState } from 'react';
+import { supabase } from '../../services/api';
 import Modal from '../shared/Modal';
 
 const Bubblers = () => {
-  const bubblers = mockData.bubblers;
+  const [bubblers, setBubblers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [selectedBubbler, setSelectedBubbler] = useState(null);
   const [showModal, setShowModal] = useState(false);
+
+  useEffect(() => {
+    const fetchBubblers = async () => {
+      setLoading(true);
+      setError(null);
+      const { data, error } = await supabase.from('bubblers').select('*');
+      if (error) setError(error.message);
+      else setBubblers(data || []);
+      setLoading(false);
+    };
+    fetchBubblers();
+  }, []);
 
   const handleRowClick = (bubbler) => {
     setSelectedBubbler(bubbler);
@@ -52,30 +66,36 @@ const Bubblers = () => {
   return (
     <div className="card">
       <h1 className="text-2xl font-bold mb-4">Bubblers</h1>
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead>
-          <tr>
-            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
-            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Permissions</th>
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-100">
-          {bubblers.map(bubbler => (
-            <tr
-              key={bubbler.email}
-              className="hover:bg-blue-50 cursor-pointer"
-              onClick={() => handleRowClick(bubbler)}
-            >
-              <td className="px-4 py-2 font-medium text-gray-900">{bubbler.name}</td>
-              <td className="px-4 py-2 text-gray-700">{bubbler.email}</td>
-              <td className="px-4 py-2 text-gray-700">{bubbler.phone}</td>
-              <td className="px-4 py-2 text-gray-700">{bubbler.permissions?.join(', ')}</td>
+      {loading ? (
+        <div className="text-gray-500">Loading bubblers...</div>
+      ) : error ? (
+        <div className="text-red-500">Error: {error}</div>
+      ) : (
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead>
+            <tr>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Permissions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-100">
+            {bubblers.map(bubbler => (
+              <tr
+                key={bubbler.id || bubbler.email}
+                className="hover:bg-blue-50 cursor-pointer"
+                onClick={() => handleRowClick(bubbler)}
+              >
+                <td className="px-4 py-2 font-medium text-gray-900">{bubbler.name}</td>
+                <td className="px-4 py-2 text-gray-700">{bubbler.email}</td>
+                <td className="px-4 py-2 text-gray-700">{bubbler.phone}</td>
+                <td className="px-4 py-2 text-gray-700">{Array.isArray(bubbler.permissions) ? bubbler.permissions.join(', ') : ''}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
       {showModal && selectedBubbler && (
         <Modal title={selectedBubbler.name + " Profile"} onClose={() => setShowModal(false)}>
           <div className="space-y-6 max-h-[80vh] overflow-y-auto">

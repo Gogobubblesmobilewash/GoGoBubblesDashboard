@@ -259,7 +259,7 @@ const Dashboard = () => {
               onClick={() => navigate('/jobs?status=completed')}
               color="green"
             />
-            <QuickAction
+              <QuickAction
               title="View Jobs"
               description="See all active/in-progress jobs"
               icon={FiBriefcase}
