@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../services/api';
 import Modal from '../shared/Modal';
+import { BUBBLER_ROLES } from '../../constants/roles';
+import { FiPlus, FiEdit, FiTrash2, FiUserPlus } from 'react-icons/fi';
 
 const Bubblers = () => {
   const [bubblers, setBubblers] = useState([]);
@@ -8,6 +10,15 @@ const Bubblers = () => {
   const [error, setError] = useState(null);
   const [selectedBubbler, setSelectedBubbler] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [newBubbler, setNewBubbler] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    role: 'SHINE'
+  });
+  const [editingBubbler, setEditingBubbler] = useState(null);
 
   useEffect(() => {
     const fetchBubblers = async () => {
@@ -63,9 +74,110 @@ const Bubblers = () => {
     // In the future, this could open a job details modal or navigate to job management
   };
 
+  const handleAddBubbler = async () => {
+    try {
+      const role = BUBBLER_ROLES[newBubbler.role];
+      const bubblerData = {
+        name: newBubbler.name,
+        email: newBubbler.email,
+        phone: newBubbler.phone,
+        role: newBubbler.role,
+        permissions: role.permissions,
+        services: role.services,
+        is_active: true,
+        join_date: new Date().toISOString(),
+        last_active: new Date().toISOString(),
+        jobs_completed: 0,
+        jobs_assigned: 0,
+        jobs_cancelled: 0,
+        jobs_declined: 0,
+        jobs_reassigned: 0,
+        total_earnings: 0,
+        rating: 0
+      };
+
+      const { error } = await supabase
+        .from('bubblers')
+        .insert([bubblerData]);
+
+      if (error) throw error;
+
+      // Reset form and close modal
+      setNewBubbler({ name: '', email: '', phone: '', role: 'SHINE' });
+      setShowAddModal(false);
+      
+      // Refresh bubblers list
+      const { data, error: fetchError } = await supabase.from('bubblers').select('*');
+      if (!fetchError) setBubblers(data || []);
+      
+      alert('Bubbler added successfully!');
+    } catch (error) {
+      console.error('Error adding bubbler:', error);
+      alert('Error adding bubbler: ' + error.message);
+    }
+  };
+
+  const handleEditBubbler = async () => {
+    try {
+      const role = BUBBLER_ROLES[editingBubbler.role];
+      const updateData = {
+        name: editingBubbler.name,
+        email: editingBubbler.email,
+        phone: editingBubbler.phone,
+        role: editingBubbler.role,
+        permissions: role.permissions,
+        services: role.services,
+        updated_at: new Date().toISOString()
+      };
+
+      const { error } = await supabase
+        .from('bubblers')
+        .update(updateData)
+        .eq('id', editingBubbler.id);
+
+      if (error) throw error;
+
+      // Reset form and close modal
+      setEditingBubbler(null);
+      setShowEditModal(false);
+      
+      // Refresh bubblers list
+      const { data, error: fetchError } = await supabase.from('bubblers').select('*');
+      if (!fetchError) setBubblers(data || []);
+      
+      alert('Bubbler updated successfully!');
+    } catch (error) {
+      console.error('Error updating bubbler:', error);
+      alert('Error updating bubbler: ' + error.message);
+    }
+  };
+
+  const getRoleDisplayName = (role) => {
+    return BUBBLER_ROLES[role]?.name || role;
+  };
+
+  const getRoleColor = (role) => {
+    const colors = {
+      SHINE: 'bg-cyan-100 text-cyan-800',
+      SPARKLE: 'bg-blue-100 text-blue-800',
+      FRESH: 'bg-green-100 text-green-800',
+      ELITE: 'bg-purple-100 text-purple-800'
+    };
+    return colors[role] || 'bg-gray-100 text-gray-800';
+  };
+
   return (
     <div className="card">
-      <h1 className="text-2xl font-bold mb-4">Bubblers</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Bubblers</h1>
+        <button
+          onClick={() => setShowAddModal(true)}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
+        >
+          <FiUserPlus />
+          Add Bubbler
+        </button>
+      </div>
       {loading ? (
         <div className="text-gray-500">Loading bubblers...</div>
       ) : error ? (
@@ -77,20 +189,64 @@ const Bubblers = () => {
               <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
               <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
               <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
-              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Permissions</th>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-100">
             {bubblers.map(bubbler => (
               <tr
                 key={bubbler.id || bubbler.email}
-                className="hover:bg-blue-50 cursor-pointer"
-                onClick={() => handleRowClick(bubbler)}
+                className="hover:bg-blue-50"
               >
-                <td className="px-4 py-2 font-medium text-gray-900">{bubbler.name}</td>
-                <td className="px-4 py-2 text-gray-700">{bubbler.email}</td>
-                <td className="px-4 py-2 text-gray-700">{bubbler.phone}</td>
-                <td className="px-4 py-2 text-gray-700">{Array.isArray(bubbler.permissions) ? bubbler.permissions.join(', ') : ''}</td>
+                <td className="px-4 py-2 font-medium text-gray-900 cursor-pointer" onClick={() => handleRowClick(bubbler)}>
+                  {bubbler.name}
+                </td>
+                <td className="px-4 py-2 text-gray-700 cursor-pointer" onClick={() => handleRowClick(bubbler)}>
+                  {bubbler.email}
+                </td>
+                <td className="px-4 py-2 text-gray-700 cursor-pointer" onClick={() => handleRowClick(bubbler)}>
+                  {bubbler.phone}
+                </td>
+                <td className="px-4 py-2 cursor-pointer" onClick={() => handleRowClick(bubbler)}>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getRoleColor(bubbler.role)}`}>
+                    {getRoleDisplayName(bubbler.role)}
+                  </span>
+                </td>
+                <td className="px-4 py-2 cursor-pointer" onClick={() => handleRowClick(bubbler)}>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${bubbler.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                    {bubbler.is_active ? 'Active' : 'Inactive'}
+                  </span>
+                </td>
+                <td className="px-4 py-2">
+                  <div className="flex gap-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEditingBubbler(bubbler);
+                        setShowEditModal(true);
+                      }}
+                      className="text-blue-600 hover:text-blue-800"
+                      title="Edit"
+                    >
+                      <FiEdit size={16} />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (confirm('Are you sure you want to delete this bubbler?')) {
+                          // Handle delete
+                          console.log('Delete bubbler:', bubbler.id);
+                        }
+                      }}
+                      className="text-red-600 hover:text-red-800"
+                      title="Delete"
+                    >
+                      <FiTrash2 size={16} />
+                    </button>
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -273,6 +429,140 @@ const Bubblers = () => {
                 <div className="text-sm">This bubbler has no current or upcoming assignments.</div>
               </div>
             )}
+          </div>
+        </Modal>
+      )}
+
+      {/* Add Bubbler Modal */}
+      {showAddModal && (
+        <Modal title="Add New Bubbler" onClose={() => setShowAddModal(false)}>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+              <input
+                type="text"
+                value={newBubbler.name}
+                onChange={(e) => setNewBubbler({...newBubbler, name: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter full name"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <input
+                type="email"
+                value={newBubbler.email}
+                onChange={(e) => setNewBubbler({...newBubbler, email: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter email address"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+              <input
+                type="tel"
+                value={newBubbler.phone}
+                onChange={(e) => setNewBubbler({...newBubbler, phone: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter phone number"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+              <select
+                value={newBubbler.role}
+                onChange={(e) => setNewBubbler({...newBubbler, role: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {Object.entries(BUBBLER_ROLES).map(([key, role]) => (
+                  <option key={key} value={key}>
+                    {role.name} - {role.description}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAddBubbler}
+                disabled={!newBubbler.name || !newBubbler.email || !newBubbler.phone}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Add Bubbler
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* Edit Bubbler Modal */}
+      {showEditModal && editingBubbler && (
+        <Modal title="Edit Bubbler" onClose={() => setShowEditModal(false)}>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+              <input
+                type="text"
+                value={editingBubbler.name}
+                onChange={(e) => setEditingBubbler({...editingBubbler, name: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter full name"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <input
+                type="email"
+                value={editingBubbler.email}
+                onChange={(e) => setEditingBubbler({...editingBubbler, email: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter email address"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+              <input
+                type="tel"
+                value={editingBubbler.phone}
+                onChange={(e) => setEditingBubbler({...editingBubbler, phone: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter phone number"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+              <select
+                value={editingBubbler.role}
+                onChange={(e) => setEditingBubbler({...editingBubbler, role: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {Object.entries(BUBBLER_ROLES).map(([key, role]) => (
+                  <option key={key} value={key}>
+                    {role.name} - {role.description}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleEditBubbler}
+                disabled={!editingBubbler.name || !editingBubbler.email || !editingBubbler.phone}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Update Bubbler
+              </button>
+            </div>
           </div>
         </Modal>
       )}

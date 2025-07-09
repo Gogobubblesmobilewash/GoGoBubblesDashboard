@@ -13,12 +13,56 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [userRole, setUserRole] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Log whenever loading changes
     console.log('AuthContext: loading state changed:', loading);
   }, [loading]);
+
+  // Function to fetch user role from database
+  const fetchUserRole = async (userEmail) => {
+    if (!userEmail) {
+      setUserRole(null);
+      return;
+    }
+
+    try {
+      // Check if user is admin first
+      if (userEmail.includes('admin')) {
+        setUserRole({ type: 'ADMIN', permissions: ['all'] });
+        return;
+      }
+
+      // Check bubblers table for role
+      const { data, error } = await supabase
+        .from('bubblers')
+        .select('*')
+        .eq('email', userEmail)
+        .single();
+
+      if (error && error.code !== 'PGRST116') { // PGRST116 is "not found"
+        console.error('Error fetching user role:', error);
+        setUserRole(null);
+        return;
+      }
+
+      if (data) {
+        setUserRole({
+          type: data.role,
+          permissions: data.permissions || [],
+          services: data.services || [],
+          isActive: data.is_active
+        });
+      } else {
+        setUserRole(null);
+      }
+    } catch (error) {
+      console.error('Exception fetching user role:', error);
+      setUserRole(null);
+    }
+  };
 
   useEffect(() => {
     // Check for existing session
@@ -31,10 +75,19 @@ export const AuthProvider = ({ children }) => {
         }
         console.log('AuthContext: Session data:', session);
         setUser(session?.user ?? null);
+        
+        // Fetch user role if user exists
+        if (session?.user) {
+          await fetchUserRole(session.user.email);
+        } else {
+          setUserRole(null);
+        }
+        
         setLoading(false);
       } catch (error) {
         console.error('AuthContext: Exception getting session:', error);
         setUser(null);
+        setUserRole(null);
         setLoading(false);
       }
     };
@@ -46,6 +99,14 @@ export const AuthProvider = ({ children }) => {
       async (event, session) => {
         console.log('AuthContext: Auth state change:', event, 'session:', session);
         setUser(session?.user ?? null);
+        
+        // Fetch user role if user exists
+        if (session?.user) {
+          await fetchUserRole(session.user.email);
+        } else {
+          setUserRole(null);
+        }
+        
         setLoading(false);
       }
     );
@@ -83,24 +144,35 @@ export const AuthProvider = ({ children }) => {
 
   const value = {
     user,
+    userRole,
     loading,
     login,
     logout,
     isAuthenticated: !!user,
-    isAdmin: user?.email?.includes('admin') || false,
-    isBubbler: user?.email?.includes('bubbler') || user?.email?.includes('@gogobubbles.com') || false,
+    isAdmin: userRole?.type === 'ADMIN',
+    isBubbler: userRole?.type && userRole.type !== 'ADMIN',
     // Role-specific permissions
-    isShineBubbler: user?.email?.includes('shine') || false,
-    isSparkleBubbler: user?.email?.includes('sparkle') || false,
-    isFreshBubbler: user?.email?.includes('fresh') || false,
-    isEliteBubbler: user?.email?.includes('elite') || false,
-    // Permission checks
-    canDoLaundry: user?.email?.includes('fresh') || user?.email?.includes('elite') || false,
-    canDoCarWash: user?.email?.includes('shine') || user?.email?.includes('elite') || false,
-    canDoHomeCleaning: user?.email?.includes('sparkle') || user?.email?.includes('elite') || false,
+    isShineBubbler: userRole?.type === 'SHINE',
+    isSparkleBubbler: userRole?.type === 'SPARKLE',
+    isFreshBubbler: userRole?.type === 'FRESH',
+    isEliteBubbler: userRole?.type === 'ELITE',
+    // Permission checks based on role
+    canDoLaundry: userRole?.type === 'FRESH' || userRole?.type === 'ELITE',
+    canDoCarWash: userRole?.type === 'SHINE' || userRole?.type === 'ELITE',
+    canDoHomeCleaning: userRole?.type === 'SPARKLE' || userRole?.type === 'ELITE',
+    // Additional role info
+    userPermissions: userRole?.permissions || [],
+    userServices: userRole?.services || [],
+    isUserActive: userRole?.isActive !== false,
   };
 
-  console.log('AuthContext: Current state:', { user, loading, isAuthenticated: !!user, isAdmin: user?.email?.includes('admin') || false });
+  console.log('AuthContext: Current state:', { 
+    user, 
+    userRole, 
+    loading, 
+    isAuthenticated: !!user, 
+    isAdmin: userRole?.type === 'ADMIN' 
+  });
 
   return (
     <AuthContext.Provider value={value}>
