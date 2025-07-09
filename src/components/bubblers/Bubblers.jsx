@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { supabase } from '../../services/api';
+import { supabase, getAllBubblersWeeklyPayouts } from '../../services/api';
 import Modal from '../shared/Modal';
 import { BUBBLER_ROLES } from '../../constants/roles';
-import { FiPlus, FiEdit, FiTrash2, FiUserPlus } from 'react-icons/fi';
+import { FiPlus, FiEdit, FiTrash2, FiUserPlus, FiDollarSign } from 'react-icons/fi';
 
 const Bubblers = () => {
   const [bubblers, setBubblers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [weeklyPayouts, setWeeklyPayouts] = useState({});
   const [selectedBubbler, setSelectedBubbler] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -24,10 +25,27 @@ const Bubblers = () => {
     const fetchBubblers = async () => {
       setLoading(true);
       setError(null);
-      const { data, error } = await supabase.from('bubblers').select('*');
-      if (error) setError(error.message);
-      else setBubblers(data || []);
-      setLoading(false);
+      try {
+        const { data, error } = await supabase.from('bubblers').select('*');
+        if (error) throw error;
+        
+        setBubblers(data || []);
+        
+        // Fetch weekly payouts for all bubblers
+        const payouts = await getAllBubblersWeeklyPayouts();
+        const payoutsMap = {};
+        payouts.forEach(payout => {
+          payoutsMap[payout.id] = {
+            weeklyPayout: payout.weeklyPayout,
+            jobCount: payout.jobCount
+          };
+        });
+        setWeeklyPayouts(payoutsMap);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchBubblers();
   }, []);
@@ -191,6 +209,7 @@ const Bubblers = () => {
               <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
               <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
               <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Weekly Payout</th>
               <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
             </tr>
           </thead>
@@ -218,6 +237,17 @@ const Bubblers = () => {
                   <span className={`px-2 py-1 rounded-full text-xs font-medium ${bubbler.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                     {bubbler.is_active ? 'Active' : 'Inactive'}
                   </span>
+                </td>
+                <td className="px-4 py-2 cursor-pointer" onClick={() => handleRowClick(bubbler)}>
+                  <div className="flex items-center gap-2">
+                    <FiDollarSign className="h-4 w-4 text-green-600" />
+                    <span className="font-semibold text-green-600">
+                      ${weeklyPayouts[bubbler.id]?.weeklyPayout?.toFixed(2) || '0.00'}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      ({weeklyPayouts[bubbler.id]?.jobCount || 0} jobs)
+                    </span>
+                  </div>
                 </td>
                 <td className="px-4 py-2">
                   <div className="flex gap-2">
@@ -286,7 +316,7 @@ const Bubblers = () => {
             {/* Job Statistics */}
             <div>
               <div className="font-semibold text-gray-800 mb-3">Job Statistics:</div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 <div className="bg-green-50 p-3 rounded-lg">
                   <div className="text-2xl font-bold text-green-600">{selectedBubbler.jobsCompleted}</div>
                   <div className="text-sm text-green-700">Completed</div>
@@ -302,6 +332,14 @@ const Bubblers = () => {
                 <div className="bg-yellow-50 p-3 rounded-lg">
                   <div className="text-2xl font-bold text-yellow-600">{selectedBubbler.jobsDeclined}</div>
                   <div className="text-sm text-yellow-700">Declined</div>
+                </div>
+                <div className="bg-emerald-50 p-3 rounded-lg">
+                  <div className="text-2xl font-bold text-emerald-600">
+                    ${weeklyPayouts[selectedBubbler.id]?.weeklyPayout?.toFixed(2) || '0.00'}
+                  </div>
+                  <div className="text-sm text-emerald-700">
+                    Weekly Payout ({weeklyPayouts[selectedBubbler.id]?.jobCount || 0} jobs)
+                  </div>
                 </div>
               </div>
             </div>

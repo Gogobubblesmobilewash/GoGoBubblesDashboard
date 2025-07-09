@@ -172,46 +172,209 @@ export const getPerks = (serviceType, tier, isFirstTime = false, signatureWashCo
 export const getPayoutRules = (serviceType, tier, addons = []) => {
   const basePayouts = {
     'Mobile Car Wash': {
-      'Express Shine': 25,
-      'Signature Shine': 35,
-      'Supreme Shine': 45
+      'Express Wash': 12,
+      'Signature Shine': 18,
+      'Supreme Shine': 25,
+      default: 12
     },
     'Home Cleaning': {
-      'Refresh Clean': 40,
-      'Signature Deep Clean': 60
+      'Refresh Clean': 20,
+      'Signature Deep Clean': 30,
+      'Supreme Deep Clean': 45,
+      default: 20
     },
     'Laundry Service': {
-      'default': 20
+      'Fresh & Fold': 15,
+      'Signature Care': 25,
+      'Supreme Care': 35,
+      default: 15
     }
   };
 
   const addonPayouts = {
-    'Clay Bar Treatment': 15,
-    'Bug & Tar Removal': 10,
-    'Plastic Trim Restoration': 12,
     'Tire Shine': 4,
-    'Upholstery Shampoo': 20,
-    'Interior Shampoo': 25,
-    'Deep Dusting': 15,
-    'Deep Clean Bedroom': 20,
-    'Refrigerator Cleaning': 25,
-    'Oven Cleaning': 30,
-    'Freezer Cleaning': 20,
-    'Carpet Cleaning': 35,
-    'Steam Mopping': 15,
-    'Eco-friendly detergent': 5,
-    'Same-day service': 10
+    'Interior Detail': 8,
+    'Premium Detailing': 12,
+    'Deep Cleaning': 10,
+    'Premium Care': 8,
+    'Express Service': 5
   };
 
   const base = basePayouts[serviceType]?.[tier] || basePayouts[serviceType]?.default || 0;
   const addonTotal = addons.reduce((sum, addon) => sum + (addonPayouts[addon] || 0), 0);
-  const total = base + addonTotal;
 
   return {
-    base,
+    total: base + addonTotal,
+    base: base,
     addons: addons.map(addon => ({ addon, payout: addonPayouts[addon] || 0 })),
-    total
+    breakdown: {
+      base: base,
+      addons: addonTotal
+    }
   };
+};
+
+// Weekly payout balance functions
+export const getWeeklyPayoutBalance = async (bubblerId) => {
+  try {
+    // Get the current week's start (Monday)
+    const now = new Date();
+    const dayOfWeek = now.getDay();
+    const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    const weekStart = new Date(now);
+    weekStart.setDate(now.getDate() - daysToMonday);
+    weekStart.setHours(0, 0, 0, 0);
+
+    // Get completed jobs for this week
+    const { data: jobs, error } = await supabase
+      .from('job_assignments')
+      .select(`
+        *,
+        orders!inner(
+          service_type,
+          tier,
+          addons,
+          status
+        )
+      `)
+      .eq('bubbler_id', bubblerId)
+      .eq('orders.status', 'completed')
+      .gte('created_at', weekStart.toISOString());
+
+    if (error) throw error;
+
+    // Calculate total payout for the week
+    let weeklyPayout = 0;
+    const jobBreakdown = [];
+
+    jobs.forEach(job => {
+      const order = job.orders;
+      const payoutRules = getPayoutRules(
+        order.service_type,
+        order.tier,
+        order.addons || []
+      );
+      
+      weeklyPayout += payoutRules.total;
+      jobBreakdown.push({
+        jobId: job.id,
+        orderId: order.id,
+        serviceType: order.service_type,
+        tier: order.tier,
+        addons: order.addons || [],
+        payout: payoutRules.total,
+        completedAt: job.updated_at
+      });
+    });
+
+    return {
+      weeklyPayout,
+      jobCount: jobs.length,
+      weekStart: weekStart.toISOString(),
+      jobBreakdown
+    };
+  } catch (error) {
+    console.error('Error calculating weekly payout:', error);
+    throw error;
+  }
+};
+
+export const getAllBubblersWeeklyPayouts = async () => {
+  try {
+    const { data: bubblers, error: bubblersError } = await supabase
+      .from('bubblers')
+      .select('id, name, email, role');
+
+    if (bubblersError) throw bubblersError;
+
+    const payouts = await Promise.all(
+      bubblers.map(async (bubbler) => {
+        try {
+          const weeklyPayout = await getWeeklyPayoutBalance(bubbler.id);
+          return {
+            ...bubbler,
+            weeklyPayout: weeklyPayout.weeklyPayout,
+            jobCount: weeklyPayout.jobCount
+          };
+        } catch (error) {
+          console.error(`Error getting payout for bubbler ${bubbler.id}:`, error);
+          return {
+            ...bubbler,
+            weeklyPayout: 0,
+            jobCount: 0
+          };
+        }
+      })
+    );
+
+    return payouts;
+  } catch (error) {
+    console.error('Error getting all bubblers weekly payouts:', error);
+    throw error;
+  }
+};
+
+export const getPayoutHistory = async (bubblerId, limit = 10) => {
+  try {
+    const { data: payouts, error } = await supabase
+      .from('payouts')
+      .select('*')
+      .eq('bubbler_id', bubblerId)
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    if (error) throw error;
+    return payouts || [];
+  } catch (error) {
+    console.error('Error getting payout history:', error);
+    throw error;
+  }
+};
+
+export const createPayoutRecord = async (bubblerId, amount, periodStart, periodEnd, jobIds) => {
+  try {
+    const { data, error } = await supabase
+      .from('payouts')
+      .insert([{
+        bubbler_id: bubblerId,
+        amount: amount,
+        period_start: periodStart,
+        period_end: periodEnd,
+        job_ids: jobIds,
+        status: 'pending',
+        created_at: new Date().toISOString()
+      }]);
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error creating payout record:', error);
+    throw error;
+  }
+};
+
+export const updatePayoutStatus = async (payoutId, status, processedAt = null) => {
+  try {
+    const updateData = {
+      status: status,
+      updated_at: new Date().toISOString()
+    };
+
+    if (processedAt) {
+      updateData.processed_at = processedAt;
+    }
+
+    const { data, error } = await supabase
+      .from('payouts')
+      .update(updateData)
+      .eq('id', payoutId);
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error updating payout status:', error);
+    throw error;
+  }
 };
 
 // Helper function to parse services and determine splitting rules

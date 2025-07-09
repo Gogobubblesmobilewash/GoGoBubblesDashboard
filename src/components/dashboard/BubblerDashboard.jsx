@@ -19,7 +19,7 @@ import {
   FiMail
 } from 'react-icons/fi';
 import useStore from '../../store/useStore';
-import { supabase } from '../../services/api';
+import { supabase, getWeeklyPayoutBalance } from '../../services/api';
 import { useAuth } from '../../store/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -34,7 +34,8 @@ const BubblerDashboard = () => {
     pendingJobs: 0,
     totalEarnings: 0,
     averageRating: 0,
-    thisWeekEarnings: 0
+    thisWeekEarnings: 0,
+    weeklyPayoutBalance: 0
   });
   const [recentJobs, setRecentJobs] = useState([]);
   const [upcomingJobs, setUpcomingJobs] = useState([]);
@@ -92,6 +93,9 @@ const BubblerDashboard = () => {
       const thisWeekJobs = jobsArray.filter(j => new Date(j.created_at) >= oneWeekAgo);
       const thisWeekEarnings = thisWeekJobs.reduce((sum, j) => sum + (parseFloat(j.earnings) || 0), 0);
 
+      // Get weekly payout balance
+      const weeklyPayoutData = await getWeeklyPayoutBalance(profile.id);
+
       // Fetch ratings for this bubbler
       const { data: ratings, error: ratingsError } = await supabase
         .from('ratings')
@@ -110,7 +114,8 @@ const BubblerDashboard = () => {
         pendingJobs,
         totalEarnings,
         averageRating,
-        thisWeekEarnings
+        thisWeekEarnings,
+        weeklyPayoutBalance: weeklyPayoutData.weeklyPayout
       });
 
       // Set recent and upcoming jobs
@@ -266,7 +271,7 @@ const BubblerDashboard = () => {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
         <StatCard
           title="Total Jobs"
           value={stats.totalJobs}
@@ -290,6 +295,12 @@ const BubblerDashboard = () => {
           value={`$${stats.thisWeekEarnings.toFixed(2)}`}
           icon={FiDollarSign}
           color="brand-aqua"
+        />
+        <StatCard
+          title="Weekly Payout"
+          value={`$${stats.weeklyPayoutBalance.toFixed(2)}`}
+          icon={FiDollarSign}
+          color="green"
         />
       </div>
 
