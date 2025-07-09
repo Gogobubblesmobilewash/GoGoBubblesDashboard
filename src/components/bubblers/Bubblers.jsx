@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { supabase, getAllBubblersWeeklyPayouts } from '../../services/api';
+import { supabase, getAllBubblersWeeklyPayouts, createPayoutRecord, updatePayoutStatus, getPayoutHistory } from '../../services/api';
 import Modal from '../shared/Modal';
 import { BUBBLER_ROLES } from '../../constants/roles';
-import { FiPlus, FiEdit, FiTrash2, FiUserPlus, FiDollarSign } from 'react-icons/fi';
+import { FiPlus, FiEdit, FiTrash2, FiUserPlus, FiDollarSign, FiCheckCircle, FiClock } from 'react-icons/fi';
 
 const Bubblers = () => {
   const [bubblers, setBubblers] = useState([]);
@@ -13,6 +13,9 @@ const Bubblers = () => {
   const [showModal, setShowModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showPayoutModal, setShowPayoutModal] = useState(false);
+  const [selectedPayoutBubbler, setSelectedPayoutBubbler] = useState(null);
+  const [payoutHistory, setPayoutHistory] = useState([]);
   const [newBubbler, setNewBubbler] = useState({
     name: '',
     email: '',
@@ -184,6 +187,101 @@ const Bubblers = () => {
     return colors[role] || 'bg-gray-100 text-gray-800';
   };
 
+  const handlePayoutClick = async (bubbler) => {
+    setSelectedPayoutBubbler(bubbler);
+    try {
+      const history = await getPayoutHistory(bubbler.id, 20);
+      setPayoutHistory(history);
+      setShowPayoutModal(true);
+    } catch (error) {
+      console.error('Error loading payout history:', error);
+      alert('Error loading payout history: ' + error.message);
+    }
+  };
+
+  const handleCreatePayout = async (bubbler) => {
+    try {
+      // Get the current week's start (Monday)
+      const now = new Date();
+      const dayOfWeek = now.getDay();
+      const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+      const weekStart = new Date(now);
+      weekStart.setDate(now.getDate() - daysToMonday);
+      weekStart.setHours(0, 0, 0, 0);
+
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekStart.getDate() + 6);
+      weekEnd.setHours(23, 59, 59, 999);
+
+      // Get completed jobs for this week
+      const { data: jobs, error } = await supabase
+        .from('job_assignments')
+        .select('id')
+        .eq('bubbler_id', bubbler.id)
+        .gte('created_at', weekStart.toISOString())
+        .lte('created_at', weekEnd.toISOString());
+
+      if (error) throw error;
+
+      const jobIds = jobs.map(job => job.id);
+      const weeklyPayout = weeklyPayouts[bubbler.id]?.weeklyPayout || 0;
+
+      if (weeklyPayout <= 0) {
+        alert('No payout amount available for this week.');
+        return;
+      }
+
+      // Create payout record
+      await createPayoutRecord(
+        bubbler.id,
+        weeklyPayout,
+        weekStart.toISOString(),
+        weekEnd.toISOString(),
+        jobIds
+      );
+
+      alert(`Payout record created for ${bubbler.name}: $${weeklyPayout.toFixed(2)}`);
+      
+      // Refresh payout history
+      const history = await getPayoutHistory(bubbler.id, 20);
+      setPayoutHistory(history);
+      
+    } catch (error) {
+      console.error('Error creating payout:', error);
+      alert('Error creating payout: ' + error.message);
+    }
+  };
+
+  const handleMarkAsPaid = async (payoutId) => {
+    try {
+      await updatePayoutStatus(payoutId, 'paid', new Date().toISOString());
+      
+      // Refresh payout history
+      const history = await getPayoutHistory(selectedPayoutBubbler.id, 20);
+      setPayoutHistory(history);
+      
+      alert('Payout marked as paid successfully!');
+    } catch (error) {
+      console.error('Error updating payout status:', error);
+      alert('Error updating payout status: ' + error.message);
+    }
+  };
+
+  const getPayoutStatusColor = (status) => {
+    switch (status) {
+      case 'paid':
+        return 'bg-green-100 text-green-800';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'processing':
+        return 'bg-blue-100 text-blue-800';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
   return (
     <div className="card">
       <div className="flex justify-between items-center mb-6">
@@ -238,15 +336,41 @@ const Bubblers = () => {
                     {bubbler.is_active ? 'Active' : 'Inactive'}
                   </span>
                 </td>
-                <td className="px-4 py-2 cursor-pointer" onClick={() => handleRowClick(bubbler)}>
+                <td className="px-4 py-2">
                   <div className="flex items-center gap-2">
-                    <FiDollarSign className="h-4 w-4 text-green-600" />
-                    <span className="font-semibold text-green-600">
-                      ${weeklyPayouts[bubbler.id]?.weeklyPayout?.toFixed(2) || '0.00'}
-                    </span>
-                    <span className="text-xs text-gray-500">
-                      ({weeklyPayouts[bubbler.id]?.jobCount || 0} jobs)
-                    </span>
+                    <div className="cursor-pointer" onClick={() => handleRowClick(bubbler)}>
+                      <FiDollarSign className="h-4 w-4 text-green-600" />
+                      <span className="font-semibold text-green-600">
+                        ${weeklyPayouts[bubbler.id]?.weeklyPayout?.toFixed(2) || '0.00'}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        ({weeklyPayouts[bubbler.id]?.jobCount || 0} jobs)
+                      </span>
+                    </div>
+                    {weeklyPayouts[bubbler.id]?.weeklyPayout > 0 && (
+                      <div className="flex gap-1">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handlePayoutClick(bubbler);
+                          }}
+                          className="text-blue-600 hover:text-blue-800 p-1"
+                          title="View Payout History"
+                        >
+                          <FiClock size={14} />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleCreatePayout(bubbler);
+                          }}
+                          className="text-green-600 hover:text-green-800 p-1"
+                          title="Create Payout Record"
+                        >
+                          <FiCheckCircle size={14} />
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </td>
                 <td className="px-4 py-2">
@@ -600,6 +724,88 @@ const Bubblers = () => {
               >
                 Update Bubbler
               </button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* Payout Management Modal */}
+      {showPayoutModal && selectedPayoutBubbler && (
+        <Modal title={`Payout Management - ${selectedPayoutBubbler.name}`} onClose={() => setShowPayoutModal(false)}>
+          <div className="space-y-6 max-h-[80vh] overflow-y-auto">
+            {/* Current Week Payout */}
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="text-lg font-semibold text-green-800">Current Week Payout</h3>
+                  <p className="text-sm text-green-600">
+                    ${weeklyPayouts[selectedPayoutBubbler.id]?.weeklyPayout?.toFixed(2) || '0.00'} 
+                    ({weeklyPayouts[selectedPayoutBubbler.id]?.jobCount || 0} jobs)
+                  </p>
+                </div>
+                <button
+                  onClick={() => handleCreatePayout(selectedPayoutBubbler)}
+                  disabled={!weeklyPayouts[selectedPayoutBubbler.id]?.weeklyPayout || weeklyPayouts[selectedPayoutBubbler.id]?.weeklyPayout <= 0}
+                  className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  <FiCheckCircle size={16} />
+                  Create Payout Record
+                </button>
+              </div>
+            </div>
+
+            {/* Payout History */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Payout History</h3>
+              {payoutHistory.length > 0 ? (
+                <div className="space-y-3">
+                  {payoutHistory.map((payout) => (
+                    <div key={payout.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <div className="font-semibold text-gray-900">
+                            ${parseFloat(payout.amount).toFixed(2)}
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            {formatDate(payout.period_start)} - {formatDate(payout.period_end)}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            Created: {formatDate(payout.created_at)}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPayoutStatusColor(payout.status)}`}>
+                            {payout.status}
+                          </span>
+                          {payout.status === 'pending' && (
+                            <button
+                              onClick={() => handleMarkAsPaid(payout.id)}
+                              className="px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 text-xs"
+                              title="Mark as Paid"
+                            >
+                              Mark Paid
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        Job IDs: {payout.job_ids?.length || 0} jobs
+                      </div>
+                      {payout.processed_at && (
+                        <div className="text-xs text-gray-500 mt-1">
+                          Processed: {formatDate(payout.processed_at)}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <FiClock className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Payout History</h3>
+                  <p className="text-sm">No payout records found for this bubbler.</p>
+                </div>
+              )}
             </div>
           </div>
         </Modal>
