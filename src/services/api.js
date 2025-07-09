@@ -189,6 +189,7 @@ export const getPayoutRules = (serviceType, tier, addons = []) => {
     'Clay Bar Treatment': 15,
     'Bug & Tar Removal': 10,
     'Plastic Trim Restoration': 12,
+    'Tire Shine': 4,
     'Upholstery Shampoo': 20,
     'Interior Shampoo': 25,
     'Deep Dusting': 15,

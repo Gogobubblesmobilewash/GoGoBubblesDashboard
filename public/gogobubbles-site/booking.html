@@ -430,6 +430,7 @@
     clay: {price:25, desc:"Clay Bar Treatment", details:"Removes surface contaminants from the paint, leaving it smooth before waxing."},
     bug: {price:20, desc:"Bug & Tar Removal", details:"Targeted treatment for sticky residue and buildup."},
     plastic: {price:18, desc:"Plastic Trim Restoration", details:"Restores faded exterior plastic trim."},
+    tireshine: {price:10, desc:"Tire Shine", details:"Deep black gloss finish for tires using premium tire dressing. Adds shine and protection for up to 2 weeks."},
     upholstery: {price:40, desc:"Upholstery Shampoo", details:"Deep cleans fabric seats and upholstery."},
     shampoo: {price:50, desc:"Interior Shampoo", details:"Deep cleans carpets and mats."}
   };
@@ -543,7 +544,17 @@
     });
     document.querySelectorAll('.cw-tier').forEach((sel, i) => {
       sel.onchange = e => {
-        state.carwash[i].tier = sel.value;
+        const newTier = sel.value;
+        state.carwash[i].tier = newTier;
+        
+        // Remove Tire Shine addon if tier is changed to Supreme Shine
+        if (newTier === 'supreme') {
+          const tireShineIndex = state.carwash[i].addons.indexOf('tireshine');
+          if (tireShineIndex > -1) {
+            state.carwash[i].addons.splice(tireShineIndex, 1);
+          }
+        }
+        
         renderServiceSections();
       };
     });
@@ -803,6 +814,10 @@
           <div style="margin:1rem 0;">
             <b>Add-ons:</b>`;
         Object.entries(carwashAddons).forEach(([key, addon]) => {
+          // Hide Tire Shine for Supreme Shine tier
+          if (key === 'tireshine' && vehicle.tier === 'supreme') {
+            return; // Skip this addon
+          }
           html += `<label><input type="checkbox" class="cw-addon" value="${key}" ${vehicle.addons.includes(key) ? 'checked' : ''}/> ${addon.desc} ($${addon.price})</label>`;
           if (vehicle.addons.includes(key)) {
             html += `<div class="info-msg" style="margin-left:1.5em;">${addon.details}</div>`;
