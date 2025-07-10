@@ -211,6 +211,14 @@
         transform: rotate(180deg);
       }
     }
+    
+    /* Mobile-first logo background treatment */
+    @media (max-width: 600px) {
+      .tidycal-bg {
+        background-size: 120%; /* Pushes logo outside the edges a bit */
+        opacity: 0.05 !important;
+      }
+    }
     .bundle-offer-msg {
       background: #e0f7fa;
       color: #00796b;
