@@ -14,9 +14,11 @@ import Earnings from './components/dashboard/Earnings';
 import AdminNotes from './components/admin/AdminNotes';
 import Ratings from './components/admin/Ratings';
 import Analytics from './components/admin/Analytics';
+import Applicants from './components/admin/Applicants';
 import Orders from './components/orders/Orders';
 import Bubblers from './components/bubblers/Bubblers';
 import BookingForm from './components/booking/BookingForm';
+import Onboarding from './components/auth/Onboarding';
 
 import { useAuth } from './store/AuthContext';
 import { SpeedInsights } from "@vercel/speed-insights/react";
@@ -136,6 +138,10 @@ function App() {
             path="/booking" 
             element={<BookingForm />}
           />
+          <Route 
+            path="/onboarding/:bubblerId" 
+            element={<Onboarding />}
+          />
 
           {/* All authenticated routes share the same layout */}
           <Route 
@@ -246,6 +252,14 @@ function App() {
               element={
                 <ProtectedRoute requireAdmin>
                   <Analytics />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
+              path="applicants"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <Applicants />
                 </ProtectedRoute>
               }
             />

@@ -42,6 +42,7 @@ const Layout = () => {
     { name: 'Orders', icon: FileText, path: '/orders' },
     { name: 'All Jobs', icon: Calendar, path: '/jobs' },
     { name: 'Equipment', icon: Briefcase, path: '/equipment' },
+    { name: 'Applicants', icon: Users, path: '/applicants' },
     { name: 'Ratings', icon: Star, path: '/ratings' },
     { name: 'Admin Notes', icon: FileText, path: '/admin-notes' },
     { name: 'Earnings', icon: DollarSign, path: '/earnings' },

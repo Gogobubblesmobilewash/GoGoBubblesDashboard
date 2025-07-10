@@ -328,7 +328,13 @@
       </div>
     </div>
   </div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
+    // Supabase configuration
+    const supabaseUrl = 'https://your-project.supabase.co';
+    const supabaseKey = 'your-anon-key';
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
     // Simple search/filter for job listings
     document.getElementById('job-search').addEventListener('input', function() {
       const val = this.value.trim().toLowerCase();
@@ -1061,53 +1067,100 @@
           return;
         }
       }
-      
-      const form = event.target;
-      const formData = new FormData(form);
-      const data = {};
 
-      for (const [key, value] of formData.entries()) {
-        const existing = data[key];
-        if (existing) {
-          if (Array.isArray(existing)) {
-            existing.push(value);
-          } else {
-            data[key] = [existing, value];
-          }
-        } else {
-          data[key] = value;
-        }
+      // Collect form data
+      const formData = new FormData(event.target);
+      const applicationData = {
+        first_name: formData.get('firstName'),
+        last_name: formData.get('lastName'),
+        email: formData.get('email'),
+        phone: formData.get('phone'),
+        address: formData.get('address'),
+        role_applied_for: role,
+        authorized_to_work: formData.get('authorized') === 'yes',
+        age_verified: formData.get('age18') === 'yes',
+        has_transportation: formData.get('transportation') === 'yes',
+        travel_radius_minutes: parseInt(formData.get('travelDistance')),
+        primary_language: formData.get('primaryLanguage') || formData.get('elitePrimaryLanguage') || formData.get('freshPrimaryLanguage'),
+        english_comfort: formData.get('englishCommunication') || formData.get('eliteEnglishCommunication') || formData.get('freshEnglishCommunication'),
+        experience: formData.get('experience') || formData.get('cleaningExperience') || formData.get('laundryExperience'),
+        availability: formData.get('availability'),
+        why_go_gobubbles: formData.get('whyGoGoBubbles'),
+        start_date: formData.get('startDate'),
+        application_status: 'pending',
+        created_at: new Date().toISOString()
+      };
+
+      // Role-specific data
+      if (role === 'shine') {
+        applicationData.has_water_supply = formData.getAll('equipment_owned').includes('hose_tank');
+        applicationData.has_power_supply = formData.getAll('equipment_owned').includes('inverter');
+        applicationData.has_bucket = formData.getAll('equipment_owned').includes('bucket');
+        applicationData.has_towels = formData.getAll('equipment_owned').includes('towels');
+        applicationData.has_soap = formData.getAll('equipment_owned').includes('solutions');
+        applicationData.willing_to_rent_equipment = formData.get('equipmentRental') === 'yes';
+        applicationData.car_wash_experience = formData.get('carWashExperience') === 'yes';
+        applicationData.experience_description = formData.get('experienceDescription');
+        applicationData.weather_conditions_ok = formData.get('weatherConditions') === 'yes';
       }
 
-      const applicationData = {
-        role: role,
-        timestamp: new Date().toISOString(),
-        ...data // Flatten the data for easier viewing in Formspree
-      };
-      
-      try {
-        const response = await fetch('https://formspree.io/f/manjeweg', {
-          method: 'POST',
-          body: JSON.stringify(applicationData),
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          }
-        });
+      if (role === 'sparkle') {
+        applicationData.has_mop = formData.getAll('basic_supplies_owned').includes('mop') || formData.getAll('basic_supplies_owned').includes('swiffer_style_mop');
+        applicationData.has_toilet_brush = formData.getAll('basic_supplies_owned').includes('toilet_brush');
+        applicationData.has_all_purpose_cleaner = formData.getAll('basic_supplies_owned').includes('all_purpose_cleaner');
+        applicationData.has_glass_cleaner = formData.getAll('basic_supplies_owned').includes('glass_cleaner');
+        applicationData.has_bathroom_cleaner = formData.getAll('basic_supplies_owned').includes('bathroom_cleaner');
+        applicationData.has_broom_dustpan = formData.getAll('basic_supplies_owned').includes('broom_and_dustpan');
+        applicationData.has_cloths = formData.getAll('basic_supplies_owned').includes('microfiber_cloths');
+        applicationData.has_sponges = formData.getAll('basic_supplies_owned').includes('scrubbing_sponges');
+        applicationData.has_vacuum = formData.get('ownVacuum') === 'yes';
+        applicationData.willing_to_rent_equipment = formData.get('equipmentRental') === 'yes';
+        applicationData.selected_none_supplies = formData.getAll('basic_supplies_owned').includes('none');
+        applicationData.cleaning_experience_types = formData.getAll('cleaning_experience_type');
+      }
 
-        if (response.ok) {
-          // Show success message
-          alert('Thank you for your application! We will review your information and contact you within 2-3 business days.');
-          // Close the modal
-          closeApplicationForm();
-          // Reset the form
-          form.reset();
-        } else {
-          throw new Error('Form submission failed.');
-        }
+      if (role === 'fresh') {
+        applicationData.laundry_process_ok = formData.get('laundryProcess') === 'yes';
+        applicationData.home_washer = formData.get('homeWasher') === 'yes';
+        applicationData.hygiene_standards_agreed = formData.get('hygieneStandards') === 'yes';
+        applicationData.willing_to_rent_equipment = formData.get('equipmentRental') === 'yes';
+        applicationData.has_laundry_cart = formData.get('laundryCart') === 'yes';
+      }
+
+      if (role === 'elite') {
+        applicationData.current_role = formData.get('currentRole');
+        applicationData.additional_service = formData.get('additionalService');
+        applicationData.jobs_completed_5_plus = formData.get('jobsCompleted') === 'yes';
+        applicationData.same_day_availability = formData.get('sameDayAvailability') === 'yes';
+        applicationData.job_flexibility = formData.get('jobFlexibility') === 'yes';
+        applicationData.why_elite = formData.get('whyElite');
+        applicationData.mentoring_interest = formData.get('mentoringInterest');
+      }
+
+      // Spanish proficiency
+      if (formData.get('spanish') === 'yes' || formData.get('spanish') === 'some') {
+        applicationData.spanish_proficiency = formData.get('spanishProficiency');
+      }
+
+      try {
+        // Save to Supabase
+        const { data, error } = await supabase
+          .from('applications')
+          .insert([applicationData]);
+
+        if (error) throw error;
+
+        // Show success message
+        alert('Thank you for your application! We will review your information and contact you within 2-3 business days.');
+        
+        // Close the modal
+        closeApplicationForm();
+        
+        // Reset the form
+        event.target.reset();
       } catch (error) {
-        console.error('Submission error:', error);
-        alert('There was an error submitting your application. Please try again.');
+        console.error('Error submitting application:', error);
+        alert('There was an error submitting your application. Please try again or contact us directly.');
       }
     }
 
