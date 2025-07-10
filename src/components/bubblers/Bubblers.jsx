@@ -18,6 +18,9 @@ const Bubblers = () => {
   const [showPayoutModal, setShowPayoutModal] = useState(false);
   const [selectedPayoutBubbler, setSelectedPayoutBubbler] = useState(null);
   const [payoutHistory, setPayoutHistory] = useState([]);
+  const [showDeviceModal, setShowDeviceModal] = useState(false);
+  const [selectedDeviceBubbler, setSelectedDeviceBubbler] = useState(null);
+  const [deviceFingerprints, setDeviceFingerprints] = useState([]);
   const [newBubbler, setNewBubbler] = useState({
     name: '',
     email: '',
@@ -43,7 +46,22 @@ const Bubblers = () => {
         const bubblersWithDeviceInfo = await Promise.all(
           data.map(async (bubbler) => {
             const hasActiveBinding = await DeviceBindingService.hasActiveBinding(bubbler.id);
-            return { ...bubbler, hasActiveDeviceBinding: hasActiveBinding };
+            
+            // Get device change count (total resets)
+            const { data: deviceData } = await supabase
+              .from('device_fingerprints')
+              .select('reset_count')
+              .eq('bubbler_id', bubbler.id)
+              .order('created_at', { ascending: false })
+              .limit(1);
+            
+            const deviceChangeCount = deviceData && deviceData.length > 0 ? deviceData[0].reset_count : 0;
+            
+            return { 
+              ...bubbler, 
+              hasActiveDeviceBinding: hasActiveBinding,
+              device_change_count: deviceChangeCount
+            };
           })
         );
         
@@ -362,6 +380,18 @@ const Bubblers = () => {
     }
   };
 
+  const handleViewDevices = async (bubbler) => {
+    try {
+      setSelectedDeviceBubbler(bubbler);
+      const fingerprints = await DeviceBindingService.getDeviceBindingInfo(bubbler.id);
+      setDeviceFingerprints(fingerprints);
+      setShowDeviceModal(true);
+    } catch (error) {
+      console.error('Error fetching device fingerprints:', error);
+      alert('Error loading device information: ' + error.message);
+    }
+  };
+
   return (
     <div className="card">
       <div className="flex justify-between items-center mb-6">
@@ -462,6 +492,7 @@ const Bubblers = () => {
               <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
               <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
               <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Device</th>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Device Changes</th>
               <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Weekly Payout</th>
               <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
             </tr>
@@ -502,6 +533,11 @@ const Bubblers = () => {
                       </span>
                     );
                   })()}
+                </td>
+                <td className="px-4 py-2 cursor-pointer" onClick={() => handleRowClick(bubbler)}>
+                  <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                    {bubbler.device_change_count}
+                  </span>
                 </td>
                 <td className="px-4 py-2">
                   <div className="flex items-center gap-2">
@@ -565,6 +601,16 @@ const Bubblers = () => {
                       title="Delete"
                     >
                       <FiTrash2 size={16} />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleViewDevices(bubbler);
+                      }}
+                      className="text-purple-600 hover:text-purple-800"
+                      title="View Devices"
+                    >
+                      <FiMonitor size={16} />
                     </button>
                     {bubbler.device_binding && (
                       <button
@@ -1033,6 +1079,134 @@ const Bubblers = () => {
                   <p className="text-sm">No payout records found for this bubbler.</p>
                 </div>
               )}
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* Device Fingerprints Modal */}
+      {showDeviceModal && selectedDeviceBubbler && (
+        <Modal title={`Device History - ${selectedDeviceBubbler.name}`} onClose={() => setShowDeviceModal(false)}>
+          <div className="space-y-6 max-h-[80vh] overflow-y-auto">
+            {/* Device Summary */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="text-lg font-semibold text-blue-800">Device Binding Summary</h3>
+                  <p className="text-sm text-blue-600">
+                    Total device changes: {selectedDeviceBubbler.device_change_count || 0}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <FiShield className="h-5 w-5 text-blue-600" />
+                  <span className="text-sm font-medium text-blue-800">Security Overview</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Device Fingerprints List */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Device Fingerprint History</h3>
+              {deviceFingerprints.length > 0 ? (
+                <div className="space-y-4">
+                  {deviceFingerprints.map((fingerprint, index) => (
+                    <div key={fingerprint.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="flex items-center gap-2">
+                          <div className={`w-3 h-3 rounded-full ${fingerprint.is_active ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                          <span className="font-semibold text-gray-900">
+                            Device #{deviceFingerprints.length - index}
+                          </span>
+                          {fingerprint.is_active && (
+                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                              Active
+                            </span>
+                          )}
+                          {fingerprint.created_by_admin && (
+                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                              Admin Created
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {formatDate(fingerprint.created_at)}
+                        </div>
+                      </div>
+                      
+                      {/* Device Metadata */}
+                      {fingerprint.device_metadata && (
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+                          <div className="text-sm">
+                            <span className="font-medium text-gray-700">Browser:</span>
+                            <div className="text-gray-600">{fingerprint.device_metadata.browser}</div>
+                          </div>
+                          <div className="text-sm">
+                            <span className="font-medium text-gray-700">OS:</span>
+                            <div className="text-gray-600">{fingerprint.device_metadata.os}</div>
+                          </div>
+                          <div className="text-sm">
+                            <span className="font-medium text-gray-700">Screen:</span>
+                            <div className="text-gray-600">{fingerprint.device_metadata.screen}</div>
+                          </div>
+                          <div className="text-sm">
+                            <span className="font-medium text-gray-700">Timezone:</span>
+                            <div className="text-gray-600">{fingerprint.device_metadata.timezone}</div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Additional Info */}
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs text-gray-500">
+                        <div>
+                          <span className="font-medium">Last Used:</span>
+                          <div>{fingerprint.last_used ? formatDate(fingerprint.last_used) : 'Never'}</div>
+                        </div>
+                        <div>
+                          <span className="font-medium">Reset Count:</span>
+                          <div>{fingerprint.reset_count || 0}</div>
+                        </div>
+                        <div>
+                          <span className="font-medium">Language:</span>
+                          <div>{fingerprint.device_metadata?.language || 'Unknown'}</div>
+                        </div>
+                      </div>
+                      
+                      {/* Fingerprint Hash (truncated for security) */}
+                      <div className="mt-3 pt-3 border-t border-gray-200">
+                        <div className="text-xs text-gray-500">
+                          <span className="font-medium">Fingerprint Hash:</span>
+                          <div className="font-mono text-gray-600 break-all">
+                            {fingerprint.fingerprint_hash ? 
+                              `${fingerprint.fingerprint_hash.substring(0, 16)}...` : 
+                              'Not available'
+                            }
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <FiMonitor className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Device History</h3>
+                  <p className="text-sm">No device fingerprints found for this bubbler.</p>
+                </div>
+              )}
+            </div>
+
+            {/* Security Notes */}
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <div className="flex">
+                <FiShield className="h-5 w-5 text-yellow-400 mr-3 mt-0.5" />
+                <div>
+                  <p className="text-yellow-800 font-semibold">Security Information</p>
+                  <p className="text-yellow-700 text-sm mt-1">
+                    Device fingerprints are hashed for security. Each device binding prevents unauthorized access from other devices.
+                    Multiple device changes may indicate account sharing attempts.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </Modal>
