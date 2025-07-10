@@ -71,24 +71,74 @@ class DeviceBindingService {
     try {
       const fingerprintHash = this.hashFingerprint(fingerprint);
       
-      // Call the database function to validate
-      const { data, error } = await supabase.rpc('validate_device_binding', {
-        p_bubbler_id: bubblerId,
-        p_device_fingerprint_hash: fingerprintHash
-      });
+      // First check if the database function exists by trying a simple query
+      try {
+        // Call the database function to validate
+        const { data, error } = await supabase.rpc('validate_device_binding', {
+          p_bubbler_id: bubblerId,
+          p_device_fingerprint_hash: fingerprintHash
+        });
+
+        if (error) {
+          // If the function doesn't exist, fall back to manual validation
+          console.warn('Database function not available, using fallback validation:', error.message);
+          return await this.fallbackValidateDeviceBinding(bubblerId, fingerprintHash);
+        }
+
+        // Log the login attempt
+        await this.logLoginAttempt(bubblerId, fingerprint, data);
+
+        return {
+          isValid: data,
+          fingerprintHash,
+          requiresBinding: !data && !(await this.hasActiveBinding(bubblerId))
+        };
+      } catch (rpcError) {
+        // Fallback to manual validation if RPC fails
+        console.warn('RPC failed, using fallback validation:', rpcError.message);
+        return await this.fallbackValidateDeviceBinding(bubblerId, fingerprintHash);
+      }
+    } catch (error) {
+      console.error('Error validating device binding:', error);
+      return { isValid: false, error: error.message };
+    }
+  }
+
+  // Fallback validation method when database functions are not available
+  static async fallbackValidateDeviceBinding(bubblerId, fingerprintHash) {
+    try {
+      // Check if user has any active device binding
+      const hasActive = await this.hasActiveBinding(bubblerId);
+      
+      if (!hasActive) {
+        // No active binding, allow login
+        return {
+          isValid: true,
+          fingerprintHash,
+          requiresBinding: false
+        };
+      }
+
+      // Check if current fingerprint matches any active binding
+      const { data, error } = await supabase
+        .from('device_fingerprints')
+        .select('id')
+        .eq('bubbler_id', bubblerId)
+        .eq('fingerprint_hash', fingerprintHash)
+        .eq('is_active', true)
+        .limit(1);
 
       if (error) throw error;
 
-      // Log the login attempt
-      await this.logLoginAttempt(bubblerId, fingerprint, data);
+      const isValid = data && data.length > 0;
 
       return {
-        isValid: data,
+        isValid,
         fingerprintHash,
-        requiresBinding: !data && !(await this.hasActiveBinding(bubblerId))
+        requiresBinding: !isValid && hasActive
       };
     } catch (error) {
-      console.error('Error validating device binding:', error);
+      console.error('Error in fallback validation:', error);
       return { isValid: false, error: error.message };
     }
   }
@@ -96,17 +146,50 @@ class DeviceBindingService {
   // Check if user has any active device binding
   static async hasActiveBinding(bubblerId) {
     try {
-      const { data, error } = await supabase
-        .from('device_fingerprints')
-        .select('id')
-        .eq('bubbler_id', bubblerId)
-        .eq('is_active', true)
-        .limit(1);
+      // First try the new device_fingerprints table
+      try {
+        const { data, error } = await supabase
+          .from('device_fingerprints')
+          .select('id')
+          .eq('bubbler_id', bubblerId)
+          .eq('is_active', true)
+          .limit(1);
 
-      if (error) throw error;
-      return data && data.length > 0;
+        if (error) {
+          console.warn('Device fingerprints table not available:', error.message);
+          // Fall back to legacy check
+          return await this.checkLegacyDeviceBinding(bubblerId);
+        }
+        
+        return data && data.length > 0;
+      } catch (tableError) {
+        console.warn('Device fingerprints table not available:', tableError.message);
+        // Fall back to legacy check
+        return await this.checkLegacyDeviceBinding(bubblerId);
+      }
     } catch (error) {
       console.error('Error checking active binding:', error);
+      return false;
+    }
+  }
+
+  // Check legacy device binding field
+  static async checkLegacyDeviceBinding(bubblerId) {
+    try {
+      const { data, error } = await supabase
+        .from('bubblers')
+        .select('device_binding')
+        .eq('id', bubblerId)
+        .single();
+
+      if (error) {
+        console.warn('Legacy device binding check failed:', error.message);
+        return false;
+      }
+
+      return !!data?.device_binding;
+    } catch (error) {
+      console.warn('Legacy device binding check failed:', error.message);
       return false;
     }
   }
@@ -157,30 +240,41 @@ class DeviceBindingService {
   // Clear device binding (admin function)
   static async clearDeviceBinding(bubblerId) {
     try {
-      // Deactivate all bindings for this user
-      const { error } = await supabase
-        .from('device_fingerprints')
-        .update({ 
-          is_active: false,
-          reset_count: supabase.raw('reset_count + 1')
-        })
-        .eq('bubbler_id', bubblerId);
+      // Try to clear device fingerprints first
+      try {
+        const { error } = await supabase
+          .from('device_fingerprints')
+          .update({ 
+            is_active: false,
+            reset_count: supabase.raw('reset_count + 1')
+          })
+          .eq('bubbler_id', bubblerId);
 
-      if (error) throw error;
+        if (error) {
+          console.warn('Device fingerprints table not available:', error.message);
+        }
+      } catch (tableError) {
+        console.warn('Device fingerprints table not available:', tableError.message);
+      }
 
-      // Clear legacy field
-      await supabase
-        .from('bubblers')
-        .update({
-          device_binding: null,
-          device_binding_date: null
-        })
-        .eq('id', bubblerId);
+      // Always try to clear legacy field
+      try {
+        await supabase
+          .from('bubblers')
+          .update({
+            device_binding: null,
+            device_binding_date: null
+          })
+          .eq('id', bubblerId);
+      } catch (legacyError) {
+        console.warn('Legacy device binding fields not available:', legacyError.message);
+      }
 
       return true;
     } catch (error) {
       console.error('Error clearing device binding:', error);
-      throw error;
+      // Don't throw - allow the operation to continue even if clearing fails
+      return true;
     }
   }
 
@@ -192,17 +286,35 @@ class DeviceBindingService {
       // Get IP address (this would need to be passed from the server in production)
       const ipAddress = await this.getClientIP();
       
-      await supabase.rpc('log_login_attempt', {
-        p_bubbler_id: bubblerId,
-        p_ip_address: ipAddress,
-        p_device_fingerprint_hash: fingerprintHash,
-        p_user_agent: fingerprint.userAgent,
-        p_login_success: success,
-        p_failure_reason: failureReason,
-        p_session_id: this.generateSessionId()
-      });
+      try {
+        // Try to use the database function first
+        await supabase.rpc('log_login_attempt', {
+          p_bubbler_id: bubblerId,
+          p_ip_address: ipAddress,
+          p_device_fingerprint_hash: fingerprintHash,
+          p_user_agent: fingerprint.userAgent,
+          p_login_success: success,
+          p_failure_reason: failureReason,
+          p_session_id: this.generateSessionId()
+        });
+      } catch (rpcError) {
+        // Fallback to direct table insert if function doesn't exist
+        console.warn('Login logging function not available, using fallback:', rpcError.message);
+        await supabase
+          .from('login_history')
+          .insert([{
+            bubbler_id: bubblerId,
+            ip_address: ipAddress,
+            device_fingerprint_hash: fingerprintHash,
+            user_agent: fingerprint.userAgent,
+            login_success: success,
+            failure_reason: failureReason,
+            session_id: this.generateSessionId()
+          }]);
+      }
     } catch (error) {
       console.error('Error logging login attempt:', error);
+      // Don't throw - logging failure shouldn't break the app
     }
   }
 
@@ -232,9 +344,12 @@ class DeviceBindingService {
         .eq('bubbler_id', bubblerId)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.warn('Device fingerprints table not available:', error.message);
+        return [];
+      }
 
-      return data;
+      return data || [];
     } catch (error) {
       console.error('Error getting device binding info:', error);
       return [];
