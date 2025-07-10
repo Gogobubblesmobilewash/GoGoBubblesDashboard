@@ -93,9 +93,12 @@ const Onboarding = () => {
       const { error } = await supabase
         .from('bubblers')
         .update({
+          email: formData.email, // Allow email update
+          phone: formData.phone, // Allow phone update
           password: formData.password, // In production, this should be hashed
           onboarding_completed: true,
           temp_password: null, // Clear temp password
+          password_reset_required: false, // Clear password reset requirement
           updated_at: new Date().toISOString()
         })
         .eq('id', bubblerId);
@@ -241,11 +244,11 @@ const Onboarding = () => {
                     type="text"
                     name="name"
                     value={formData.name}
-                    onChange={handleInputChange}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-aqua focus:border-transparent"
-                    required
+                    disabled
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
                   />
                 </div>
+                <p className="text-xs text-gray-500 mt-1">Name cannot be changed</p>
               </div>
 
               <div>

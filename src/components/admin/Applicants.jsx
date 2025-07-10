@@ -80,13 +80,14 @@ const Applicants = () => {
     if (role === 'fresh') return true; // No equipment required for laundry
     
     if (role === 'sparkle') {
-      // Must have basic cleaning supplies
+      // Must have basic cleaning supplies AND vacuum (or willing to rent)
       const requiredSupplies = [
         app.has_mop, app.has_toilet_brush, app.has_all_purpose_cleaner,
         app.has_glass_cleaner, app.has_bathroom_cleaner, app.has_broom_dustpan
       ];
       const hasClothsOrSponges = app.has_cloths || app.has_sponges;
-      return requiredSupplies.every(supply => supply) && hasClothsOrSponges;
+      const hasVacuumOrWillingToRent = app.has_vacuum || app.willing_to_rent_equipment;
+      return requiredSupplies.every(supply => supply) && hasClothsOrSponges && hasVacuumOrWillingToRent;
     }
     
     if (role === 'shine') {
@@ -104,6 +105,8 @@ const Applicants = () => {
            !app.age_verified || 
            !app.has_transportation ||
            (app.role_applied_for?.toLowerCase() === 'sparkle' && app.selected_none_supplies) ||
+           (app.role_applied_for?.toLowerCase() === 'sparkle' && 
+            !app.has_vacuum && !app.willing_to_rent_equipment) ||
            (app.role_applied_for?.toLowerCase() === 'shine' && 
             !app.has_water_supply && !app.willing_to_rent_equipment &&
             !app.has_power_supply && !app.willing_to_rent_equipment);
@@ -115,6 +118,10 @@ const Applicants = () => {
     if (!app.has_transportation) return 'No transportation';
     if (app.role_applied_for?.toLowerCase() === 'sparkle' && app.selected_none_supplies) {
       return 'Missing required supplies';
+    }
+    if (app.role_applied_for?.toLowerCase() === 'sparkle' && 
+        !app.has_vacuum && !app.willing_to_rent_equipment) {
+      return 'No vacuum and unwilling to rent';
     }
     if (app.role_applied_for?.toLowerCase() === 'shine' && 
         !app.has_water_supply && !app.willing_to_rent_equipment &&
@@ -214,6 +221,8 @@ const Applicants = () => {
         name: `${selectedApplication.first_name} ${selectedApplication.last_name}`,
         email: selectedApplication.email,
         phone: selectedApplication.phone,
+        address: selectedApplication.address,
+        travel_radius_minutes: selectedApplication.travel_radius_minutes,
         role: role,
         is_active: true,
         join_date: new Date().toISOString(),
@@ -226,6 +235,7 @@ const Applicants = () => {
         total_earnings: 0,
         rating: 0,
         temp_password: tempPassword, // Store temporary password
+        password_reset_required: true, // Flag that password reset is required
         onboarding_completed: false
       };
 

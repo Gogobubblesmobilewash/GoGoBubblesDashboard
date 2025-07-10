@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { supabase, getAllBubblersWeeklyPayouts, createPayoutRecord, updatePayoutStatus, getPayoutHistory } from '../../services/api';
+import DeviceBindingService from '../../services/deviceBinding';
 import Modal from '../shared/Modal';
 import { BUBBLER_ROLES } from '../../constants/roles';
-import { FiPlus, FiEdit, FiTrash2, FiUserPlus, FiDollarSign, FiCheckCircle, FiClock } from 'react-icons/fi';
+import { FiPlus, FiEdit, FiTrash2, FiUserPlus, FiDollarSign, FiCheckCircle, FiClock, FiShield, FiMonitor, FiUnlock } from 'react-icons/fi';
 
 const Bubblers = () => {
   const [bubblers, setBubblers] = useState([]);
+  const [filteredBubblers, setFilteredBubblers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [weeklyPayouts, setWeeklyPayouts] = useState({});
@@ -23,6 +25,11 @@ const Bubblers = () => {
     role: 'SHINE'
   });
   const [editingBubbler, setEditingBubbler] = useState(null);
+  
+  // Filter states
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [roleFilter, setRoleFilter] = useState('all');
 
   useEffect(() => {
     const fetchBubblers = async () => {
@@ -32,7 +39,15 @@ const Bubblers = () => {
         const { data, error } = await supabase.from('bubblers').select('*');
         if (error) throw error;
         
-        setBubblers(data || []);
+        // Check device binding status for each bubbler
+        const bubblersWithDeviceInfo = await Promise.all(
+          data.map(async (bubbler) => {
+            const hasActiveBinding = await DeviceBindingService.hasActiveBinding(bubbler.id);
+            return { ...bubbler, hasActiveDeviceBinding: hasActiveBinding };
+          })
+        );
+        
+        setBubblers(bubblersWithDeviceInfo || []);
         
         // Fetch weekly payouts for all bubblers
         const payouts = await getAllBubblersWeeklyPayouts();
@@ -52,6 +67,37 @@ const Bubblers = () => {
     };
     fetchBubblers();
   }, []);
+
+  // Filter bubblers based on search and filters
+  useEffect(() => {
+    let filtered = bubblers;
+
+    // Search filter
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(bubbler => 
+        bubbler.name?.toLowerCase().includes(term) ||
+        bubbler.email?.toLowerCase().includes(term) ||
+        bubbler.role?.toLowerCase().includes(term)
+      );
+    }
+
+    // Status filter
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(bubbler => {
+        if (statusFilter === 'active') return bubbler.is_active === true;
+        if (statusFilter === 'inactive') return bubbler.is_active === false;
+        return true;
+      });
+    }
+
+    // Role filter
+    if (roleFilter !== 'all') {
+      filtered = filtered.filter(bubbler => bubbler.role?.toLowerCase() === roleFilter);
+    }
+
+    setFilteredBubblers(filtered);
+  }, [bubblers, searchTerm, statusFilter, roleFilter]);
 
   const handleRowClick = (bubbler) => {
     setSelectedBubbler(bubbler);
@@ -282,6 +328,40 @@ const Bubblers = () => {
     }
   };
 
+  const handleClearDeviceBinding = async (bubblerId) => {
+    try {
+      await DeviceBindingService.clearDeviceBinding(bubblerId);
+
+      // Refresh bubblers list
+      const { data, error: fetchError } = await supabase.from('bubblers').select('*');
+      if (!fetchError) setBubblers(data || []);
+      
+      alert('Device binding cleared successfully! The user can now bind to a new device.');
+    } catch (error) {
+      console.error('Error clearing device binding:', error);
+      alert('Error clearing device binding: ' + error.message);
+    }
+  };
+
+  const getDeviceBindingStatus = (bubbler) => {
+    // Check if user has any active device binding in the new system
+    if (bubbler.device_binding || bubbler.hasActiveDeviceBinding) {
+      return {
+        status: 'bound',
+        text: 'Device Locked',
+        color: 'bg-green-100 text-green-800',
+        icon: FiShield
+      };
+    } else {
+      return {
+        status: 'unbound',
+        text: 'No Device Binding',
+        color: 'bg-gray-100 text-gray-800',
+        icon: FiMonitor
+      };
+    }
+  };
+
   return (
     <div className="card">
       <div className="flex justify-between items-center mb-6">
@@ -294,6 +374,80 @@ const Bubblers = () => {
           Add Bubbler
         </button>
       </div>
+
+      {/* Stats Summary */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="bg-white p-4 rounded-lg border border-gray-200">
+          <div className="text-2xl font-bold text-gray-800">{bubblers.length}</div>
+          <div className="text-sm text-gray-600">Total Bubblers</div>
+        </div>
+        <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+          <div className="text-2xl font-bold text-green-600">
+            {bubblers.filter(b => b.is_active).length}
+          </div>
+          <div className="text-sm text-green-700">Active & Ready</div>
+        </div>
+        <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+          <div className="text-2xl font-bold text-red-600">
+            {bubblers.filter(b => !b.is_active).length}
+          </div>
+          <div className="text-sm text-red-700">Inactive</div>
+        </div>
+        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+          <div className="text-2xl font-bold text-blue-600">
+            ${bubblers.reduce((total, b) => total + (weeklyPayouts[b.id]?.weeklyPayout || 0), 0).toFixed(2)}
+          </div>
+          <div className="text-sm text-blue-700">Total Weekly Payout</div>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="bg-gray-50 p-4 rounded-lg mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Search */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Search</label>
+            <input
+              type="text"
+              placeholder="Search by name, email, or role..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          {/* Status Filter */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">All Statuses</option>
+              <option value="active">Active Only</option>
+              <option value="inactive">Inactive Only</option>
+            </select>
+          </div>
+
+          {/* Role Filter */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+            <select
+              value={roleFilter}
+              onChange={(e) => setRoleFilter(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">All Roles</option>
+              <option value="shine">Shine Bubbler</option>
+              <option value="sparkle">Sparkle Bubbler</option>
+              <option value="fresh">Fresh Bubbler</option>
+              <option value="elite">Elite Bubbler</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
       {loading ? (
         <div className="text-gray-500">Loading bubblers...</div>
       ) : error ? (
@@ -307,12 +461,13 @@ const Bubblers = () => {
               <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
               <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
               <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Device</th>
               <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Weekly Payout</th>
               <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-100">
-            {bubblers.map(bubbler => (
+            {filteredBubblers.map(bubbler => (
               <tr
                 key={bubbler.id || bubbler.email}
                 className="hover:bg-blue-50"
@@ -335,6 +490,18 @@ const Bubblers = () => {
                   <span className={`px-2 py-1 rounded-full text-xs font-medium ${bubbler.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                     {bubbler.is_active ? 'Active' : 'Inactive'}
                   </span>
+                </td>
+                <td className="px-4 py-2 cursor-pointer" onClick={() => handleRowClick(bubbler)}>
+                  {(() => {
+                    const deviceStatus = getDeviceBindingStatus(bubbler);
+                    const IconComponent = deviceStatus.icon;
+                    return (
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${deviceStatus.color} flex items-center gap-1`}>
+                        <IconComponent size={12} />
+                        {deviceStatus.text}
+                      </span>
+                    );
+                  })()}
                 </td>
                 <td className="px-4 py-2">
                   <div className="flex items-center gap-2">
@@ -399,6 +566,20 @@ const Bubblers = () => {
                     >
                       <FiTrash2 size={16} />
                     </button>
+                    {bubbler.device_binding && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (confirm('Clear device binding? This will allow the user to bind to a new device.')) {
+                            handleClearDeviceBinding(bubbler.id);
+                          }
+                        }}
+                        className="text-orange-600 hover:text-orange-800"
+                        title="Clear Device Binding"
+                      >
+                        <FiUnlock size={16} />
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>
@@ -582,6 +763,52 @@ const Bubblers = () => {
                 </div>
               </div>
             )}
+
+            {/* Device Binding Information */}
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <div className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                <FiShield className="h-5 w-5 text-brand-aqua" />
+                Device Security
+              </div>
+              {selectedBubbler.hasActiveDeviceBinding ? (
+                <div className="space-y-3">
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <FiShield className="h-4 w-4 text-green-600" />
+                      <span className="font-medium text-green-800">Device Locked</span>
+                    </div>
+                    <p className="text-sm text-green-700 mb-2">
+                      This account is bound to a specific device to prevent unauthorized access.
+                    </p>
+                    <div className="text-xs text-green-600">
+                      <strong>Bound on:</strong> {selectedBubbler.device_binding_date ? new Date(selectedBubbler.device_binding_date).toLocaleDateString() : 'Unknown'}
+                    </div>
+                  </div>
+                  <button
+                    onClick={async () => {
+                      if (confirm('Clear device binding? This will allow the user to bind to a new device.')) {
+                        await handleClearDeviceBinding(selectedBubbler.id);
+                        setShowModal(false);
+                      }
+                    }}
+                    className="w-full px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 flex items-center justify-center gap-2"
+                  >
+                    <FiUnlock size={16} />
+                    Clear Device Binding
+                  </button>
+                </div>
+              ) : (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                  <div className="flex items-center gap-2 mb-2">
+                    <FiMonitor className="h-4 w-4 text-blue-600" />
+                    <span className="font-medium text-blue-800">No Device Binding</span>
+                  </div>
+                  <p className="text-sm text-blue-700">
+                    This account is not bound to any device. The user can bind to a device when they first save their profile.
+                  </p>
+                </div>
+              )}
+            </div>
 
             {/* No Jobs Message */}
             {(!selectedBubbler.currentJobs || selectedBubbler.currentJobs.length === 0) && 
