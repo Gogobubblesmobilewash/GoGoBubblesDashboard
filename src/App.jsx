@@ -22,6 +22,8 @@ import Onboarding from './components/auth/Onboarding';
 import { useAuth } from './store/AuthContext';
 import { SpeedInsights } from "@vercel/speed-insights/react";
 
+// Force deployment - BookingForm component removed
+
 // Error Boundary Component
 class ErrorBoundary extends React.Component {
   constructor(props) {
