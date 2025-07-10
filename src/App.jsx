@@ -17,7 +17,6 @@ import Analytics from './components/admin/Analytics';
 import Applicants from './components/admin/Applicants';
 import Orders from './components/orders/Orders';
 import Bubblers from './components/bubblers/Bubblers';
-import BookingForm from './components/booking/BookingForm';
 import Onboarding from './components/auth/Onboarding';
 
 import { useAuth } from './store/AuthContext';
@@ -134,10 +133,7 @@ function App() {
               isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />
             }
           />
-          <Route 
-            path="/booking" 
-            element={<BookingForm />}
-          />
+
           <Route 
             path="/onboarding/:bubblerId" 
             element={<Onboarding />}
