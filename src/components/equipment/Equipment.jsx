@@ -348,6 +348,14 @@ const Equipment = () => {
     );
   }
 
+  // Equipment summary stats
+  const totalEquipment = filteredEquipment.length;
+  const availableCount = filteredEquipment.filter(e => e.status === 'available').length;
+  const rentedCount = filteredEquipment.filter(e => e.status === 'rented').length;
+  const overdueCount = filteredEquipment.filter(e => e.status === 'rented' && isOverdue(e.expectedReturn)).length;
+  const maintenanceCount = filteredEquipment.filter(e => e.status === 'maintenance').length;
+  const damagedCount = filteredEquipment.filter(e => e.status === 'damaged').length;
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -377,63 +385,43 @@ const Equipment = () => {
         )}
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {['available', 'rented', 'returned'].map((status) => (
-          <div key={status} className="card text-center">
-            <div className="text-2xl font-bold text-blue-600">
-              {equipment.filter((e) => e.status === status).length}
-            </div>
-            <div className="text-xs text-gray-500 capitalize">{status}</div>
-          </div>
-        ))}
-        <div className="card text-center">
-          <div className="text-2xl font-bold text-red-600">
-            {equipment.filter((e) => isOverdue(e.expectedReturn)).length}
-          </div>
-          <div className="text-xs text-gray-500">Overdue</div>
+      {/* Equipment Summary Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
+        <div className="bg-white p-4 rounded-lg border border-gray-200">
+          <div className="text-2xl font-bold text-gray-800">{totalEquipment}</div>
+          <div className="text-sm text-gray-600">Total Equipment</div>
+        </div>
+        <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+          <div className="text-2xl font-bold text-green-600">{availableCount}</div>
+          <div className="text-sm text-green-700">Available</div>
+        </div>
+        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+          <div className="text-2xl font-bold text-blue-600">{rentedCount}</div>
+          <div className="text-sm text-blue-700">Out / Rented</div>
+        </div>
+        <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+          <div className="text-2xl font-bold text-red-600">{overdueCount}</div>
+          <div className="text-sm text-red-700">Overdue</div>
+        </div>
+        <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+          <div className="text-2xl font-bold text-yellow-600">{maintenanceCount}</div>
+          <div className="text-sm text-yellow-700">In Maintenance</div>
+        </div>
+        <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
+          <div className="text-2xl font-bold text-orange-600">{damagedCount}</div>
+          <div className="text-sm text-orange-700">Damaged</div>
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="card">
-        <div className="flex flex-col lg:flex-row lg:justify-between gap-4">
-          <div className="flex gap-2 flex-wrap">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <input
-                placeholder="Search equipment"
-                className="pl-10 pr-4 py-2 border rounded-xl focus:ring-2 focus:ring-cyan-500"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <select
-              className="px-4 py-2 border rounded-xl focus:ring-2 focus:ring-cyan-500"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-            >
-              <option value="all">All</option>
-              <option value="available">Available</option>
-              <option value="rented">Rented</option>
-              <option value="returned">Returned</option>
-              <option value="maintenance">Maintenance</option>
-              <option value="damaged">Damaged</option>
-            </select>
-          </div>
-          <div className="flex gap-2">
-            <button className="btn-secondary text-xs">
-              <Download className="h-4 w-4 mr-1" />
-              Export
-            </button>
-            {isAdmin && (
-              <button className="btn-secondary text-xs">
-                <Upload className="h-4 w-4 mr-1" />
-                Import
-              </button>
-            )}
-          </div>
-        </div>
+      {/* Equipment Filters */}
+      <div className="flex flex-wrap gap-2 mb-4">
+        <button onClick={() => setStatusFilter('all')} className={`px-4 py-2 rounded ${statusFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}>All</button>
+        <button onClick={() => setStatusFilter('available')} className={`px-4 py-2 rounded ${statusFilter === 'available' ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-700'}`}>Available</button>
+        <button onClick={() => setStatusFilter('rented')} className={`px-4 py-2 rounded ${statusFilter === 'rented' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}>Out / Rented</button>
+        <button onClick={() => setStatusFilter('overdue')} className={`px-4 py-2 rounded ${statusFilter === 'overdue' ? 'bg-red-600 text-white' : 'bg-gray-100 text-gray-700'}`}>Overdue</button>
+        <button onClick={() => setStatusFilter('maintenance')} className={`px-4 py-2 rounded ${statusFilter === 'maintenance' ? 'bg-yellow-600 text-white' : 'bg-gray-100 text-gray-700'}`}>Maintenance</button>
+        <button onClick={() => setStatusFilter('damaged')} className={`px-4 py-2 rounded ${statusFilter === 'damaged' ? 'bg-orange-600 text-white' : 'bg-gray-100 text-gray-700'}`}>Damaged</button>
+        <button onClick={() => setStatusFilter('assignedToMe')} className={`px-4 py-2 rounded ${statusFilter === 'assignedToMe' ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-700'}`}>Assigned to Me</button>
       </div>
 
       {/* Equipment Grid */}

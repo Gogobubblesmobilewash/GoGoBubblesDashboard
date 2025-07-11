@@ -16,8 +16,18 @@ import {
   FiDollarSign as DollarSign,
   FiUsers as Users,
   FiBarChart2 as BarChart3,
-  FiCamera as Camera
+  FiCamera as Camera,
+  FiMessageCircle as MessageCircle,
+  FiClock as Clock,
+  FiActivity as Activity,
+  FiTrendingUp as TrendingUp,
+  FiGitBranch as Workflow,
+  FiAward as Award,
+  FiHeart as Heart,
+  FiTarget as Target
 } from 'react-icons/fi';
+import MessageNotifications from '../messages/MessageNotifications';
+import NotificationCenter from '../activity/NotificationCenter';
 
 const Layout = () => {
   const { activeTab, setActiveTab } = useStore();
@@ -44,6 +54,17 @@ const Layout = () => {
     { name: 'Equipment', icon: Briefcase, path: '/equipment' },
     { name: 'Applicants', icon: Users, path: '/applicants' },
     { name: 'Ratings', icon: Star, path: '/ratings' },
+    { name: 'Messages', icon: MessageCircle, path: '/messages' },
+    { name: 'Activity Feed', icon: Clock, path: '/activity' },
+    { name: 'Advanced Analytics', icon: BarChart3, path: '/advanced-analytics' },
+    { name: 'Performance Monitor', icon: Activity, path: '/performance' },
+    { name: 'Automated Reporting', icon: FileText, path: '/automated-reporting' },
+    { name: 'Business Intelligence', icon: TrendingUp, path: '/business-intelligence' },
+    { name: 'Automated Workflows', icon: Workflow, path: '/automated-workflows' },
+    { name: 'Customer Analytics', icon: Users, path: '/customer-analytics' },
+    { name: 'Elite Bubbler Management', icon: Award, path: '/elite-bubbler-management' },
+    { name: 'Bubbler Morale', icon: Heart, path: '/bubbler-morale' },
+    { name: 'Job Assignment Caps', icon: Target, path: '/job-assignment-caps' },
     { name: 'Admin Notes', icon: FileText, path: '/admin-notes' },
     { name: 'Earnings', icon: DollarSign, path: '/earnings' },
     { name: 'Bubblers', icon: Users, path: '/bubblers' },
@@ -150,6 +171,12 @@ const Layout = () => {
               </button>
             </div>
             <div className="flex items-center space-x-4">
+              {/* Activity Notifications */}
+              <NotificationCenter />
+              
+              {/* Message Notifications */}
+              <MessageNotifications />
+              
               <div className="hidden sm:flex items-center space-x-3">
                 <span className="text-sm text-gray-500">Welcome,</span>
                 <span className="text-sm font-semibold text-gray-800">{user?.name}</span>

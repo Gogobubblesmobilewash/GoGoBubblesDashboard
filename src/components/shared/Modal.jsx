@@ -1,29 +1,46 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FiX as X } from 'react-icons/fi';
+import { FiX } from 'react-icons/fi';
 
-const Modal = ({ title, children, onClose, size = 'md' }) => {
+const Modal = ({ isOpen, onClose, title, children, size = 'md' }) => {
+  if (!isOpen) return null;
+
   const sizeClasses = {
     sm: 'max-w-md',
-    md: 'max-w-lg',
-    lg: 'max-w-2xl',
-    xl: 'max-w-4xl'
+    md: 'max-w-2xl',
+    lg: 'max-w-4xl',
+    xl: 'max-w-6xl',
+    full: 'max-w-full mx-4'
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 backdrop-blur-sm">
-      <div className={`bg-white rounded-3xl shadow-card ${sizeClasses[size]} w-full p-6 md:p-8 relative animate-in fade-in duration-200`}>
-        <button 
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        {/* Background overlay */}
+        <div 
+          className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" 
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-        >
-          <X className="h-5 w-5" />
-        </button>
-        {title && (
-          <h3 className="text-xl font-bold text-gray-800 mb-6 font-poppins pr-8">{title}</h3>
-        )}
-        <div>
-          {children}
+        />
+        
+        {/* Modal panel */}
+        <div className={`inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle ${sizeClasses[size]} w-full`}>
+          {/* Header */}
+          <div className="bg-white px-6 py-4 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+              <button
+                onClick={onClose}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <FiX className="h-6 w-6" />
+              </button>
+            </div>
+          </div>
+          
+          {/* Content */}
+          <div className="px-6 py-4">
+            {children}
+          </div>
         </div>
       </div>
     </div>
@@ -31,15 +48,11 @@ const Modal = ({ title, children, onClose, size = 'md' }) => {
 };
 
 Modal.propTypes = {
-  children: PropTypes.node.isRequired,
+  isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
-  size: PropTypes.oneOf(['sm', 'md', 'lg', 'xl']),
-  title: PropTypes.string
-};
-
-Modal.defaultProps = {
-  size: 'md',
-  title: null
+  title: PropTypes.string.isRequired,
+  children: PropTypes.node.isRequired,
+  size: PropTypes.oneOf(['sm', 'md', 'lg', 'xl', 'full'])
 };
 
 export default Modal; 

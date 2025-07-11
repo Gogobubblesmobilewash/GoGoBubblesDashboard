@@ -18,6 +18,17 @@ import Applicants from './components/admin/Applicants';
 import Orders from './components/orders/Orders';
 import Bubblers from './components/bubblers/Bubblers';
 import Onboarding from './components/auth/Onboarding';
+import Messages from './components/messages/Messages';
+import ActivityFeed from './components/activity/ActivityFeed';
+import AdvancedAnalytics from './components/analytics/AdvancedAnalytics';
+import PerformanceMonitor from './components/analytics/PerformanceMonitor';
+import AutomatedReporting from './components/analytics/AutomatedReporting';
+import BusinessIntelligence from './components/analytics/BusinessIntelligence';
+import AutomatedWorkflows from './components/analytics/AutomatedWorkflows';
+import CustomerAnalytics from './components/analytics/CustomerAnalytics';
+import EliteBubblerManagement from './components/admin/EliteBubblerManagement';
+import BubblerMorale from './components/admin/BubblerMorale';
+import JobAssignmentCaps from './components/admin/JobAssignmentCaps';
 
 import { useAuth } from './store/AuthContext';
 import { SpeedInsights } from "@vercel/speed-insights/react";
@@ -250,6 +261,94 @@ function App() {
               element={
                 <ProtectedRoute requireAdmin>
                   <Analytics />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
+              path="messages"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <Messages />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
+              path="activity"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <ActivityFeed />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
+              path="advanced-analytics"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdvancedAnalytics />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
+              path="performance"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <PerformanceMonitor />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
+              path="automated-reporting"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AutomatedReporting />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
+              path="business-intelligence"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <BusinessIntelligence />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
+              path="automated-workflows"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AutomatedWorkflows />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
+              path="customer-analytics"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <CustomerAnalytics />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
+              path="elite-bubbler-management"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <EliteBubblerManagement />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
+              path="bubbler-morale"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <BubblerMorale />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
+              path="job-assignment-caps"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <JobAssignmentCaps />
                 </ProtectedRoute>
               }
             />

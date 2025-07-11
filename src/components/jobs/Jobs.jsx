@@ -1,6 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { FiSearch, FiFilter, FiPlus, FiEdit, FiTrash2, FiCheck, FiX, FiCamera, FiUpload, FiDownload, FiMessageCircle, FiCpu } from 'react-icons/fi';
+import { 
+  FiSearch, 
+  FiFilter, 
+  FiPlus, 
+  FiEdit, 
+  FiTrash2, 
+  FiCheck, 
+  FiX, 
+  FiCamera, 
+  FiUpload, 
+  FiDownload, 
+  FiMessageCircle, 
+  FiCpu,
+  FiChevronLeft,
+  FiChevronRight,
+  FiMoreHorizontal,
+  FiCalendar,
+  FiUser,
+  FiMapPin,
+  FiDollarSign,
+  FiClock,
+  FiAlertCircle,
+  FiCheckSquare,
+  FiSquare
+} from 'react-icons/fi';
 import toast, { Toaster } from 'react-hot-toast';
 import useStore from '../../store/useStore';
 import { supabase } from '../../services/api';
@@ -16,7 +40,7 @@ import {
 } from '../../constants';
 import QRScanner from './QRScanner';
 import Modal from '../shared/Modal';
-import MessageThread from './MessageThread';
+import MessageThread from '../messages/MessageThread';
 import { parseServicesForSplitting, fetchBubblersWithTravelPrefs } from '../../services/api';
 import dayjs from 'dayjs';
 import { useAuth } from '../../store/AuthContext';
@@ -61,6 +85,24 @@ const Jobs = () => {
   const [qrNotifications, setQrNotifications] = useState([]);
   const [pickupPhotos, setPickupPhotos] = useState({}); // assignmentId -> file
   const [deliveryPhotos, setDeliveryPhotos] = useState({}); // assignmentId -> file
+
+  // Enhanced filtering and pagination state
+  const [advancedFilters, setAdvancedFilters] = useState({
+    serviceType: 'all',
+    dateRange: 'all',
+    priority: 'all',
+    assignedBubbler: 'all',
+    minAmount: '',
+    maxAmount: '',
+    hasMessages: 'all'
+  });
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [selectedJobs, setSelectedJobs] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [jobsPerPage] = useState(20);
+  const [sortBy, setSortBy] = useState('created_at');
+  const [sortOrder, setSortOrder] = useState('desc');
+  const [viewMode, setViewMode] = useState('table'); // 'table' or 'cards'
 
   // Helper to determine acceptance window (minutes) based on job type
   const getAcceptanceWindow = (service) => {
@@ -327,6 +369,228 @@ const Jobs = () => {
     if (error) throw error;
     const { publicURL } = supabase.storage.from('job-photos').getPublicUrl(filePath).data;
     return publicURL;
+  };
+
+  // Enhanced filtering logic
+  const getFilteredJobs = () => {
+    let jobs = [];
+    
+    // Flatten orders into individual job assignments
+    orders.forEach(order => {
+      if (order.order_service) {
+        order.order_service.forEach(service => {
+          if (service.job_assignments) {
+            service.job_assignments.forEach(assignment => {
+              jobs.push({
+                ...assignment,
+                order,
+                service,
+                customerName: order.customer_name,
+                customerAddress: order.address,
+                serviceType: service.service_type,
+                earningsEstimate: service.earnings_estimate,
+                depositAmount: service.deposit_amount,
+                created_at: order.created_at,
+                assignedBubbler: bubblers.find(b => b.id === assignment.bubbler_id)?.name || 'Unassigned',
+                messageCount: messageCounts[assignment.id] || 0
+              });
+            });
+          }
+        });
+      }
+    });
+
+    // Apply filters
+    if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase();
+      jobs = jobs.filter(job => 
+        job.customerName?.toLowerCase().includes(searchLower) ||
+        job.customerAddress?.toLowerCase().includes(searchLower) ||
+        job.serviceType?.toLowerCase().includes(searchLower) ||
+        job.assignedBubbler?.toLowerCase().includes(searchLower)
+      );
+    }
+
+    if (statusFilter !== 'all') {
+      jobs = jobs.filter(job => job.status === statusFilter);
+    }
+
+    if (advancedFilters.serviceType !== 'all') {
+      jobs = jobs.filter(job => job.serviceType === advancedFilters.serviceType);
+    }
+
+    if (advancedFilters.assignedBubbler !== 'all') {
+      jobs = jobs.filter(job => job.assignedBubbler === advancedFilters.assignedBubbler);
+    }
+
+    if (advancedFilters.minAmount) {
+      jobs = jobs.filter(job => parseFloat(job.earningsEstimate || 0) >= parseFloat(advancedFilters.minAmount));
+    }
+
+    if (advancedFilters.maxAmount) {
+      jobs = jobs.filter(job => parseFloat(job.earningsEstimate || 0) <= parseFloat(advancedFilters.maxAmount));
+    }
+
+    if (advancedFilters.hasMessages === 'yes') {
+      jobs = jobs.filter(job => job.messageCount > 0);
+    } else if (advancedFilters.hasMessages === 'no') {
+      jobs = jobs.filter(job => job.messageCount === 0);
+    }
+
+    // Date range filtering
+    if (advancedFilters.dateRange !== 'all') {
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+      
+      jobs = jobs.filter(job => {
+        const jobDate = new Date(job.created_at);
+        switch (advancedFilters.dateRange) {
+          case 'today':
+            return jobDate >= today;
+          case 'week':
+            return jobDate >= weekAgo;
+          case 'month':
+            return jobDate >= monthAgo;
+          default:
+            return true;
+        }
+      });
+    }
+
+    // For non-admin users, filter to only their jobs
+    if (!isAdmin) {
+      jobs = jobs.filter(job => job.bubbler_id === user?.id);
+    }
+
+    return jobs;
+  };
+
+  // Sorting
+  const getSortedJobs = (jobs) => {
+    return jobs.sort((a, b) => {
+      let aValue = a[sortBy];
+      let bValue = b[sortBy];
+      
+      // Handle nested properties
+      if (sortBy === 'customerName') {
+        aValue = a.customerName;
+        bValue = b.customerName;
+      } else if (sortBy === 'serviceType') {
+        aValue = a.serviceType;
+        bValue = b.serviceType;
+      } else if (sortBy === 'assignedBubbler') {
+        aValue = a.assignedBubbler;
+        bValue = b.assignedBubbler;
+      }
+      
+      if (typeof aValue === 'string') {
+        aValue = aValue.toLowerCase();
+        bValue = bValue.toLowerCase();
+      }
+      
+      if (sortOrder === 'asc') {
+        return aValue > bValue ? 1 : -1;
+      } else {
+        return aValue < bValue ? 1 : -1;
+      }
+    });
+  };
+
+  // Pagination
+  const getPaginatedJobs = (jobs) => {
+    const startIndex = (currentPage - 1) * jobsPerPage;
+    return jobs.slice(startIndex, startIndex + jobsPerPage);
+  };
+
+  // Bulk actions
+  const handleBulkAction = async (action) => {
+    if (selectedJobs.length === 0) {
+      toast.error('Please select jobs first');
+      return;
+    }
+
+    try {
+      switch (action) {
+        case 'assign':
+          // Open assignment modal for first selected job
+          const firstJob = orders.find(order => 
+            order.order_service?.some(service => 
+              service.job_assignments?.some(assignment => 
+                selectedJobs.includes(assignment.id)
+              )
+            )
+          );
+          if (firstJob) {
+            const service = firstJob.order_service.find(service => 
+              service.job_assignments?.some(assignment => 
+                selectedJobs.includes(assignment.id)
+              )
+            );
+            setAssignModal({ open: true, service, order: firstJob });
+          }
+          break;
+        case 'message':
+          // Open message modal for first selected job
+          const firstSelectedJob = getFilteredJobs().find(job => selectedJobs.includes(job.id));
+          if (firstSelectedJob) {
+            setMessageModal({ open: true, assignment: firstSelectedJob });
+          }
+          break;
+        case 'export':
+          exportSelectedJobs();
+          break;
+        default:
+          toast.error('Action not implemented');
+      }
+    } catch (error) {
+      console.error('Bulk action error:', error);
+      toast.error('Failed to perform bulk action');
+    }
+  };
+
+  const exportSelectedJobs = () => {
+    const selectedJobData = getFilteredJobs().filter(job => selectedJobs.includes(job.id));
+    const csvContent = generateJobCSV(selectedJobData);
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `selected_jobs_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    toast.success('Jobs exported successfully');
+  };
+
+  const generateJobCSV = (jobs) => {
+    const headers = [
+      'Job ID',
+      'Customer Name',
+      'Service Type',
+      'Status',
+      'Assigned Bubbler',
+      'Earnings Estimate',
+      'Deposit Amount',
+      'Created Date',
+      'Assigned Date',
+      'Message Count'
+    ];
+    
+    const rows = jobs.map(job => [
+      job.id,
+      job.customerName,
+      job.serviceType,
+      job.status,
+      job.assignedBubbler,
+      job.earningsEstimate,
+      job.depositAmount,
+      new Date(job.created_at).toLocaleDateString(),
+      job.assigned_at ? new Date(job.assigned_at).toLocaleDateString() : '',
+      job.messageCount
+    ]);
+    
+    return [headers, ...rows].map(row => row.join(',')).join('\n');
   };
 
   useEffect(() => {
@@ -786,6 +1050,11 @@ const Jobs = () => {
     );
   };
 
+  const filteredJobs = getFilteredJobs();
+  const sortedJobs = getSortedJobs(filteredJobs);
+  const paginatedJobs = getPaginatedJobs(sortedJobs);
+  const totalPages = Math.ceil(sortedJobs.length / jobsPerPage);
+
   if (loading) {
     return <div className="p-6">Loading orders...</div>;
   }
@@ -793,42 +1062,202 @@ const Jobs = () => {
   return (
     <div className="p-6">
       <Toaster position="top-right" />
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">Order Management</h1>
       
-      {/* Search and Filter Controls */}
-      <div className="mb-6 flex flex-col sm:flex-row gap-4">
-        {/* Search */}
-        <div className="flex-1">
-            <div className="relative">
-            <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-              placeholder="Search by customer name, address, or service type..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">All Jobs</h1>
+          <p className="text-sm text-gray-600 mt-1">
+            Showing {sortedJobs.length} of {filteredJobs.length} jobs
+          </p>
         </div>
         
-        {/* Status Filter */}
-        <div className="sm:w-48">
-            <select
-            value={statusFilter}
-            onChange={handleStatusChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        <div className="flex items-center gap-3 mt-4 sm:mt-0">
+          {/* View Mode Toggle */}
+          <div className="flex bg-gray-100 rounded-lg p-1">
+            <button
+              onClick={() => setViewMode('table')}
+              className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                viewMode === 'table' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'
+              }`}
+            >
+              Table
+            </button>
+            <button
+              onClick={() => setViewMode('cards')}
+              className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                viewMode === 'cards' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'
+              }`}
+            >
+              Cards
+            </button>
+          </div>
+          
+          {/* Export Button */}
+          <button
+            onClick={() => exportSelectedJobs()}
+            disabled={selectedJobs.length === 0}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <option value="all">All Statuses</option>
-            <option value="assigned">Assigned</option>
-            <option value="accepted">Accepted</option>
-            <option value="en_route">En Route</option>
-            <option value="in-progress">In Progress</option>
-            <option value="completed">Completed</option>
-            <option value="expired">Expired</option>
-            <option value="declined">Declined</option>
-            </select>
+            <FiDownload className="h-4 w-4" />
+            Export Selected
+          </button>
         </div>
       </div>
+
+      {/* Enhanced Search and Filter Controls */}
+      <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6">
+        <div className="flex flex-col lg:flex-row gap-4">
+          {/* Search */}
+          <div className="flex-1">
+            <div className="relative">
+              <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search by customer name, address, service type, or bubbler..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+          </div>
+          
+          {/* Status Filter */}
+          <div className="lg:w-48">
+            <select
+              value={statusFilter}
+              onChange={handleStatusChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="all">All Statuses</option>
+              <option value="assigned">Assigned</option>
+              <option value="accepted">Accepted</option>
+              <option value="en_route">En Route</option>
+              <option value="in-progress">In Progress</option>
+              <option value="completed">Completed</option>
+              <option value="expired">Expired</option>
+              <option value="declined">Declined</option>
+            </select>
+          </div>
+
+          {/* Advanced Filters Toggle */}
+          <button
+            onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+            className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            <FiFilter className="h-4 w-4" />
+            Advanced Filters
+          </button>
+        </div>
+
+        {/* Advanced Filters Panel */}
+        {showAdvancedFilters && (
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Service Type Filter */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Service Type</label>
+                <select
+                  value={advancedFilters.serviceType}
+                  onChange={(e) => setAdvancedFilters(prev => ({ ...prev, serviceType: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
+                >
+                  <option value="all">All Services</option>
+                  <option value="Laundry Service">Laundry</option>
+                  <option value="Mobile Car Wash">Car Wash</option>
+                  <option value="Home Cleaning">Home Cleaning</option>
+                </select>
+              </div>
+
+              {/* Date Range Filter */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Date Range</label>
+                <select
+                  value={advancedFilters.dateRange}
+                  onChange={(e) => setAdvancedFilters(prev => ({ ...prev, dateRange: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
+                >
+                  <option value="all">All Time</option>
+                  <option value="today">Today</option>
+                  <option value="week">This Week</option>
+                  <option value="month">This Month</option>
+                </select>
+              </div>
+
+              {/* Amount Range */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Min Amount</label>
+                <input
+                  type="number"
+                  placeholder="Min $"
+                  value={advancedFilters.minAmount}
+                  onChange={(e) => setAdvancedFilters(prev => ({ ...prev, minAmount: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Max Amount</label>
+                <input
+                  type="number"
+                  placeholder="Max $"
+                  value={advancedFilters.maxAmount}
+                  onChange={(e) => setAdvancedFilters(prev => ({ ...prev, maxAmount: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
+                />
+              </div>
+
+              {/* Has Messages Filter */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Has Messages</label>
+                <select
+                  value={advancedFilters.hasMessages}
+                  onChange={(e) => setAdvancedFilters(prev => ({ ...prev, hasMessages: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
+                >
+                  <option value="all">All Jobs</option>
+                  <option value="yes">With Messages</option>
+                  <option value="no">Without Messages</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Bulk Actions */}
+      {selectedJobs.length > 0 && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <FiCheckSquare className="h-5 w-5 text-blue-600" />
+              <span className="text-sm font-medium text-blue-900">
+                {selectedJobs.length} job{selectedJobs.length !== 1 ? 's' : ''} selected
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => handleBulkAction('assign')}
+                className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors"
+              >
+                Assign
+              </button>
+              <button
+                onClick={() => handleBulkAction('message')}
+                className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors"
+              >
+                Message
+              </button>
+              <button
+                onClick={() => setSelectedJobs([])}
+                className="px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700 transition-colors"
+              >
+                Clear
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* QR Code Notifications - Admin Only */}
       {isAdmin && qrNotifications.length > 0 && (
@@ -868,15 +1297,238 @@ const Jobs = () => {
       {/* Results */}
       {loading ? (
         <div className="text-center py-8">Loading jobs...</div>
-      ) : getVisibleOrders().length === 0 ? (
+      ) : paginatedJobs.length === 0 ? (
         <div className="text-center py-8 text-gray-500">
-          {searchTerm || statusFilter !== 'all' ? 'No jobs match your filters.' : 'No jobs found.'}
+          {searchTerm || statusFilter !== 'all' || Object.values(advancedFilters).some(v => v !== 'all' && v !== '') ? 'No jobs match your filters.' : 'No jobs found.'}
+        </div>
+      ) : viewMode === 'table' ? (
+        <>
+          {/* Table View */}
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left">
+                      <input
+                        type="checkbox"
+                        checked={selectedJobs.length === paginatedJobs.length && paginatedJobs.length > 0}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedJobs(paginatedJobs.map(job => job.id));
+                          } else {
+                            setSelectedJobs([]);
+                          }
+                        }}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => setSortBy('customerName')}>
+                      <div className="flex items-center gap-1">
+                        <FiUser className="h-4 w-4" />
+                        Customer
+                        {sortBy === 'customerName' && (
+                          <span className="text-blue-600">{sortOrder === 'asc' ? '↑' : '↓'}</span>
+                        )}
+                      </div>
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => setSortBy('serviceType')}>
+                      <div className="flex items-center gap-1">
+                        <FiBriefcase className="h-4 w-4" />
+                        Service
+                        {sortBy === 'serviceType' && (
+                          <span className="text-blue-600">{sortOrder === 'asc' ? '↑' : '↓'}</span>
+                        )}
+                      </div>
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => setSortBy('status')}>
+                      <div className="flex items-center gap-1">
+                        <FiClock className="h-4 w-4" />
+                        Status
+                        {sortBy === 'status' && (
+                          <span className="text-blue-600">{sortOrder === 'asc' ? '↑' : '↓'}</span>
+                        )}
+                      </div>
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => setSortBy('assignedBubbler')}>
+                      <div className="flex items-center gap-1">
+                        <FiUser className="h-4 w-4" />
+                        Assigned To
+                        {sortBy === 'assignedBubbler' && (
+                          <span className="text-blue-600">{sortOrder === 'asc' ? '↑' : '↓'}</span>
+                        )}
+                      </div>
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => setSortBy('earningsEstimate')}>
+                      <div className="flex items-center gap-1">
+                        <FiDollarSign className="h-4 w-4" />
+                        Earnings
+                        {sortBy === 'earningsEstimate' && (
+                          <span className="text-blue-600">{sortOrder === 'asc' ? '↑' : '↓'}</span>
+                        )}
+                      </div>
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => setSortBy('created_at')}>
+                      <div className="flex items-center gap-1">
+                        <FiCalendar className="h-4 w-4" />
+                        Created
+                        {sortBy === 'created_at' && (
+                          <span className="text-blue-600">{sortOrder === 'asc' ? '↑' : '↓'}</span>
+                        )}
+                      </div>
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {paginatedJobs.map((job) => (
+                    <tr key={job.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <input
+                          type="checkbox"
+                          checked={selectedJobs.includes(job.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedJobs([...selectedJobs, job.id]);
+                            } else {
+                              setSelectedJobs(selectedJobs.filter(id => id !== job.id));
+                            }
+                          }}
+                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div>
+                          <div className="text-sm font-medium text-gray-900">{job.customerName}</div>
+                          <div className="text-sm text-gray-500">{job.customerAddress}</div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                          {job.serviceType}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                          job.status === 'completed' ? 'bg-green-100 text-green-800' :
+                          job.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
+                          job.status === 'assigned' ? 'bg-yellow-100 text-yellow-800' :
+                          job.status === 'expired' ? 'bg-red-100 text-red-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {job.status.replace('_', ' ')}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {job.assignedBubbler}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        ${Number(job.earningsEstimate || 0).toFixed(2)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {new Date(job.created_at).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <div className="flex items-center gap-2">
+                          {/* Message Button - Always show for assigned jobs */}
+                          {job.assignedBubbler && (
+                            <button
+                              onClick={() => setMessageModal({ open: true, assignment: job })}
+                              className={`${
+                                job.messageCount > 0 
+                                  ? 'text-blue-600 hover:text-blue-900' 
+                                  : 'text-gray-400 hover:text-gray-600'
+                              }`}
+                              title={job.messageCount > 0 ? `${job.messageCount} messages` : 'Send message'}
+                            >
+                              <FiMessageCircle className="h-4 w-4" />
+                              {job.messageCount > 0 && (
+                                <span className="ml-1 text-xs bg-blue-100 text-blue-800 px-1 rounded-full">
+                                  {job.messageCount}
+                                </span>
+                              )}
+                            </button>
+                          )}
+                          {isAdmin && job.status === 'unassigned' && (
+                            <button
+                              onClick={() => {
+                                const order = orders.find(o => 
+                                  o.order_service?.some(s => 
+                                    s.job_assignments?.some(a => a.id === job.id)
+                                  )
+                                );
+                                if (order) {
+                                  const service = order.order_service.find(s => 
+                                    s.job_assignments?.some(a => a.id === job.id)
+                                  );
+                                  setAssignModal({ open: true, service, order });
+                                }
+                              }}
+                              className="text-green-600 hover:text-green-900"
+                            >
+                              <FiPlus className="h-4 w-4" />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between mt-6">
+              <div className="text-sm text-gray-700">
+                Showing {((currentPage - 1) * jobsPerPage) + 1} to {Math.min(currentPage * jobsPerPage, sortedJobs.length)} of {sortedJobs.length} results
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <FiChevronLeft className="h-4 w-4" />
+                </button>
+                
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  const page = i + 1;
+                  return (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-3 py-2 border rounded-md text-sm font-medium ${
+                        currentPage === page
+                          ? 'bg-blue-600 text-white border-blue-600'
+                          : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  );
+                })}
+                
+                <button
+                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <FiChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          )}
+        </>
       ) : (
+        // Card View (existing renderOrderServices)
         getVisibleOrders().map(order => (
           <div key={order.id} className="mb-8">
             {renderOrderServices(order)}
-            </div>
+          </div>
         ))
       )}
       <AssignModal {...assignModal} onClose={() => setAssignModal({ open: false, service: null, order: null })} />
