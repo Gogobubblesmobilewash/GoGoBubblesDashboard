@@ -206,10 +206,10 @@ const NotificationCenter = () => {
     }
   };
 
-  // Navigate to related content
+  // Defensive version of navigateToRelated
   const navigateToRelated = (notification) => {
-    const activity = notification.activity;
-    if (!activity) return;
+    const activity = notification?.activity;
+    if (!activity || !activity.event_type) return;
 
     if (activity.job_assignment_id) {
       navigate(`/jobs?job=${activity.job_assignment_id}`);
@@ -222,10 +222,10 @@ const NotificationCenter = () => {
     setShowNotifications(false);
   };
 
-  // Format notification message
+  // Defensive version of formatNotificationMessage
   const formatNotificationMessage = (notification) => {
-    const activity = notification.activity;
-    if (!activity) return notification.message || 'Notification';
+    const activity = notification?.activity;
+    if (!activity || !activity.event_type) return notification.message || 'Notification';
 
     switch (activity.event_type) {
       case 'job_assigned':
@@ -247,14 +247,14 @@ const NotificationCenter = () => {
         return `New rating received from ${activity.job_assignment?.order?.customer_name || 'a customer'}`;
       
       default:
-        return activity.description || 'New notification';
+        return activity.description || notification.message || 'New notification';
     }
   };
 
-  // Get notification icon and styling
+  // Defensive version of getNotificationConfig
   const getNotificationConfig = (notification) => {
-    const activity = notification.activity;
-    if (!activity) return NOTIFICATION_TYPES.info;
+    const activity = notification?.activity;
+    if (!activity || !activity.event_type) return NOTIFICATION_TYPES.info;
 
     switch (activity.event_type) {
       case 'job_assigned':
