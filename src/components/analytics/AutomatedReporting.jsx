@@ -1,28 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  CalendarDays, 
-  FileText, 
-  BarChart3, 
-  TrendingUp, 
-  Users, 
-  DollarSign,
-  Clock,
-  Mail,
-  Download,
-  Settings,
-  Plus,
-  Edit,
-  Trash2,
-  Eye,
-  Filter,
-  Search,
-  RefreshCw,
-  ChevronDown,
-  ChevronUp,
-  AlertCircle,
-  CheckCircle,
-  XCircle
-} from 'lucide-react';
+  FiCalendar as CalendarDays, 
+  FiFileText as FileText, 
+  FiBarChart2 as BarChart3, 
+  FiTrendingUp as TrendingUp, 
+  FiUsers as Users, 
+  FiDollarSign as DollarSign,
+  FiClock as Clock,
+  FiMail as Mail,
+  FiDownload as Download,
+  FiSettings as Settings,
+  FiPlus as Plus,
+  FiEdit as Edit,
+  FiTrash2 as Trash2,
+  FiEye as Eye,
+  FiFilter as Filter,
+  FiSearch as Search,
+  FiRefreshCw as RefreshCw,
+  FiChevronDown as ChevronDown,
+  FiChevronUp as ChevronUp,
+  FiAlertCircle as AlertCircle,
+  FiCheckCircle as CheckCircle,
+  FiXCircle as XCircle
+} from 'react-icons/fi';
 
 const AutomatedReporting = () => {
   const [activeTab, setActiveTab] = useState('reports');

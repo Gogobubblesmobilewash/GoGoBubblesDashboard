@@ -7,7 +7,7 @@ import {
   FiUser, 
   FiClock, 
   FiCheck,
-  FiCheckCheck,
+  FiCheckCircle,
   FiPaperclip,
   FiMoreHorizontal,
   FiRefreshCw
@@ -311,7 +311,7 @@ const Messages = () => {
                               <>
                                 {thread.latestMessage.from_user_id === user?.id ? (
                                   thread.latestMessage.read ? (
-                                    <FiCheckCheck className="h-3 w-3 text-blue-600" />
+                                    <FiCheckCircle className="h-3 w-3 text-blue-600" />
                                   ) : (
                                     <FiCheck className="h-3 w-3 text-gray-400" />
                                   )

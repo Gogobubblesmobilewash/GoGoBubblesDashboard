@@ -1,29 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Users, 
-  Star, 
-  Award, 
-  CheckCircle, 
-  XCircle, 
-  Clock,
-  Filter,
-  Search,
-  Plus,
-  Edit,
-  Eye,
-  Settings,
-  RefreshCw,
-  Download,
-  AlertTriangle,
-  TrendingUp,
-  UserCheck,
-  UserX,
-  Calendar,
-  MapPin,
-  DollarSign,
-  Activity,
-  BarChart3
-} from 'lucide-react';
+  FiUsers as Users, 
+  FiStar as Star, 
+  FiAward as Award, 
+  FiCheckCircle as CheckCircle, 
+  FiXCircle as XCircle, 
+  FiClock as Clock,
+  FiFilter as Filter,
+  FiSearch as Search,
+  FiPlus as Plus,
+  FiEdit as Edit,
+  FiEye as Eye,
+  FiSettings as Settings,
+  FiRefreshCw as RefreshCw,
+  FiDownload as Download,
+  FiAlertTriangle as AlertTriangle,
+  FiTrendingUp as TrendingUp,
+  FiUserCheck as UserCheck,
+  FiUserX as UserX,
+  FiCalendar as Calendar,
+  FiMapPin as MapPin,
+  FiDollarSign as DollarSign,
+  FiActivity as Activity,
+  FiBarChart2 as BarChart3
+} from 'react-icons/fi';
 
 const EliteBubblerManagement = () => {
   const [activeTab, setActiveTab] = useState('elite');

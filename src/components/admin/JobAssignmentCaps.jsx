@@ -1,32 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Users, 
-  Car, 
-  Home, 
-  Package, 
-  Settings, 
-  Plus, 
-  Edit, 
-  Save,
-  X,
-  CheckCircle,
-  AlertTriangle,
-  Clock,
-  MapPin,
-  BarChart3,
-  Filter,
-  Search,
-  RefreshCw,
-  Download,
-  Eye,
-  Zap,
-  Target,
-  TrendingUp,
-  Activity,
-  Shield,
-  Calendar,
-  Star
-} from 'lucide-react';
+  FiUsers as Users, 
+  FiTruck as Truck, 
+  FiHome as Home, 
+  FiPackage as Package, 
+  FiSettings as Settings, 
+  FiPlus as Plus, 
+  FiEdit as Edit, 
+  FiSave as Save,
+  FiX as X,
+  FiCheckCircle as CheckCircle,
+  FiAlertTriangle as AlertTriangle,
+  FiClock as Clock,
+  FiMapPin as MapPin,
+  FiBarChart2 as BarChart3,
+  FiFilter as Filter,
+  FiSearch as Search,
+  FiRefreshCw as RefreshCw,
+  FiDownload as Download,
+  FiEye as Eye,
+  FiZap as Zap,
+  FiTarget as Target,
+  FiTrendingUp as TrendingUp,
+  FiActivity as Activity,
+  FiShield as Shield,
+  FiCalendar as Calendar,
+  FiStar as Star
+} from 'react-icons/fi';
 
 const JobAssignmentCaps = () => {
   const [activeTab, setActiveTab] = useState('caps');
@@ -44,7 +44,7 @@ const JobAssignmentCaps = () => {
   const serviceTypes = {
     shine: {
       name: 'Shine Bubbler (Mobile Car Wash)',
-      icon: Car,
+      icon: Truck,
       color: 'blue',
       tiers: {
         express_shine: {

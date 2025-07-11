@@ -10,7 +10,7 @@ import {
   FiUser,
   FiClock,
   FiCheck,
-  FiCheckCheck
+  FiCheckCircle
 } from 'react-icons/fi';
 import { supabase } from '../../services/api';
 import { useAuth } from '../../store/AuthContext';
@@ -264,7 +264,7 @@ const MessageThread = ({ jobAssignment, onClose }) => {
                       {isOwnMessage(message) && (
                         <span className="text-xs">
                           {message.read ? (
-                            <FiCheckCheck className="h-3 w-3" />
+                            <FiCheckCircle className="h-3 w-3" />
                           ) : (
                             <FiCheck className="h-3 w-3" />
                           )}
