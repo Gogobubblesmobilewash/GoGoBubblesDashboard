@@ -25,7 +25,7 @@ import {
 import useStore from '../../store/useStore';
 import { supabase } from '../../services/api';
 import { useAuth } from '../../store/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import BubblerDashboard from './BubblerDashboard';
 import BreakdownModal from './BreakdownModal';
 
@@ -90,52 +90,74 @@ const Dashboard = () => {
     setLoading(true);
     try {
       // Fetch jobs with date filtering
-      const { data: jobs } = await supabase
+      const { data: jobs, error: jobsError } = await supabase
         .from('job_assignments')
         .select('*')
         .gte('created_at', dateRange.startDate.toISOString())
         .lte('created_at', dateRange.endDate.toISOString());
       const jobsArray = Array.isArray(jobs) ? jobs : [];
+      if (jobsError) console.warn('Jobs fetch warning:', jobsError);
       
-      // Fetch applicants with date filtering
-      const { data: applicants } = await supabase
-        .from('applicants')
-        .select('*')
-        .gte('created_at', dateRange.startDate.toISOString())
-        .lte('created_at', dateRange.endDate.toISOString());
-      const applicantsArray = Array.isArray(applicants) ? applicants : [];
+      // Fetch applicants with date filtering (defensive - table might not exist)
+      let applicantsArray = [];
+      try {
+        const { data: applicants, error: applicantsError } = await supabase
+          .from('applicants')
+          .select('*')
+          .gte('created_at', dateRange.startDate.toISOString())
+          .lte('created_at', dateRange.endDate.toISOString());
+        applicantsArray = Array.isArray(applicants) ? applicants : [];
+        if (applicantsError) console.warn('Applicants fetch warning:', applicantsError);
+      } catch (err) {
+        console.warn('Applicants table not available:', err);
+      }
       
       // Fetch equipment (no date filtering needed for current status)
-      const { data: equipment } = await supabase.from('equipment').select('*');
+      const { data: equipment, error: equipmentError } = await supabase.from('equipment').select('*');
       const equipmentArray = Array.isArray(equipment) ? equipment : [];
+      if (equipmentError) console.warn('Equipment fetch warning:', equipmentError);
       
-      // Fetch ratings with date filtering
-      const { data: ratings } = await supabase
-        .from('ratings')
-        .select('*')
-        .gte('created_at', dateRange.startDate.toISOString())
-        .lte('created_at', dateRange.endDate.toISOString());
-      const ratingsArray = Array.isArray(ratings) ? ratings : [];
+      // Fetch ratings with date filtering (defensive - table might not exist)
+      let ratingsArray = [];
+      try {
+        const { data: ratings, error: ratingsError } = await supabase
+          .from('ratings')
+          .select('*')
+          .gte('created_at', dateRange.startDate.toISOString())
+          .lte('created_at', dateRange.endDate.toISOString());
+        ratingsArray = Array.isArray(ratings) ? ratings : [];
+        if (ratingsError) console.warn('Ratings fetch warning:', ratingsError);
+      } catch (err) {
+        console.warn('Ratings table not available:', err);
+      }
       
       // Fetch messages with date filtering
-      const { data: messages } = await supabase
+      const { data: messages, error: messagesError } = await supabase
         .from('messages')
         .select('*')
         .gte('created_at', dateRange.startDate.toISOString())
         .lte('created_at', dateRange.endDate.toISOString());
       const messagesArray = Array.isArray(messages) ? messages : [];
+      if (messagesError) console.warn('Messages fetch warning:', messagesError);
       
       // Fetch bubblers (no date filtering needed for current status)
-      const { data: bubblers } = await supabase.from('bubblers').select('*');
+      const { data: bubblers, error: bubblersError } = await supabase.from('bubblers').select('*');
       const bubblersArray = Array.isArray(bubblers) ? bubblers : [];
+      if (bubblersError) console.warn('Bubblers fetch warning:', bubblersError);
       
-      // Fetch payouts with date filtering
-      const { data: payouts } = await supabase
-        .from('payouts')
-        .select('*')
-        .gte('created_at', dateRange.startDate.toISOString())
-        .lte('created_at', dateRange.endDate.toISOString());
-      const payoutsArray = Array.isArray(payouts) ? payouts : [];
+      // Fetch payouts with date filtering (defensive - table might not exist)
+      let payoutsArray = [];
+      try {
+        const { data: payouts, error: payoutsError } = await supabase
+          .from('payouts')
+          .select('*')
+          .gte('created_at', dateRange.startDate.toISOString())
+          .lte('created_at', dateRange.endDate.toISOString());
+        payoutsArray = Array.isArray(payouts) ? payouts : [];
+        if (payoutsError) console.warn('Payouts fetch warning:', payoutsError);
+      } catch (err) {
+        console.warn('Payouts table not available:', err);
+      }
 
       // Store raw data for breakdowns
       setRawData({
@@ -609,6 +631,12 @@ const Dashboard = () => {
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-aqua" />
       </div>
     );
+  }
+
+  // Only render dashboard content when on the dashboard route
+  const location = useLocation();
+  if (location.pathname !== '/dashboard') {
+    return null;
   }
 
   return (

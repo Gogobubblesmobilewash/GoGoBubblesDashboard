@@ -118,6 +118,7 @@ const ActivityFeed = () => {
   const loadActivities = async () => {
     setLoading(true);
     try {
+      // Defensive check - activity_log table might not exist
       let query = supabase
         .from('activity_log')
         .select(`
@@ -150,12 +151,16 @@ const ActivityFeed = () => {
 
       const { data, error } = await query;
       
-      if (error) throw error;
+      if (error) {
+        console.warn('Activity log table not available:', error);
+        setActivities([]);
+        return;
+      }
       
       setActivities(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error('Error loading activities:', error);
-      toast.error('Failed to load activities');
+      console.warn('Activity feed not available:', error);
+      setActivities([]);
     } finally {
       setLoading(false);
     }

@@ -14,7 +14,6 @@ import {
   FiTrendingDown,
   FiMinus,
   FiBarChart2,
-  FiGauge,
   FiZap,
   FiShield,
   FiUsers,

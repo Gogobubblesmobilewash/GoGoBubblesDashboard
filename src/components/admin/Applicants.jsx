@@ -56,7 +56,11 @@ const Applicants = () => {
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.warn('Applications table not available:', error);
+        setApplications([]);
+        return;
+      }
 
       // Process applications to add computed fields
       const processedApplications = data.map(app => ({
@@ -68,7 +72,8 @@ const Applicants = () => {
 
       setApplications(processedApplications || []);
     } catch (err) {
-      setError(err.message);
+      console.warn('Applications not available:', err);
+      setApplications([]);
     } finally {
       setLoading(false);
     }

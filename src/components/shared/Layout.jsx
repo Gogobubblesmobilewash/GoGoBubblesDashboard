@@ -209,11 +209,6 @@ const Layout = () => {
             </p>
           </div>
           
-          {/* Dashboard Title */}
-          <h1 className="text-2xl font-bold text-gray-800 mb-6 font-poppins">
-            {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
-          </h1>
-          
           <Outlet />
         </main>
       </div>

@@ -1059,6 +1059,11 @@ const Jobs = () => {
     return <div className="p-6">Loading orders...</div>;
   }
 
+  // Only render jobs content when on the jobs route
+  if (location.pathname !== '/jobs') {
+    return null;
+  }
+
   return (
     <div className="p-6">
       <Toaster position="top-right" />

@@ -98,6 +98,7 @@ const NotificationCenter = () => {
   const loadNotifications = async () => {
     setLoading(true);
     try {
+      // Defensive check - notifications table might not exist
       let query = supabase
         .from('notifications')
         .select(`
@@ -129,7 +130,12 @@ const NotificationCenter = () => {
 
       const { data, error } = await query;
       
-      if (error) throw error;
+      if (error) {
+        console.warn('Notifications table not available:', error);
+        setNotifications([]);
+        setUnreadCount(0);
+        return;
+      }
       
       const notificationsList = Array.isArray(data) ? data : [];
       setNotifications(notificationsList);
@@ -138,8 +144,9 @@ const NotificationCenter = () => {
       const unread = notificationsList.filter(n => !n.read).length;
       setUnreadCount(unread);
     } catch (error) {
-      console.error('Error loading notifications:', error);
-      toast.error('Failed to load notifications');
+      console.warn('Notification center not available:', error);
+      setNotifications([]);
+      setUnreadCount(0);
     } finally {
       setLoading(false);
     }
