@@ -41,6 +41,15 @@ import {
 } from '../../services/api';
 import { useAuth } from '../../store/AuthContext';
 
+// Mock data for development - replace with actual API calls
+const mockData = {
+  users: [
+    { id: 1, name: 'John Doe', email: 'john@example.com', role: 'bubbler', permissions: ['Mobile Car Wash'] },
+    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'bubbler', permissions: ['Home Cleaning'] },
+    { id: 3, name: 'Bob Wilson', email: 'bob@example.com', role: 'bubbler', permissions: ['Laundry Service'] }
+  ]
+};
+
 const GOLD = '#FFD700'; // Brand gold for perk icon
 
 const Orders = () => {

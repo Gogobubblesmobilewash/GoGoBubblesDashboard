@@ -681,25 +681,26 @@ const Jobs = () => {
 
   // Handle manual override for QR code mismatches
   const handleManualOverride = async (assignmentId) => {
-    if (window.confirm('Are you sure you want to manually override the QR code validation? This should only be used in rare cases (e.g., label worn off).')) {
-      try {
-        const { error } = await supabase
-          .from('job_assignments')
-          .update({ 
-            manual_override: true,
-            override_timestamp: new Date().toISOString(),
-            override_by: user?.email || 'Admin'
-          })
-          .eq('id', assignmentId);
-        
-        if (error) throw error;
-        
-        toast.success('Manual override applied successfully');
-        loadOrders(); // Refresh to show updated status
-      } catch (error) {
-        console.error('Error applying manual override:', error);
+    try {
+      const { error } = await supabase
+        .from('job_assignments')
+        .update({ 
+          manual_override: true,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', assignmentId);
+
+      if (error) {
+        console.error('Manual override error:', error);
         toast.error('Failed to apply manual override');
+        return;
       }
+
+      toast.success('Manual override applied successfully');
+      loadOrders(); // Refresh the orders data
+    } catch (error) {
+      console.error('Manual override error:', error);
+      toast.error('Failed to apply manual override');
     }
   };
 
