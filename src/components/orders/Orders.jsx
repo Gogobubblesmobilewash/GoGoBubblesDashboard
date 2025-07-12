@@ -40,6 +40,7 @@ import {
   supabase
 } from '../../services/api';
 import { useAuth } from '../../store/AuthContext';
+import toast from 'react-hot-toast';
 
 // Mock data for development - replace with actual API calls
 const mockData = {
@@ -253,7 +254,7 @@ const Orders = () => {
   const handleSplitOrder = (order) => {
     const services = parseServicesForSplitting(order.services);
     if (services.length <= 1) {
-      alert('This order has only one service and cannot be split.');
+      toast.error('This order has only one service and cannot be split.');
       return;
     }
 
@@ -313,7 +314,7 @@ const Orders = () => {
       setSplitConfirmation(null);
       setSelectedOrder(null);
       
-      alert(`✅ Successfully split order into ${splitConfirmation.servicesCount} jobs! Check the Jobs tab to assign them to bubblers.`);
+      toast.success(`Successfully split order into ${splitConfirmation.servicesCount} jobs! Check the Jobs tab to assign them to bubblers.`);
     } catch (error) {
       console.error('Error splitting order:', error);
       setError('Error splitting order: ' + error.message);
@@ -338,7 +339,7 @@ const Orders = () => {
       
       if (error) throw error;
       
-      alert('✅ Order marked as completed successfully!');
+      toast.success('Order marked as completed successfully!');
       setShowCompletionModal(false);
       setSelectedOrder(null);
       await loadOrders(); // This will hide the completed order
@@ -366,7 +367,7 @@ const Orders = () => {
       
       if (error) throw error;
       
-      alert('✅ Order cancelled successfully!');
+      toast.success('Order cancelled successfully!');
       setShowCancellationModal(false);
       setSelectedOrder(null);
       await loadOrders(); // This will hide the cancelled order
@@ -443,7 +444,7 @@ const Orders = () => {
     setSelectedBubbler(null);
     
     // Show success message (you can implement a toast notification here)
-    alert(`Job assigned to ${selectedBubbler.name} successfully!`);
+    toast.success(`Job assigned to ${selectedBubbler.name} successfully!`);
   };
 
   const revertSplitOrder = async (order) => {
@@ -461,7 +462,7 @@ const Orders = () => {
       
       if (error) throw error;
       
-      alert('✅ Order split has been reverted!');
+      toast.success('✅ Order split has been reverted!');
       await loadOrders();
     } catch (error) {
       setError('Error reverting split: ' + error.message);
@@ -887,7 +888,7 @@ const Orders = () => {
                 onClick={() => {
                   const reason = document.getElementById('cancellationReason')?.value;
                   if (!reason?.trim()) {
-                    alert('Please provide a cancellation reason.');
+                    toast.error('Please provide a cancellation reason.');
                     return;
                   }
                   cancelOrder(selectedOrder['Order ID'] || selectedOrder.orderId, reason);
