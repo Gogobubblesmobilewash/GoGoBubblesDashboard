@@ -139,8 +139,8 @@ export const getPerks = (serviceType, tier, isFirstTime = false, signatureWashCo
     // Signature and Supreme tiers get free air freshener
     if (tier === 'Signature Shine' || tier === 'Supreme Shine') {
       perks.push('Free air freshener');
-    }
-    
+  }
+  
     // Every 3rd Signature wash within a year gets free tire shine
     if (tier === 'Signature Shine' && signatureWashCount > 0 && signatureWashCount % 3 === 0) {
       perks.push('Free tire shine (Every 3rd Signature wash)');

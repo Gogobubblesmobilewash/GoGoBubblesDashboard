@@ -18,40 +18,49 @@
     }
     header, section {
       padding: 2.5rem 1.25rem;
-      max-width: 900px;
+      max-width: 1200px;
       margin: 0 auto;
     }
     .hero {
-      background: linear-gradient(120deg, #4fd1c5 0%, #4299e1 100%);
+      background: url('website_hero.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center top;
       color: #fff;
       text-align: center;
       border-radius: 0 0 2rem 2rem;
-      padding-top: 4rem;
-      padding-bottom: 4rem;
+      padding-top: 6rem;
+      padding-bottom: 3rem;
       position: relative;
+      min-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      margin-left: 3.7vw;
+      position: relative;
+      z-index: 1;
+    }
+    /* Remove the original hero section tint overlay */
+    .hero::before {
+      display: none !important;
+    }
+    .hero > * {
+      position: relative;
+      z-index: 1;
     }
     .hero img {
-      max-width: 220px;
-      margin-bottom: 0.5rem;
-      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
-      animation: floatLogo 3s ease-in-out infinite;
-      transition: transform 0.3s ease;
+      max-width: 2400px;
+      width: 100%;
+      border-radius: 2.5rem;
+      box-shadow: 0 8px 48px rgba(44,62,80,0.15);
+      display: block;
+      margin: 0 auto;
+      transform: scale(1.1);
     }
 
     .hero img:hover {
       transform: scale(1.05);
-    }
-
-    @keyframes floatLogo {
-      0% {
-        transform: translateY(0px);
-      }
-      50% {
-        transform: translateY(-10px);
-      }
-      100% {
-        transform: translateY(0px);
-      }
     }
 
     .hero h1 {
@@ -97,6 +106,15 @@
     }
 
     @media (max-width: 600px) {
+      .hero {
+        min-height: 60vh;
+        padding-top: 3rem;
+        padding-bottom: 3rem;
+      }
+      .hero img {
+        transform: scale(1.05);
+        max-width: 100%;
+      }
       .hero > .cta-btn {
         position: static;
         display: block;
@@ -250,24 +268,53 @@
       margin-bottom: 2rem;
     }
     .faq-item {
-      margin-bottom: 1.5rem;
+      background: #fff;
+      border-radius: 1rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      margin-bottom: 0.6rem;
+      padding: 0.5rem 0.8rem;
+      transition: box-shadow 0.2s;
+    }
+    .faq-item.active {
+      box-shadow: 0 4px 16px rgba(44,62,80,0.10);
     }
     .faq-item h4 {
-      margin: 0 0 0.5rem;
-      font-size: 1.1rem;
-      color: #4299e1;
+      margin: 0 !important;
+      padding: 0 !important;
+      line-height: 1.1 !important;
     }
     .faq-item p {
       margin: 0;
       color: #444;
     }
     .final-cta {
-      background: linear-gradient(120deg, #4299e1 0%, #4fd1c5 100%);
+      background: linear-gradient(135deg, #1086bc 0%, #309ac7 25%, #00C4CC 50%, #1fc2a7 75%, #4fd1c5 100%);
       color: #fff;
       text-align: center;
       border-radius: 2rem;
       margin: 3rem 0 2rem;
       padding: 3rem 1.5rem;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 
+        0 20px 40px rgba(16, 134, 188, 0.3),
+        0 8px 24px rgba(0, 0, 0, 0.1);
+    }
+    
+    .final-cta::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+      animation: shimmer 3s infinite;
+    }
+    
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
     }
     .final-cta h2 {
       font-size: 2rem;
@@ -332,44 +379,141 @@
     font-weight: bold;
     text-align: center;
 }
-/* 1️⃣ Fonts → Premium typography */
+/* 1️⃣ Enhanced Typography & Visual Hierarchy */
 body {
     font-family: 'Open Sans', sans-serif;
     color: #2E2E2E;
-    line-height: 1.6;
+    line-height: 1.7;
+    font-weight: 400;
+    letter-spacing: 0.01em;
 }
 
 h1, h2, h3, h4, h5, h6 {
     font-family: 'Poppins', sans-serif;
-    font-weight: 600;
-    color: #2E2E2E;
+    font-weight: 700;
+    color: #1a1a1a;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
 }
 
-/* 2️⃣ Buttons → Better padding, hover effect */
+h1 { font-size: 3.5rem; font-weight: 800; }
+h2 { font-size: 2.5rem; font-weight: 700; margin-bottom: 1.5rem; }
+h3 { font-size: 1.8rem; font-weight: 600; margin-bottom: 1rem; }
+h4 { font-size: 1.4rem; font-weight: 600; margin-bottom: 0.75rem; }
+
+/* Enhanced text contrast and readability */
+p {
+    color: #3a3a3a;
+    line-height: 1.8;
+    font-weight: 400;
+}
+
+.hero h1 {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2E2E2E 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* 2️⃣ Premium Gradient Effects & Enhanced Interactive Elements */
 button, .final-cta .cta-btn {
-    background-color: #1fc2a7; /* Brand Aqua */
+    background: linear-gradient(135deg, #1fc2a7 0%, #4fd1c5 100%);
     color: #FFFFFF;
-    padding: 14px 28px;
-    border-radius: 8px;
+    padding: 16px 32px;
+    border-radius: 12px;
     font-family: 'Poppins', sans-serif;
     font-weight: 700;
-    font-size: 1rem;
+    font-size: 1.1rem;
     border: none;
     cursor: pointer;
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 
+        0 8px 24px rgba(31, 194, 167, 0.3),
+        0 4px 12px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+button::before, .final-cta .cta-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.6s ease;
+}
+
+button:hover::before, .final-cta .cta-btn:hover::before {
+    left: 100%;
 }
 
 button:hover, .final-cta .cta-btn:hover {
-    background-color:  #4fd1c5;
-    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    background: linear-gradient(135deg, #4fd1c5 0%, #1fc2a7 100%);
+    transform: translateY(-2px);
+    box-shadow: 
+        0 12px 32px rgba(31, 194, 167, 0.4),
+        0 6px 16px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
-/* 3️⃣ Hero section → Add more breathing space */
+button:active, .final-cta .cta-btn:active {
+    transform: translateY(0);
+    box-shadow: 
+        0 6px 16px rgba(31, 194, 167, 0.3),
+        0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 3️⃣ Enhanced Spacing & Custom Scrollbar */
 .hero {
+    padding: 100px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Custom gradient scrollbar */
+::-webkit-scrollbar {
+    width: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #1086bc, #4fd1c5);
+    border-radius: 6px;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #4fd1c5, #1fc2a7);
+}
+
+/* Enhanced section spacing */
+section {
     padding: 80px 20px;
     max-width: 1200px;
     margin: 0 auto;
+}
+
+/* Improved spacing for mobile */
+@media (max-width: 768px) {
+    section {
+        padding: 60px 16px;
+    }
+    
+    .hero {
+        padding: 80px 16px;
+    }
+    
+    h1 { font-size: 2.5rem; }
+    h2 { font-size: 2rem; }
+    h3 { font-size: 1.5rem; }
 }
 
 /* 4️⃣ Section spacing → Premium brands use more vertical space */
@@ -404,6 +548,44 @@ section:nth-of-type(even) {
     box-shadow: 0 6px 12px rgba(0,0,0,0.15);
 }
 
+/* Pulsing animation for CTA button */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 6px 20px rgba(31,194,167,0.3);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+}
+
+.final-cta .cta-btn {
+    animation: pulse 2s infinite;
+    transition: all 0.3s ease;
+}
+
+.final-cta .cta-btn:hover {
+    animation: none;
+    transform: scale(1.05);
+}
+
+.final-cta .cta-btn:active {
+    animation: none;
+    transform: scale(0.98);
+}
+
+/* Stop pulsing after click */
+.final-cta .cta-btn.clicked {
+    animation: none;
+}
+
+
+
 /* 2️⃣ Improve FAQ question text (FAQ headings) */
 .faq h2 {
     font-family: 'Poppins', sans-serif;
@@ -417,16 +599,212 @@ section:nth-of-type(even) {
     font-family: 'Poppins', sans-serif;
     font-size: 1.25rem;
     font-weight: 600;
-    color: #4299e1;
+    color: #1086bc;
     margin-bottom: 0.5rem;
 }
+
+/* Collapsible FAQ Styles */
+.faq-question {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    margin-bottom: 0.2rem;
+    transition: background-color 0.3s ease;
+}
+
+.faq-question:hover {
+    background: #e2e8f0;
+}
+
+.faq-question h4 {
+    margin: 0;
+    padding: 0;
+    line-height: 1.2;
+}
+
+.faq-toggle {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #1086bc;
+    transition: transform 0.3s ease;
+    min-width: 24px;
+    text-align: center;
+}
+
+.faq-item.active .faq-toggle {
+    transform: rotate(45deg);
+}
+
+.faq-answer {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    padding: 0 1rem;
+}
+
+.faq-item.active .faq-answer {
+    max-height: 500px;
+    opacity: 1;
+    padding: 1rem;
+}
+
+.faq-answer p {
+    margin: 0;
+    color: #444;
+    line-height: 1.6;
+}
+
+/* Desktop: Show all FAQ answers by default */
+@media (min-width: 768px) {
+    .faq-question {
+        cursor: default;
+        background: transparent;
+        padding: 0;
+        margin-bottom: 0.5rem;
+    }
+    
+    .faq-question:hover {
+        background: transparent;
+    }
+    
+    .faq-toggle {
+        display: none;
+    }
+    
+    .faq-answer {
+        max-height: none;
+        padding: 0;
+    }
+    
+    .faq-item.active .faq-answer {
+        padding: 0;
+    }
+}
 .service-card {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 
+        0 12px 32px rgba(0, 0, 0, 0.08),
+        0 4px 16px rgba(0, 0, 0, 0.04),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    position: relative;
+    overflow: hidden;
+}
+
+.service-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(31, 194, 167, 0.08),
+        rgba(79, 209, 197, 0.15),
+        rgba(16, 134, 188, 0.12),
+        rgba(31, 194, 167, 0.08),
+        transparent
+    );
+    transform: skewX(-6deg);
+    opacity: 0;
+    transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform, opacity;
+    pointer-events: none;
+    animation: var(--shimmer-anim, none);
+}
+
+.service-card.active-shimmer::before {
+    opacity: 1;
+    animation: var(--shimmer-anim, iridescent-shimmer 1.2s cubic-bezier(0.4, 0, 0.2, 1)) forwards !important;
+}
+
+.service-card:active::before,
+.service-card:focus:active::before {
+    animation: iridescent-shimmer 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes iridescent-shimmer {
+    0% {
+        left: -100%;
+        opacity: 0;
+        transform: skewX(-6deg) scaleX(1);
+    }
+    15% {
+        opacity: 0.9;
+    }
+    85% {
+        opacity: 0.9;
+    }
+    100% {
+        left: 100%;
+        opacity: 0;
+        transform: skewX(-6deg) scaleX(1.1);
+    }
+}
+
+/* Mobile-optimized touch interactions */
+@media (hover: none) and (pointer: coarse) {
+    .service-card::before {
+        background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(31, 194, 167, 0.12),
+            rgba(79, 209, 197, 0.2),
+            rgba(16, 134, 188, 0.16),
+            rgba(31, 194, 167, 0.12),
+            transparent
+        );
+    }
+    
+    .service-card:active::before {
+        animation: iridescent-shimmer 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+}
+
+/* Reduced motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+    .service-card::before {
+        animation: none;
+        transition: none;
+    }
+    
+    .service-card:hover::before,
+    .service-card:focus-within::before,
+    .service-card:active::before {
+        animation: none;
+    }
 }
 
 .service-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    transform: translateY(-12px) scale(1.05);
+    box-shadow: 
+        0 32px 64px rgba(0, 0, 0, 0.15),
+        0 12px 32px rgba(0, 0, 0, 0.1),
+        0 0 0 1px rgba(255, 255, 255, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+
+/* Shimmer effect - fast and dramatic */
+.service-card.shimmer-active {
+    transform: translateY(-15px) scale(1.08);
+    box-shadow: 
+        0 40px 80px rgba(0, 0, 0, 0.2),
+        0 16px 40px rgba(0, 0, 0, 0.12),
+        0 0 0 2px rgba(31, 194, 167, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 1);
+    z-index: 999;
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 section h2 {
     position: relative;
@@ -457,9 +835,54 @@ section h2::after {
 }
 /* Final Polish → Subtle Improvements */
 
-/* Slight spacing between testimonial cards */
+/* Enhanced Testimonials with Premium Styling */
 .testimonial-list {
-  gap: 2.5rem;
+  gap: 3rem;
+}
+
+.testimonial {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 24px;
+  padding: 2.5rem;
+  box-shadow: 
+    0 16px 40px rgba(0, 0, 0, 0.08),
+    0 6px 20px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #2a2a2a;
+}
+
+.testimonial::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #1086bc, #4fd1c5, #1fc2a7);
+  border-radius: 24px 24px 0 0;
+}
+
+.testimonial:hover {
+  transform: translateY(-6px);
+  box-shadow: 
+    0 24px 56px rgba(0, 0, 0, 0.12),
+    0 8px 24px rgba(0, 0, 0, 0.08),
+    0 0 0 1px rgba(255, 255, 255, 0.6);
+}
+
+.testimonial .author {
+  color: #1086bc !important;
+  font-weight: 700;
+  font-size: 1rem;
+  margin-top: 1rem;
+  display: block;
 }
 
 /* Slightly lighter quote mark */
@@ -474,7 +897,7 @@ section h2::after {
 
 /* FAQ items spacing fix */
 .faq-item {
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 
 /* Final CTA section tweak */
@@ -499,7 +922,7 @@ footer {
   }
 
 .learn-more-service {
-  background: #4299e1;
+  background: linear-gradient(120deg, #1086bc 0%, #309ac7 100%);
   color: white;
   border: none;
   padding: 0.5rem 1rem;
@@ -507,11 +930,11 @@ footer {
   font-size: 0.9rem;
   cursor: pointer;
   margin-top: 1rem;
-  transition: background-color 0.3s ease;
+  transition: background 0.3s ease;
 }
 
 .learn-more-service:hover {
-  background: #3182ce;
+  background: linear-gradient(120deg, #309ac7 0%, #4fd1c5 100%);
 }
 
 .service-details {
@@ -539,21 +962,29 @@ footer {
   }
 }
 
+@media (max-width: 600px) {
+  .hero {
+    margin-top: 0.3in !important;
+  }
+}
+
 .final-cta.sticky-cta {
   position: fixed;
   left: 0;
   right: 0;
   bottom: 0;
-  width: 100vw;
+  width: 100%;
   z-index: 1000;
   margin: 0;
   border-radius: 1.5rem 1.5rem 0 0;
   box-shadow: 0 -2px 12px rgba(44,62,80,0.10);
   padding: 0.75rem 1.5rem;
-  background: linear-gradient(120deg, #4299e1 0%, #4fd1c5 100%);
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+  background: linear-gradient(135deg, #1086bc 0%, #309ac7 25%, #00C4CC 50%, #1fc2a7 75%, #4fd1c5 100%);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  box-sizing: border-box;
 }
 
 .final-cta.sticky-cta h2 {
@@ -583,12 +1014,14 @@ footer {
   left: 0;
   right: 0;
   bottom: 0;
-  width: 100vw;
+  width: 100%;
   z-index: 2000;
-  background: linear-gradient(120deg, #4299e1 0%, #4fd1c5 100%);
+  background: linear-gradient(135deg, #1086bc 0%, #309ac7 25%, #00C4CC 50%, #1fc2a7 75%, #4fd1c5 100%);
   text-align: center;
   padding: 1rem 0;
+  padding-bottom: env(safe-area-inset-bottom, 16px);
   box-shadow: 0 -2px 12px rgba(44,62,80,0.10);
+  box-sizing: border-box;
 }
 .sticky-cta-btn {
   background: #1fc2a7;
@@ -610,15 +1043,20 @@ footer {
   </style>
 </head>
 <body>
-  <header class="hero">
-    <img src="GoGoBubbleslogotransparent.png" alt="GoGoBubbles Logo">
-    <h1>Effortless Clean. Delivered to Your Door.</h1>
-    <p>Mobile Car Wash • Home Cleaning • Laundry Services — Houston Tri-State Area</p>
-    <span class="highlight-yellow">Limited Time Introductory Offer! </span>
-    <a href="booking.html" class="cta-btn">Book Now</a>
-  </header>
-
-  <section>
+  <header class="hero" style="display: flex; flex-direction: column; justify-content: flex-start; align-items: stretch; background: none; box-shadow: none; padding-top: 0; margin-top: 0; position: relative;">
+  <!-- Wrap the hero image in a container -->
+  <div class="hero-img-wrap">
+    <img src="website_hero.png" alt="GoGoBubbles Hero" style="max-width: 1800px; width: 100%; border-radius: 2.5rem; box-shadow: 0 4px 32px rgba(44,62,80,0.10); display: block; margin: 0 auto;">
+  </div>
+  <!-- Limited Time Introductory Offer Label (now inside hero) -->
+  <div style="text-align: center; margin: 1.2rem auto 0.5rem auto; width: 100%;">
+    <div style="background: linear-gradient(135deg, #FFD166 0%, #FFB347 100%); color: #2E2E2E; padding: 12px 24px; border-radius: 8px; display: inline-block; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 1.1rem; box-shadow: 0 4px 12px rgba(255, 209, 102, 0.3); border: 2px solid rgba(255, 255, 255, 0.8);">
+      Limited Time Introductory Offer
+    </div>
+  </div>
+</header>
+  
+  <section id="services" style="padding-top: 0.5rem;">
     <h2>Our Services</h2>
     <div class="services">
       <div class="service-card">
@@ -658,7 +1096,7 @@ footer {
     </div>
   </section>
 
-  <section class="how-it-works">
+  <section class="how-it-works" id="how-it-works">
     <h2>How It Works</h2>
     <div class="steps">
       <div class="step">
@@ -679,7 +1117,7 @@ footer {
     </div>
   </section>
 
-  <section class="testimonials">
+  <section class="testimonials" id="testimonials">
     <h2>Hear From Happy GoGoBubbles Customers</h2>
     <div class="testimonial-list">
       <div class="testimonial">
@@ -697,31 +1135,66 @@ footer {
     </div>
   </section>
 
-  <section class="faq">
+  <section class="faq" id="faq">
+    <div style="text-align: center; margin: 1.2rem auto 0.5rem auto; width: 100%;">
+      <div style="background: linear-gradient(135deg, #FFD166 0%, #FFB347 100%); color: #2E2E2E; padding: 12px 24px; border-radius: 8px; display: inline-block; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 1.1rem; box-shadow: 0 4px 12px rgba(255, 209, 102, 0.3); border: 2px solid rgba(255, 255, 255, 0.8);">
+        Proudly Serving the Houston Tri-State Area
+      </div>
+    </div>
     <h2>Got Questions? We've Got Answers.</h2>
     <div class="faq-item">
-      <h4>Do you bring your own water and equipment?</h4>
-      <p>Yes - our pros arrive fully equipped. We bring our own water, power, and cleaning supplies. We never use your utilities unless requested.</p>
+      <div class="faq-question">
+        <h4>Do you bring your own water and equipment?</h4>
+        <span class="faq-toggle">+</span>
+      </div>
+      <div class="faq-answer">
+        <p>Yes - our pros arrive fully equipped. We bring our own water, power, and cleaning supplies. We never use your utilities unless requested.</p>
+      </div>
     </div>
     <div class="faq-item">
-      <h4>Do I need to be home for the services?</h4>
-      <p>For first-time home cleanings, we ask that someone is present to let us in. After your first service,  you may choose to proivde secure access or key instrustions if preferred. For car wash and laundry, you do not need to be home - just provide access to your vehicle or laundry.</p>
+      <div class="faq-question">
+        <h4>Do I need to be home for the services?</h4>
+        <span class="faq-toggle">+</span>
+      </div>
+      <div class="faq-answer">
+        <p>For first-time home cleanings, we ask that someone is present to let us in. After your first service,  you may choose to proivde secure access or key instructions if preferred. For car wash and laundry, you do not need to be home - just provide access to your vehicle or laundry.</p>
+      </div>
     </div>
     <div class="faq-item">
-      <h4>How does same-day laundry work?</h4>
-      <p>Book before 10 a.m. for guaranteed same-day return. After that, we'll try based on driver availability.</p>
+      <div class="faq-question">
+        <h4>How does same-day laundry work?</h4>
+        <span class="faq-toggle">+</span>
+      </div>
+      <div class="faq-answer">
+        <p>Book before 10 a.m. for guaranteed same-day return. After that, we'll try based on driver availability.</p>
+      </div>
     </div>
     <div class="faq-item">
+      <div class="faq-question">
         <h4>How does payment work?</h4>
+        <span class="faq-toggle">+</span>
+      </div>
+      <div class="faq-answer">
         <p>When you book your service, you'll pay a deposit based on your service type (see Deposit Policy). This deposit secures your appointment time and is non-refundable. On the day of your appointment, you'll recieve an automated email and/or text with a secure link to pay the remaining balance. Full payment must be completed before service begins. Our team is unable to proceed with service until payment is confirmed.</p>
+      </div>
     </div>
     <div class="faq-item">
-      <h4>Can I bundle services?</h4>
-      <p>Absolutely! Bundle car wash, home cleaning, and/or laundry service to save time and money. Look for bundle offers when booking online.</p>
+      <div class="faq-question">
+        <h4>Can I bundle services?</h4>
+        <span class="faq-toggle">+</span>
+      </div>
+      <div class="faq-answer">
+        <p>Absolutely! Bundle car wash, home cleaning, and/or laundry service to save time and money. Look for bundle offers when booking online.</p>
+      </div>
     </div>
     <div class="faq-item">
-      <h4>What kind of detergent do you use?</h4>
-      <p>We use non-scented detergent by default. If you'd like eco-friendly or skin-sensitive detergent, just add it to your order.</p>
+      <div class="faq-question">
+        <h4>What kind of detergent do you use?</h4>
+        <span class="faq-toggle">+</span>
+      </div>
+      <div class="faq-answer">
+        <p>We use non-scented detergent by default. If you'd like eco-friendly or skin-sensitive detergent, just add it to your order.</p>
+      </div>
     </div>
   </section>
 
@@ -737,51 +1210,880 @@ footer {
     &copy; 2024 GoGoBubbles. All rights reserved.
   </footer>
 
-  <script>
-    function toggleServiceDetails(button) {
-      const details = button.nextElementSibling;
-      const isExpanded = details.style.display === 'block';
+  <!-- Premium Floating Footer Navigation Panel -->
+<nav class="footer-nav-panel vertical-nav-panel">
+  <a href="#services" class="footer-nav-link">
+    <img src="service_icon.png" alt="Services" class="footer-nav-icon">
+    <span class="nav-label" style="color:#1a365d;">Services</span>
+  </a>
+  <a href="#how-it-works" class="footer-nav-link">
+    <img src="how_it_works_icon.png" alt="How It Works" class="footer-nav-icon">
+    <span class="nav-label" style="color:#1a365d;">How It Works</span>
+  </a>
+  <a href="#testimonials" class="footer-nav-link">
+    <img src="review_icon.png" alt="Reviews" class="footer-nav-icon">
+    <span class="nav-label" style="color:#1a365d;">Reviews</span>
+  </a>
+  <a href="#faq" class="footer-nav-link">
+    <img src="faq_icon.png" alt="FAQ" class="footer-nav-icon">
+    <span class="nav-label" style="color:#1a365d;">FAQs</span>
+  </a>
+</nav>
+
+<style>
+.vertical-nav-panel .nav-label {
+  display: block;
+  text-align: center;
+  font-family: 'Inter', Arial, sans-serif;
+  font-size: 0.6rem;
+  font-weight: 600;
+  margin-top: 0.1rem;
+  letter-spacing: 0.01em;
+  text-shadow: 0 1px 4px rgba(44,62,80,0.10);
+}
+</style>
+
+<style>
+html, body {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+.hero {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+.hero img {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+</style>
+
+<style>
+html {
+  scroll-behavior: smooth;
+}
+.vertical-nav-panel {
+  position: fixed;
+  top: 50%;
+  left: 8px;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  background: linear-gradient(135deg, #1086bc 0%, #309ac7 25%, #00C4CC 50%, #1fc2a7 75%, #4fd1c5 100%);
+  backdrop-filter: blur(8px);
+  border-radius: 0.7rem;
+  box-shadow: 0 2px 8px rgba(44,62,80,0.07);
+  padding: 0.3rem 0.1rem;
+  z-index: 1200;
+  align-items: center;
+  border: 1px solid rgba(44,62,80,0.08);
+  opacity: 0.96;
+}
+.footer-nav-icon {
+  width: 72px;
+  height: 72px;
+  margin: 0;
+  display: block;
+  filter: drop-shadow(0 1px 2px rgba(44,62,80,0.10));
+  transition: transform 0.18s cubic-bezier(.4,0,.2,1), box-shadow 0.18s cubic-bezier(.4,0,.2,1);
+}
+.footer-nav-link {
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  border-radius: 1rem;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.footer-nav-link:hover .footer-nav-icon, .footer-nav-link:focus .footer-nav-icon {
+  transform: scale(1.32) translateY(-6px) !important;
+  box-shadow: 0 12px 32px rgba(31,194,167,0.32), 0 2px 12px rgba(44,62,80,0.18) !important;
+  z-index: 2 !important;
+}
+.footer-nav-icon {
+  transition: transform 0.22s cubic-bezier(.4,0,.2,1), box-shadow 0.22s cubic-bezier(.4,0,.2,1) !important;
+}
+@media (max-width: 900px) {
+  .vertical-nav-panel {
+    padding: 0.1rem 0.05rem;
+    gap: 0.1rem;
+    border-radius: 0.5rem;
+  }
+  .footer-nav-icon {
+    width: 64px;
+    height: 64px;
+  }
+}
+@media (max-width: 900px) {
+  .vertical-nav-panel {
+    padding: 0.05rem 0.01rem;
+    gap: 0.05rem;
+    border-radius: 0.3rem;
+  }
+  .footer-nav-icon {
+    width: 56px;
+    height: 56px;
+  }
+}
+@media (max-width: 900px) {
+  .vertical-nav-panel {
+    right: 0;
+    left: auto;
+    top: 16px;
+    transform: translateX(120%);
+    transition: transform 0.28s cubic-bezier(.4,0,.2,1), opacity 0.18s;
+    opacity: 0;
+    border-radius: 1.2rem;
+    box-shadow: 0 2px 16px rgba(44,62,80,0.13);
+    background: linear-gradient(135deg, #1086bc 0%, #309ac7 25%, #00C4CC 50%, #1fc2a7 75%, #4fd1c5 100%);
+    padding: 0.3rem 0.1rem;
+    gap: 0.2rem;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    z-index: 2001;
+    align-items: center;
+    width: 68px;
+    height: auto;
+    pointer-events: none;
+  }
+  .vertical-nav-panel.open {
+    transform: translateX(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .nav-toggle-btn {
+    right: 0;
+    left: auto;
+    position: fixed;
+    top: 18px;
+    z-index: 2100;
+    background: #fff;
+    border: none;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(44,62,80,0.13);
+    padding: 0.3rem;
+    cursor: pointer;
+    transition: box-shadow 0.18s;
+  }
+  .nav-toggle-btn:active {
+    box-shadow: 0 4px 16px rgba(44,62,80,0.18);
+  }
+  body.nav-open::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(44,62,80,0.13);
+    z-index: 2000;
+    pointer-events: auto;
+  }
+}
+</style>
+
+<!-- Floating Quick Nav Tab (mobile only, appears after scroll) -->
+<button id="quickNavTab" class="quick-nav-tab" aria-label="Open navigation" style="display:none;">
+  Quick Nav
+</button>
+
+<style>
+.quick-nav-tab {
+  position: fixed;
+  top: 1.2rem;
+  right: 1.2rem;
+  z-index: 1050;
+  background: linear-gradient(135deg,
+    rgba(16,134,188,0.40) 0%,
+    rgba(48,154,199,0.40) 25%,
+    rgba(0,196,204,0.40) 50%,
+    rgba(31,194,167,0.40) 75%,
+    rgba(79,209,197,0.40) 100%
+  );
+  color: #fff;
+  font-family: 'Inter', Arial, sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 0.7rem;
+  width: 68px;
+  height: 68px;
+  box-shadow: 0 2px 8px rgba(44,62,80,0.13);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, opacity 0.2s;
+  backdrop-filter: blur(2px);
+  opacity: 0.96;
+}
+.quick-nav-tab:hover {
+  background: linear-gradient(135deg,
+    rgba(16,134,188,0.55) 0%,
+    rgba(48,154,199,0.55) 25%,
+    rgba(0,196,204,0.55) 50%,
+    rgba(31,194,167,0.55) 75%,
+    rgba(79,209,197,0.55) 100%
+  );
+  filter: brightness(1.08);
+}
+@media (max-width: 600px) {
+  .quick-nav-tab {
+    width: 56px;
+    height: 56px;
+    font-size: 0.85rem;
+    top: 0.7rem;
+    right: 0.7rem;
+  }
+}
+
+/* Desktop: Hide drawer */
+.peek-nav-drawer {
+  display: none;
+}
+
+/* Mobile: Show drawer on the right, matching left panel style but translucent */
+@media (max-width: 900px) {
+  .peek-nav-drawer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    position: fixed;
+    top: 50%;
+    right: 8px;
+    left: auto;
+    transform: translateY(-50%) translateX(120%);
+    min-width: 68px;
+    width: 68px;
+    padding: 0.3rem 0.1rem;
+    background: linear-gradient(135deg,
+      rgba(16,134,188,0.40) 0%,
+      rgba(48,154,199,0.40) 25%,
+      rgba(0,196,204,0.40) 50%,
+      rgba(31,194,167,0.40) 75%,
+      rgba(79,209,197,0.40) 100%
+    );
+    border-radius: 0.7rem;
+    box-shadow: 0 4px 24px rgba(44,62,80,0.13);
+    backdrop-filter: blur(8px);
+    z-index: 1051;
+    transition: transform 0.35s cubic-bezier(.77,0,.18,1), opacity 0.2s;
+    opacity: 1;
+  }
+  .peek-nav-drawer.open {
+    transform: translateY(-50%) translateX(0);
+    opacity: 1;
+  }
+  .peek-nav-drawer .footer-nav-icon {
+    width: 56px;
+    height: 56px;
+    transition: transform 0.22s cubic-bezier(.4,0,.2,1), box-shadow 0.22s cubic-bezier(.4,0,.2,1), background 0.18s;
+  }
+  .peek-nav-drawer .footer-nav-icon:active,
+  .peek-nav-drawer .footer-nav-icon:hover {
+    transform: scale(1.32) translateY(-6px);
+    box-shadow: 0 12px 32px 0 rgba(31,194,167,0.32), 0 2px 12px 0 rgba(44,62,80,0.18);
+    background: rgba(255,255,255,0.18);
+    border-radius: 8px;
+    z-index: 2;
+  }
+  .peek-nav-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
+  }
+  .peek-nav-link .nav-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    margin-top: 0.2rem;
+    text-align: center;
+  }
+}
+</style>
+<!-- Mobile Drawer Navigation -->
+<div id="mobileNavDrawer" class="peek-nav-drawer">
+  <a href="#services" class="peek-nav-link" aria-label="Services">
+    <img src="service_icon.png" alt="Services" class="footer-nav-icon">
+    <span class="nav-label" style="color:#1a365d;">Services</span>
+  </a>
+  <a href="#how-it-works" class="peek-nav-link" aria-label="How It Works">
+    <img src="how_it_works_icon.png" alt="How It Works" class="footer-nav-icon">
+    <span class="nav-label" style="color:#1a365d;">How It Works</span>
+  </a>
+  <a href="#testimonials" class="peek-nav-link" aria-label="Reviews">
+    <img src="review_icon.png" alt="Reviews" class="footer-nav-icon">
+    <span class="nav-label" style="color:#1a365d;">Reviews</span>
+  </a>
+  <a href="#faq" class="peek-nav-link" aria-label="FAQ">
+    <img src="faq_icon.png" alt="FAQ" class="footer-nav-icon">
+    <span class="nav-label" style="color:#1a365d;">FAQs</span>
+  </a>
+</div>
+<script>
+(function() {
+  var quickTab = document.getElementById('quickNavTab');
+  var drawer = document.getElementById('mobileNavDrawer');
+  // Show tab after scrolling 120px (mobile only), but hide in FAQ section
+  function updateQuickTab() {
+    if (window.innerWidth <= 900 && window.scrollY > 120) {
+      // Check if we're in the FAQ section
+      const faqSection = document.getElementById('faq');
+      if (faqSection) {
+        const faqTop = faqSection.offsetTop;
+        const faqBottom = faqTop + faqSection.offsetHeight;
+        const currentScrollTop = window.scrollY;
+        
+        // Hide if we're in the FAQ section (from top to bottom)
+        if (currentScrollTop >= faqTop && currentScrollTop < faqBottom) {
+          quickTab.style.display = 'none';
+          if (drawer) drawer.classList.remove('open');
+        } else {
+          quickTab.style.display = 'flex';
+        }
+      } else {
+        quickTab.style.display = 'flex';
+      }
+    } else {
+      quickTab.style.display = 'none';
+      if (drawer) drawer.classList.remove('open');
+    }
+  }
+  window.addEventListener('scroll', updateQuickTab);
+  window.addEventListener('resize', updateQuickTab);
+  document.addEventListener('DOMContentLoaded', updateQuickTab);
+  // Toggle drawer on tab click
+  quickTab.addEventListener('click', function(e) {
+    console.log('Quick Nav clicked');
+    e.stopPropagation();
+    if (drawer) drawer.classList.toggle('open');
+  });
+  // Hide drawer when clicking outside
+  document.addEventListener('click', function(e) {
+    if (drawer && drawer.classList.contains('open') && !quickTab.contains(e.target) && !drawer.contains(e.target)) {
+      drawer.classList.remove('open');
+    }
+  });
+  // Optional: Close drawer on nav link click
+  if (drawer) {
+    drawer.querySelectorAll('a').forEach(function(link) {
+      link.addEventListener('click', function() {
+        drawer.classList.remove('open');
+      });
+    });
+  }
+  
+  // FAQ Toggle Functionality (mobile only)
+  function initFAQToggle() {
+    console.log('Initializing FAQ toggle...');
+    const faqItems = document.querySelectorAll('.faq-item');
+    console.log('Found FAQ items:', faqItems.length);
+    
+    faqItems.forEach(function(item, index) {
+      const question = item.querySelector('.faq-question');
+      const answer = item.querySelector('.faq-answer');
+      const toggle = item.querySelector('.faq-toggle');
       
-      // Close all other sections first
-      document.querySelectorAll('.service-details').forEach(d => {
-        if (d !== details) {
-          d.style.display = 'none';
-          const prevButton = d.previousElementSibling;
-          if (prevButton.classList.contains('learn-more-service')) {
-            prevButton.textContent = 'Learn More';
+      console.log('FAQ item', index, 'question:', question, 'answer:', answer, 'toggle:', toggle);
+      
+      if (question) {
+        // Remove any existing event listeners
+        question.removeEventListener('click', question.faqClickHandler);
+        
+        // Create new click handler
+        question.faqClickHandler = function(e) {
+          console.log('FAQ question clicked, window width:', window.innerWidth);
+          // Only toggle on mobile (screen width <= 768px)
+          if (window.innerWidth <= 768) {
+            const isActive = item.classList.contains('active');
+            console.log('FAQ item active state:', isActive);
+            
+            // Close all other FAQ items
+            faqItems.forEach(function(otherItem) {
+              if (otherItem !== item) {
+                otherItem.classList.remove('active');
+              }
+            });
+            
+            // Toggle current item
+            if (isActive) {
+              item.classList.remove('active');
+              console.log('FAQ item closed');
+            } else {
+              item.classList.add('active');
+              console.log('FAQ item opened');
+            }
           }
+        };
+        
+        question.addEventListener('click', question.faqClickHandler);
+      }
+    });
+  }
+  
+  // Initialize FAQ toggle on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, initializing FAQ...');
+    initFAQToggle();
+  });
+  
+  // Re-initialize on window resize
+  window.addEventListener('resize', function() {
+    console.log('Window resized, reinitializing FAQ...');
+    initFAQToggle();
+  });
+  
+  // Also initialize FAQ toggle in the main DOMContentLoaded
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialize FAQ toggle
+    initFAQToggle();
+  });
+  
+  // Service Details Toggle Function
+  window.toggleServiceDetails = function(button) {
+    const serviceCard = button.closest('.service-card');
+    const details = serviceCard.querySelector('.service-details');
+    const isVisible = details.classList.contains('open');
+
+    // Close all service details first
+    const allServiceCards = document.querySelectorAll('.service-card');
+    allServiceCards.forEach(function(card) {
+      const otherDetails = card.querySelector('.service-details');
+      const otherButton = card.querySelector('.learn-more-service');
+      if (otherDetails) {
+        otherDetails.classList.remove('open');
+      }
+      if (otherButton) {
+        otherButton.textContent = 'Learn More';
+      }
+    });
+
+    // Toggle current service details
+    if (!isVisible) {
+      details.classList.add('open');
+      button.textContent = 'Show Less';
+    } else {
+      details.classList.remove('open');
+      button.textContent = 'Learn More';
+    }
+
+    // Activate shimmer for the clicked card
+    const overlay = serviceCard.querySelector('.shimmer-overlay');
+    if (overlay) {
+      overlay.classList.remove('shimmer-animate');
+      overlay.classList.remove('shimmer-animate-reverse');
+      void overlay.offsetWidth;
+      overlay.classList.add('shimmer-animate');
+    }
+  };
+  
+  // Stop CTA button pulsing after click
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialize FAQ toggle
+    initFAQToggle();
+    
+    const ctaButtons = document.querySelectorAll('.final-cta .cta-btn');
+    ctaButtons.forEach(function(button) {
+      button.addEventListener('click', function() {
+        this.classList.add('clicked');
+      });
+    });
+    
+    // Smooth scroll behavior
+    document.documentElement.style.scrollBehavior = 'smooth';
+    
+    // --- ULTRA-RESPONSIVE SHIMMER ON SCROLL (ALWAYS RESTART) ---
+    // 1. Add shimmer overlay to each service card (run once on DOMContentLoaded)
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.service-card').forEach(function(card) {
+        if (!card.querySelector('.shimmer-overlay')) {
+          const overlay = document.createElement('div');
+          overlay.className = 'shimmer-overlay';
+          card.appendChild(overlay);
+        }
+      });
+    });
+    // Remove old shimmer logic - replaced with enhanced version below
+
+    // Ultra-responsive shimmer effect triggered by service cards
+    let lastScrollY = window.scrollY;
+    let scrollThreshold = 5; // Very low scroll threshold for immediate response
+    let lastShimmerTime = 0;
+    let shimmerInterval = 150; // Very short interval for frequent triggering
+    
+    function triggerShimmerOnScroll() {
+      const currentScrollY = window.scrollY;
+      const scrollDistance = Math.abs(currentScrollY - lastScrollY);
+      const now = Date.now();
+      
+      // Trigger on any scroll movement with minimal delay
+      if (scrollDistance < scrollThreshold || (now - lastShimmerTime) < shimmerInterval) {
+        lastScrollY = currentScrollY;
+        return;
+      }
+      
+      const cards = Array.from(document.querySelectorAll('.service-card'));
+      if (!cards.length) return;
+      
+      // Find all visible cards
+      const visibleCards = cards.filter(card => {
+        const rect = card.getBoundingClientRect();
+        return rect.bottom > 0 && rect.top < window.innerHeight;
+      });
+      
+      if (visibleCards.length === 0) return;
+      
+      // Clear all existing shimmers
+      cards.forEach(card => {
+        const overlay = card.querySelector('.shimmer-overlay');
+        if (overlay) {
+          overlay.classList.remove('shimmer-animate');
+          overlay.classList.remove('shimmer-animate-reverse');
+        }
+        card.classList.remove('shimmer-active');
+      });
+      
+      // Select a random visible card
+      const randomCard = visibleCards[Math.floor(Math.random() * visibleCards.length)];
+      const overlay = randomCard.querySelector('.shimmer-overlay');
+      
+      if (overlay) {
+        // Trigger shimmer immediately
+        randomCard.classList.add('shimmer-active');
+        
+        // Reset and trigger animation
+        overlay.classList.remove('shimmer-animate');
+        overlay.classList.remove('shimmer-animate-reverse');
+        void overlay.offsetWidth; // Force reflow
+        
+        const direction = currentScrollY > lastScrollY ? 'down' : 'up';
+        if (direction === 'down') {
+          overlay.classList.add('shimmer-animate');
+        } else {
+          overlay.classList.add('shimmer-animate-reverse');
+        }
+        
+        // Clean up after animation
+        setTimeout(() => {
+          randomCard.classList.remove('shimmer-active');
+        }, 400);
+      }
+      
+      lastScrollY = currentScrollY;
+      lastShimmerTime = now;
+    }
+    
+    // Scroll event handler
+    function handleScroll() {
+      requestAnimationFrame(triggerShimmerOnScroll);
+    }
+    
+    // Add event listeners
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('touchmove', handleScroll, { passive: true });
+    window.addEventListener('wheel', handleScroll, { passive: true });
+    
+    // Initialize shimmer on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add shimmer overlays if they don't exist
+      document.querySelectorAll('.service-card').forEach(function(card) {
+        if (!card.querySelector('.shimmer-overlay')) {
+          const overlay = document.createElement('div');
+          overlay.className = 'shimmer-overlay';
+          card.appendChild(overlay);
         }
       });
       
-      // Toggle current section
-      details.style.display = isExpanded ? 'none' : 'block';
-      button.textContent = isExpanded ? 'Learn More' : 'Show Less';
-      
-      // Scroll into view on mobile if expanded
-      if (!isExpanded && window.innerWidth < 768) {
-        details.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }
-    }
-
-    // Close sections when clicking outside
-    document.addEventListener('click', function(event) {
-      if (!event.target.closest('.service-card')) {
-        document.querySelectorAll('.service-details').forEach(details => {
-          details.style.display = 'none';
-          const button = details.previousElementSibling;
-          if (button.classList.contains('learn-more-service')) {
-            button.textContent = 'Learn More';
-          }
-        });
-      }
+      // Trigger initial shimmer after a short delay
+      setTimeout(triggerShimmerOnScroll, 500);
     });
-
-    // Ensure all service-details are hidden on page load
-    document.addEventListener('DOMContentLoaded', function() {
-      document.querySelectorAll('.service-details').forEach(function(details) {
-        details.style.display = 'none';
+    // --- END ULTRA-RESPONSIVE SHIMMER ---
+    
+    // Enhanced loading states
+    const images = document.querySelectorAll('img');
+    images.forEach(function(img) {
+      img.style.opacity = '0';
+      img.style.transform = 'scale(0.95)';
+      img.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+      
+      img.addEventListener('load', function() {
+        this.style.opacity = '1';
+        this.style.transform = 'scale(1)';
       });
     });
-  </script>
+    
+    // Touch-friendly interactions for mobile
+    if ('ontouchstart' in window) {
+      const touchElements = document.querySelectorAll('.service-card, .step, .testimonial');
+      touchElements.forEach(function(element) {
+        element.addEventListener('touchstart', function() {
+          this.style.transform = 'scale(0.98)';
+        });
+        
+        element.addEventListener('touchend', function() {
+          this.style.transform = '';
+        });
+      });
+    }
+    
+    // Auto-retract service cards when interacting with other elements
+    let activeServiceCard = null;
+    let retractTimeout = null;
+    
+    // Function to retract all service cards
+    function retractAllServiceCards() {
+      const serviceCards = document.querySelectorAll('.service-card');
+      serviceCards.forEach(function(card) {
+        card.classList.remove('active-shimmer');
+        const shimmer = card.querySelector('::before');
+        if (shimmer) {
+          shimmer.style.animation = 'none';
+        }
+      });
+      activeServiceCard = null;
+    }
+    
+    // Function to activate a service card
+    function activateServiceCard(card) {
+      retractAllServiceCards();
+      card.classList.add('active-shimmer');
+      activeServiceCard = card;
+      
+      // Clear any existing timeout
+      if (retractTimeout) {
+        clearTimeout(retractTimeout);
+      }
+    }
+    
+    // Add click listeners to service cards
+    const serviceCards = document.querySelectorAll('.service-card');
+    serviceCards.forEach(function(card) {
+      card.addEventListener('click', function(e) {
+        // Don't activate shimmer if clicking on the learn more button
+        if (e.target.classList.contains('learn-more-service')) {
+          return;
+        }
+        e.stopPropagation();
+        activateServiceCard(this);
+      });
+      
+      card.addEventListener('mouseenter', function(e) {
+        e.stopPropagation();
+        activateServiceCard(this);
+      });
+    });
+    
+    // Retract when clicking outside service cards
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.service-card')) {
+        retractAllServiceCards();
+      }
+    });
+    
+    // Retract when hovering over other interactive elements
+    const otherInteractiveElements = document.querySelectorAll('.step, .testimonial, .cta-btn, .faq-item, .hero, .final-cta');
+    otherInteractiveElements.forEach(function(element) {
+      element.addEventListener('mouseenter', function() {
+        retractAllServiceCards();
+      });
+      
+      element.addEventListener('click', function() {
+        retractAllServiceCards();
+      });
+    });
+    
+    // Retract when scrolling
+    window.addEventListener('scroll', function() {
+      retractAllServiceCards();
+    });
+    // Retract on touchmove for mobile real-time responsiveness
+    window.addEventListener('touchmove', function() {
+      retractAllServiceCards();
+    });
+  });
+})();
+</script>
+<style>
+.step {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 
+    0 12px 32px rgba(0, 0, 0, 0.06),
+    0 4px 16px rgba(0, 0, 0, 0.03);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.step::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #1086bc, #4fd1c5, #1fc2a7);
+  transform: scaleX(0);
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.step:hover::before {
+  transform: scaleX(1);
+}
+
+.step:hover {
+  transform: translateY(-4px);
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.1),
+    0 8px 20px rgba(0, 0, 0, 0.05);
+}
+
+.step span {
+  background: linear-gradient(135deg, #1086bc 0%, #4fd1c5 100%) !important;
+  color: #fff !important;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+  box-shadow: 
+    0 6px 18px rgba(16, 134, 188, 0.3),
+    0 3px 8px rgba(0, 0, 0, 0.1);
+  margin: 0 auto 1rem auto;
+  position: relative;
+  overflow: hidden;
+}
+
+.step span::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.6s ease;
+}
+
+.step:hover span::before {
+  left: 100%;
+}
+.testimonial .author {
+  color: #1086bc !important;
+}
+</style>
+<style>
+.service-details { display: none; transition: max-height 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.3s; overflow: hidden; }
+.service-details.open { display: block; }
+</style>
+<style>
+.shimmer-overlay {
+  pointer-events: none;
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border-radius: inherit;
+  opacity: 0;
+  z-index: 999;
+  background: linear-gradient(90deg, transparent, rgba(31,194,167,0.5), rgba(79,209,197,0.8), rgba(16,134,188,0.5), transparent);
+  transform: skewX(-8deg);
+  mix-blend-mode: screen;
+  will-change: opacity, transform;
+}
+.shimmer-animate {
+  animation: shimmer-overlay-anim 0.4s cubic-bezier(0.4,0,0.2,1) forwards;
+  opacity: 1;
+}
+@keyframes shimmer-overlay-anim {
+  0% { left: -100%; opacity: 0; }
+  15% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { left: 100%; opacity: 0; }
+}
+</style>
+<style>
+.shimmer-animate-reverse {
+  animation: shimmer-overlay-anim-reverse 0.4s cubic-bezier(0.4,0,0.2,1) forwards;
+  opacity: 1;
+}
+@keyframes shimmer-overlay-anim-reverse {
+  0% { right: -100%; left: auto; opacity: 0; }
+  15% { opacity: 1; }
+  85% { right: 100%; left: auto; opacity: 1; }
+  100% { right: 100%; left: auto; opacity: 0; }
+}
+</style>
+<style>
+.faq-answer {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  padding: 0 1rem;
+}
+.faq-item.active .faq-answer {
+  max-height: 500px;
+  opacity: 1;
+  padding: 1rem;
+}
+</style>
+<script>
+function initFAQToggle() {
+  const faqItems = document.querySelectorAll('.faq-item');
+  faqItems.forEach(function(item) {
+    const question = item.querySelector('.faq-question');
+    if (question) {
+      question.removeEventListener('click', question.faqClickHandler);
+      question.faqClickHandler = function(e) {
+        const isActive = item.classList.contains('active');
+        // Close all other FAQ items
+        faqItems.forEach(function(otherItem) {
+          if (otherItem !== item) {
+            otherItem.classList.remove('active');
+          }
+        });
+        // Toggle current item
+        if (isActive) {
+          item.classList.remove('active');
+        } else {
+          item.classList.add('active');
+        }
+      };
+      question.addEventListener('click', question.faqClickHandler);
+    }
+  });
+}
+document.addEventListener('DOMContentLoaded', function() {
+  initFAQToggle();
+});
+</script>
+
+<style>
+.hero-img-wrap {
+  position: relative;
+  display: inline-block;
+}
+.hero-img-wrap::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: 2.5rem;
+  background: linear-gradient(120deg, rgba(0,255,128,0.10) 0%, rgba(0,255,128,0.08) 60%, transparent 100%);
+}
+.hero-img-wrap img {
+  display: block;
+  border-radius: 2.5rem;
+  position: relative;
+  z-index: 2;
+}
+</style>
 </body>
 </html>

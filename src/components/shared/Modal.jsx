@@ -31,15 +31,15 @@ const Modal = ({ isOpen, onClose, title, children, size = 'md' }) => {
               <button
                 onClick={onClose}
                 className="text-gray-400 hover:text-gray-600 transition-colors"
-              >
+        >
                 <FiX className="h-6 w-6" />
-              </button>
+        </button>
             </div>
           </div>
           
           {/* Content */}
           <div className="px-6 py-4">
-            {children}
+          {children}
           </div>
         </div>
       </div>

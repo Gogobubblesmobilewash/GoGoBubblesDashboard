@@ -202,11 +202,11 @@ const Dashboard = () => {
 
       // Recent activity
       const recentJobs = jobsArray.sort((a, b) => new Date(b.updated_at || b.created_at) - new Date(a.updated_at || a.created_at)).slice(0, 5).map(j => ({
-        id: j.id,
+          id: j.id,
         type: 'job',
-        message: `${j.serviceType} for ${j.customerName} (${j.jobStatus})`,
-        time: new Date(j.updated_at || j.created_at).toLocaleString()
-      }));
+          message: `${j.serviceType} for ${j.customerName} (${j.jobStatus})`,
+          time: new Date(j.updated_at || j.created_at).toLocaleString()
+        }));
       
       const recentApplicants = applicantsArray.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 3).map(a => ({
         id: a.id,
@@ -759,8 +759,8 @@ const Dashboard = () => {
                         This Year
                       </button>
                     </div>
-                  </div>
-                  
+      </div>
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Custom Range</label>
                     <div className="space-y-2">
@@ -775,10 +775,10 @@ const Dashboard = () => {
                         value={dateRange.endDate.toISOString().split('T')[0]}
                         onChange={(e) => setDateRange(prev => ({ ...prev, endDate: new Date(e.target.value) }))}
                         className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
-                      />
-                    </div>
-                  </div>
-                  
+            />
+          </div>
+        </div>
+
                   <div className="flex gap-2">
                     <button
                       onClick={() => setShowDatePicker(false)}
@@ -1022,12 +1022,12 @@ const Dashboard = () => {
             </div>
             <div className="p-3 bg-yellow-500 rounded-lg group-hover:bg-yellow-600 transition-colors">
               <FiStar className="h-6 w-6 text-white" />
-            </div>
-          </div>
+                </div>
+              </div>
           <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
             <FiArrowRight className="h-4 w-4 text-yellow-600" />
-          </div>
-        </div>
+                </div>
+              </div>
 
         {/* Messages Card */}
         <div 
@@ -1046,9 +1046,9 @@ const Dashboard = () => {
           </div>
           <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
             <FiArrowRight className="h-4 w-4 text-blue-600" />
+            </div>
           </div>
-        </div>
-
+          
         {/* Bubblers Card */}
         <div 
           className="group relative bg-gradient-to-br from-emerald-50 to-emerald-100 border border-emerald-200 rounded-xl p-6 cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-105 hover:border-emerald-300" 
@@ -1066,10 +1066,10 @@ const Dashboard = () => {
           </div>
           <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
             <FiArrowRight className="h-4 w-4 text-emerald-600" />
-          </div>
-        </div>
-      </div>
-
+              </div>
+                </div>
+              </div>
+              
       {/* Recent Payouts Section */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
         <div className="flex items-center justify-between mb-6">
@@ -1081,7 +1081,7 @@ const Dashboard = () => {
             View All
             <FiArrowRight className="h-4 w-4" />
           </button>
-        </div>
+              </div>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead>
@@ -1120,9 +1120,9 @@ const Dashboard = () => {
               )}
             </tbody>
           </table>
-        </div>
-      </div>
-
+                </div>
+              </div>
+              
       {/* Recent Activity Section */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <div className="flex items-center justify-between mb-6">
@@ -1134,7 +1134,7 @@ const Dashboard = () => {
             View All
             <FiArrowRight className="h-4 w-4" />
           </button>
-        </div>
+              </div>
         <div className="space-y-4">
           {dashboardData.recentActivity.length > 0 ? (
             dashboardData.recentActivity.map((activity) => (

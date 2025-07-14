@@ -1067,7 +1067,7 @@
           return;
         }
       }
-
+      
       // Collect form data
       const formData = new FormData(event.target);
       const applicationData = {
@@ -1102,7 +1102,7 @@
         applicationData.car_wash_experience = formData.get('carWashExperience') === 'yes';
         applicationData.experience_description = formData.get('experienceDescription');
         applicationData.weather_conditions_ok = formData.get('weatherConditions') === 'yes';
-      }
+          }
 
       if (role === 'sparkle') {
         applicationData.has_mop = formData.getAll('basic_supplies_owned').includes('mop') || formData.getAll('basic_supplies_owned').includes('swiffer_style_mop');
@@ -1150,13 +1150,13 @@
 
         if (error) throw error;
 
-        // Show success message
-        alert('Thank you for your application! We will review your information and contact you within 2-3 business days.');
+          // Show success message
+          alert('Thank you for your application! We will review your information and contact you within 2-3 business days.');
         
-        // Close the modal
-        closeApplicationForm();
+          // Close the modal
+          closeApplicationForm();
         
-        // Reset the form
+          // Reset the form
         event.target.reset();
       } catch (error) {
         console.error('Error submitting application:', error);

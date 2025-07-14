@@ -390,15 +390,15 @@ const Equipment = () => {
         <div className="bg-white p-4 rounded-lg border border-gray-200">
           <div className="text-2xl font-bold text-gray-800">{totalEquipment}</div>
           <div className="text-sm text-gray-600">Total Equipment</div>
-        </div>
+            </div>
         <div className="bg-green-50 p-4 rounded-lg border border-green-200">
           <div className="text-2xl font-bold text-green-600">{availableCount}</div>
           <div className="text-sm text-green-700">Available</div>
-        </div>
+          </div>
         <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
           <div className="text-2xl font-bold text-blue-600">{rentedCount}</div>
           <div className="text-sm text-blue-700">Out / Rented</div>
-        </div>
+          </div>
         <div className="bg-red-50 p-4 rounded-lg border border-red-200">
           <div className="text-2xl font-bold text-red-600">{overdueCount}</div>
           <div className="text-sm text-red-700">Overdue</div>
@@ -406,7 +406,7 @@ const Equipment = () => {
         <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
           <div className="text-2xl font-bold text-yellow-600">{maintenanceCount}</div>
           <div className="text-sm text-yellow-700">In Maintenance</div>
-        </div>
+      </div>
         <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
           <div className="text-2xl font-bold text-orange-600">{damagedCount}</div>
           <div className="text-sm text-orange-700">Damaged</div>

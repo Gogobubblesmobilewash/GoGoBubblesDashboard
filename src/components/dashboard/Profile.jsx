@@ -545,7 +545,7 @@ const Profile = () => {
               {bubblerProfile?.temp_password ? 'Set New Password' : 'Change Password'}
             </button>
           ) : (
-            <div className="space-y-4">
+    <div className="space-y-4">
               <h4 className="font-semibold text-gray-800">
                 {bubblerProfile?.temp_password ? 'Set New Password' : 'Change Password'}
               </h4>

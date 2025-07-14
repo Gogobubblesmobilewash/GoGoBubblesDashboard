@@ -681,26 +681,26 @@ const Jobs = () => {
 
   // Handle manual override for QR code mismatches
   const handleManualOverride = async (assignmentId) => {
-    try {
-      const { error } = await supabase
-        .from('job_assignments')
-        .update({ 
-          manual_override: true,
+      try {
+        const { error } = await supabase
+          .from('job_assignments')
+          .update({ 
+            manual_override: true,
           updated_at: new Date().toISOString()
-        })
-        .eq('id', assignmentId);
-
+          })
+          .eq('id', assignmentId);
+        
       if (error) {
         console.error('Manual override error:', error);
         toast.error('Failed to apply manual override');
         return;
       }
-
-      toast.success('Manual override applied successfully');
+        
+        toast.success('Manual override applied successfully');
       loadOrders(); // Refresh the orders data
-    } catch (error) {
+      } catch (error) {
       console.error('Manual override error:', error);
-      toast.error('Failed to apply manual override');
+        toast.error('Failed to apply manual override');
     }
   };
 
@@ -1114,37 +1114,37 @@ const Jobs = () => {
       {/* Enhanced Search and Filter Controls */}
       <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6">
         <div className="flex flex-col lg:flex-row gap-4">
-          {/* Search */}
-          <div className="flex-1">
+        {/* Search */}
+        <div className="flex-1">
             <div className="relative">
-              <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
                 placeholder="Search by customer name, address, service type, or bubbler..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
-          </div>
-          
-          {/* Status Filter */}
+        </div>
+        
+        {/* Status Filter */}
           <div className="lg:w-48">
             <select
-              value={statusFilter}
-              onChange={handleStatusChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="all">All Statuses</option>
-              <option value="assigned">Assigned</option>
-              <option value="accepted">Accepted</option>
-              <option value="en_route">En Route</option>
-              <option value="in-progress">In Progress</option>
-              <option value="completed">Completed</option>
-              <option value="expired">Expired</option>
-              <option value="declined">Declined</option>
+            value={statusFilter}
+            onChange={handleStatusChange}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="all">All Statuses</option>
+            <option value="assigned">Assigned</option>
+            <option value="accepted">Accepted</option>
+            <option value="en_route">En Route</option>
+            <option value="in-progress">In Progress</option>
+            <option value="completed">Completed</option>
+            <option value="expired">Expired</option>
+            <option value="declined">Declined</option>
             </select>
-          </div>
+        </div>
 
           {/* Advanced Filters Toggle */}
           <button
@@ -1154,7 +1154,7 @@ const Jobs = () => {
             <FiFilter className="h-4 w-4" />
             Advanced Filters
           </button>
-        </div>
+      </div>
 
         {/* Advanced Filters Panel */}
         {showAdvancedFilters && (
@@ -1306,7 +1306,7 @@ const Jobs = () => {
       ) : paginatedJobs.length === 0 ? (
         <div className="text-center py-8 text-gray-500">
           {searchTerm || statusFilter !== 'all' || Object.values(advancedFilters).some(v => v !== 'all' && v !== '') ? 'No jobs match your filters.' : 'No jobs found.'}
-        </div>
+            </div>
       ) : viewMode === 'table' ? (
         <>
           {/* Table View */}
@@ -1534,7 +1534,7 @@ const Jobs = () => {
         getVisibleOrders().map(order => (
           <div key={order.id} className="mb-8">
             {renderOrderServices(order)}
-          </div>
+            </div>
         ))
       )}
       <AssignModal {...assignModal} onClose={() => setAssignModal({ open: false, service: null, order: null })} />

@@ -39,7 +39,7 @@ const Bubblers = () => {
       setLoading(true);
       setError(null);
       try {
-        const { data, error } = await supabase.from('bubblers').select('*');
+      const { data, error } = await supabase.from('bubblers').select('*');
         if (error) throw error;
         
         // Check device binding status for each bubbler
@@ -80,7 +80,7 @@ const Bubblers = () => {
       } catch (err) {
         setError(err.message);
       } finally {
-        setLoading(false);
+      setLoading(false);
       }
     };
     fetchBubblers();
