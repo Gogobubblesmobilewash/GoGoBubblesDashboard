@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="description" content="GoGoBubbles - Premium on-demand cleaning services. Professional car wash, home cleaning, and laundry services delivered to your doorstep. Serving Houston Tri-State Area since 2020.">
   <meta name="keywords" content="mobile car wash, home cleaning, laundry service, Houston, professional cleaning">
   <meta name="author" content="GoGoBubbles">
@@ -93,331 +93,467 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <!-- PROPER FLUID RESPONSIVE DESIGN -->
   <style>
+  /* ✅ MODERN FLUID RESET */
+  * {
+    box-sizing: border-box;
+  }
+
     html, body {
       margin: 0;
       padding: 0;
-      height: 100%;
-    }
-    body {
+      width: 100%;
+      max-width: 100%;
+    overflow-x: hidden;
       font-family: 'Inter', Arial, sans-serif;
-      margin: 0;
-      padding: 0;
       background: #f8fafc;
       color: #222;
-      padding-bottom: 110px;
-    }
-    header, section {
-      padding: 2.5rem 1.25rem;
-      max-width: 1200px;
+  }
+
+  /* ✅ FLUID TYPOGRAPHY SYSTEM */
+  h1 { font-size: clamp(1.5rem, 4vw, 2.5rem); font-weight: 800; }
+  h2 { font-size: clamp(1.3rem, 3.5vw, 2rem); font-weight: 700; }
+  h3 { font-size: clamp(1.1rem, 3vw, 1.6rem); font-weight: 600; }
+  h4 { font-size: clamp(1rem, 2.5vw, 1.4rem); font-weight: 600; }
+  p, li, a, span, div, button, input, textarea, select, label {
+    font-size: clamp(0.9rem, 2vw, 1.1rem);
+  }
+
+  /* ✅ FLUID LAYOUT - CSS GRID & FLEXBOX */
+    .wrapper {
+      width: 100%;
+    max-width: min(100%, 1200px);
       margin: 0 auto;
+    padding: 0 min(4vw, 2rem);
+    box-sizing: border-box;
+    }
+
+    header, section {
+    padding: min(4vw, 2rem) min(4vw, 2rem);
+    width: 100%;
+      margin: 0 auto;
+    text-align: center;
+    box-sizing: border-box;
     }
     
+  /* ✅ FLUID HERO SECTION */
     header.hero {
       padding: 0 !important;
       margin: 0 !important;
+      max-width: 100% !important;
+      width: 100% !important;
+      background: transparent;
+      position: relative !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
     }
+
     .hero {
-      max-width: 100%;
-      margin: 0;
-      padding: 0;
-      width: 100%;
       position: relative;
-      z-index: 1;
+      width: 100%;
+    height: 100vh;
       overflow: hidden;
-    }
-    
-    .hero-image {
-      width: 100vw;
-      max-width: 100%;
-      height: auto;
-      display: block;
-      object-fit: cover;
       margin: 0;
       padding: 0;
     }
-    
-    .hero-overlay {
+
+    .hero-background {
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(135deg, rgba(16,134,188,0.3) 0%, rgba(48,154,199,0.2) 25%, rgba(0,196,204,0.15) 50%, rgba(31,194,167,0.1) 75%, rgba(79,209,197,0.05) 100%);
+      top: 0; left: 0; right: 0; bottom: 0;
+      width: 100%;
+      height: 100%;
+      background: url('website_hero.png?v=47') center center / cover no-repeat;
+      z-index: 1;
+    }
+
+    .hero-frame-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
       pointer-events: none;
       z-index: 2;
+    border-radius: 0 0 min(3vw, 1.5rem) min(3vw, 1.5rem);
+      background: linear-gradient(
+        to bottom,
+        rgba(16,134,188,0.35) 0%,
+        rgba(48,154,199,0.25) 25%,
+        rgba(0,196,204,0.18) 50%,
+        rgba(31,194,167,0.15) 75%,
+        rgba(79,209,197,0.12) 100%
+      );
     }
     
-    .hero-content > * {
-      position: relative;
-      z-index: 2;
-      max-width: 100%;
-    }
-    .hero-content {
-      position: relative;
-      z-index: 2;
-      width: 100%;
-      max-width: 100%;
-      text-align: center;
-      padding-top: 0;
-    }
-    .hero-content h1 {
-      color: #fff;
-      font-size: 2.8rem;
-      font-weight: 800;
-      margin: 1.2rem 0 0.5rem;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.18);
-      -webkit-font-smoothing: antialiased;
-      -webkit-backface-visibility: hidden;
-      backface-visibility: hidden;
-    }
-    .hero-subtext {
-      color: #fff;
-      font-size: 1.3rem;
-      margin-bottom: 2.2rem;
-      -webkit-font-smoothing: antialiased;
-      -webkit-backface-visibility: hidden;
-      backface-visibility: hidden;
-    }
+  /* ✅ FLUID CTA BUTTON */
     .cta-btn {
       background: #1fc2a7;
       color: #FFFFFF;
       font-family: 'Poppins', sans-serif;
       font-weight: 700;
-      padding: 16px 32px;
+    padding: clamp(16px, 4vw, 32px) clamp(24px, 6vw, 48px);
       border: none;
-      border-radius: 8px;
-      font-size: 1.1rem;
+    border-radius: clamp(8px, 2vw, 16px);
+    font-size: clamp(1.1rem, 3vw, 1.5rem);
       cursor: pointer;
       text-decoration: none;
       transition: background-color 0.3s ease, box-shadow 0.3s ease;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 clamp(4px, 1vw, 8px) clamp(12px, 2.5vw, 20px) rgba(0,0,0,0.1);
       z-index: 2;
       position: relative;
+    display: inline-block;
+    text-align: center;
     }
+
     .cta-btn:hover {
       background: #4fd1c5;
       color: #fff;
-      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-    }
-    @media (max-width: 700px) {
-      .hero {
-        margin: 0 !important;
-        padding: 0;
-        position: relative;
-        width: 100vw;
-        max-width: 100vw;
-        overflow: hidden;
-        z-index: 1;
-        min-height: 60vh;
-      }
-      .hero-image {
-        width: 100vw;
-        max-width: 100vw;
-        height: auto;
-        min-height: 60vh;
-        object-fit: cover;
-        display: block;
-        position: relative;
-        z-index: 1;
-      }
-      .hero-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(135deg, rgba(16,134,188,0.3) 0%, rgba(48,154,199,0.2) 25%, rgba(0,196,204,0.15) 50%, rgba(31,194,167,0.1) 75%, rgba(79,209,197,0.05) 100%);
-        pointer-events: none;
-        z-index: 2;
-      }
-    }
+    box-shadow: 0 min(1.5vw, 6px) min(3vw, 12px) rgba(0,0,0,0.15);
+  }
+
+  /* ✅ FLUID SERVICES SECTION - CSS GRID */
     #services {
       margin-top: 0;
-      padding-top: 0.7rem;
+    padding-top: min(2vw, 1rem);
     }
+
     .services {
-      display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
-      gap: 1.2rem;
-      justify-content: center;
-      margin-top: 2rem;
-    }
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+    gap: min(3vw, 1.5rem);
+    margin-top: min(4vw, 2rem);
+    align-items: start;
+  }
+
     .service-card {
       background: #fff;
-      border-radius: 1rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-      padding: 2rem 1.5rem;
-      flex: 1 1 260px;
-      min-width: 220px;
-      max-width: 340px;
+    border-radius: min(2vw, 0.75rem);
+    box-shadow: 0 min(0.5vw, 2px) min(2vw, 8px) rgba(0,0,0,0.06);
+    padding: min(4vw, 1.5rem) min(3vw, 1rem);
+    width: 100%;
+      overflow-wrap: break-word;
       text-align: center;
       transition: transform 0.15s;
     }
+
+  .service-card {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .service-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(16, 134, 188, 0.1), rgba(79, 209, 197, 0.2), rgba(16, 134, 188, 0.1), transparent);
+    transition: left 0.8s ease-in-out;
+    z-index: 1;
+  }
+
+  .service-card:hover::before {
+    left: 100%;
+  }
+
     .service-card:hover {
-      transform: translateY(-6px) scale(1.03);
-    }
+    transform: translateY(min(-1.5vw, -6px)) scale(1.03);
+    box-shadow: 0 min(2vw, 8px) min(6vw, 25px) rgba(16, 134, 188, 0.15);
+  }
+
+  .service-card > * {
+    position: relative;
+    z-index: 2;
+  }
+
     .service-card img {
-      width: 56px;
-      margin-bottom: 1rem;
-    }
+    max-width: min(80%, 200px);
+    width: auto;
+    height: auto;
+    margin: 0 auto min(2vw, 0.75rem) auto;
+  display: block;
+}
+
     .service-card h3 {
-      font-family: 'Poppins', sans-serif;
-      font-size: 1.4rem;
+    color: #1a1a1a;
+    margin-bottom: clamp(8px, 1.5vw, 12px);
+    font-size: clamp(1.1rem, 3vw, 1.4rem) !important;
       font-weight: 700;
-      color: #2E2E2E;
-      margin-bottom: 0.5rem;
-      -webkit-font-smoothing: antialiased;
-      -webkit-backface-visibility: hidden;
-      backface-visibility: hidden;
-    }
+    line-height: 1.3;
+  }
+
     .service-card p {
-      font-size: 1rem;
-      color: #555;
-    }
+    color: #3a3a3a;
+    line-height: 1.6;
+    margin-bottom: clamp(12px, 2vw, 16px);
+    font-size: clamp(0.85rem, 2.5vw, 1rem);
+  }
+
+  /* ✅ SCROLL-TRIGGERED SHIMMER EFFECTS */
+  .service-card.shimmer-trigger::before {
+    left: 100%;
+  }
+  
+  .testimonial.shimmer-trigger::before {
+    left: 100%;
+  }
+  
+  /* ✅ ENHANCED HOVER EFFECTS (for desktop) */
+  .service-card:hover::before {
+    left: 100%;
+  }
+  
+  .testimonial:hover::before {
+    left: 100%;
+  }
+
+  /* ✅ FLUID HOW IT WORKS - CSS GRID */
     .how-it-works {
       background: #e6f7fa;
-      border-radius: 1.5rem;
-      margin-top: 3rem;
-      padding: 2.5rem 1.5rem;
+    border-radius: min(2.5vw, 1rem);
+    margin-top: min(4vw, 2rem);
+    padding: min(4vw, 2rem) min(3vw, 1rem);
       text-align: center;
     }
+
     .steps {
-      display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
-      gap: 1.2rem;
-      justify-content: center;
-      margin-top: 2rem;
-    }
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
+    gap: min(3vw, 1.5rem);
+    margin-top: min(4vw, 2rem);
+    align-items: start;
+  }
+
     .step {
-      flex: 1 1 260px;
-      min-width: 220px;
-      max-width: 340px;
       background: #fff;
-      border-radius: 1rem;
-      padding: 1.5rem 1rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-      margin-bottom: 1rem;
-    }
+    border-radius: min(2vw, 0.75rem);
+    padding: min(4vw, 1.5rem) min(3vw, 1rem);
+    box-shadow: 0 min(0.5vw, 2px) min(2vw, 8px) rgba(0,0,0,0.04);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .step::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #1086bc 0%, #309ac7 25%, #00C4CC 50%, #1fc2a7 75%, #4fd1c5 100%);
+    transition: width 0.6s ease-in-out;
+    z-index: 1;
+  }
+
+  .step:hover::before {
+    width: 100%;
+  }
+
+  .step:hover {
+    transform: translateY(min(-1vw, -4px));
+    box-shadow: 0 min(2vw, 8px) min(5vw, 25px) rgba(66, 153, 225, 0.2);
+  }
+
     .step span {
       display: inline-block;
       background: #4299e1;
       color: #fff;
       font-weight: 700;
       border-radius: 50%;
-      width: 36px;
-      height: 36px;
-      line-height: 36px;
-      font-size: 1.1rem;
-      margin-bottom: 0.7rem;
-    }
-    
+    width: min(8vw, 40px);
+    height: min(8vw, 40px);
+    line-height: min(8vw, 40px);
+    font-size: min(3vw, 1.1rem);
+    margin-bottom: min(2vw, 0.5rem);
+    transition: all 0.3s ease;
+  }
+
+  .step:hover span {
+    background: linear-gradient(135deg, #4299e1 0%, #4fd1c5 100%);
+    transform: scale(1.05);
+  }
+
+  .step h3 {
+    color: #1a1a1a;
+    margin-bottom: clamp(8px, 1.5vw, 12px);
+    font-size: clamp(1rem, 3vw, 1.3rem);
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  .step p {
+    color: #3a3a3a;
+    line-height: 1.6;
+    font-size: clamp(0.85rem, 2.5vw, 1rem);
+  }
+
+  /* ✅ TESTIMONIALS - CSS GRID */
     .testimonial-list {
-      display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
-      justify-content: space-between; /* ensures nice spacing */
-      gap: 1.2rem;
-      margin-top: 2rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+    gap: min(3vw, 1.5rem);
+    margin-top: min(4vw, 2rem);
+    align-items: start;
     }
 
     .testimonial {
       background: #fff;
-      border-radius: 1rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-      padding: 1.5rem 1rem 1.5rem 3rem;
+    border-radius: min(2vw, 0.75rem);
+    box-shadow: 0 min(0.5vw, 2px) min(2vw, 8px) rgba(0,0,0,0.05);
+    padding: min(4vw, 1.5rem) min(3vw, 1rem) min(4vw, 1.5rem) min(6vw, 3rem);
       font-style: italic;
       position: relative;
-      flex: 1 1 260px; /* NEW — allows to grow, shrink, min width 260px */
-      min-width: 220px;
-      max-width: 340px;
-    }
+    font-size: min(2.5vw, 0.9rem);
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
 
-    @media (max-width: 900px) {
-      .testimonial {
-        max-width: 45%; /* 2 per row on medium screens */
-      }
-    }
+  .testimonial::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(79, 209, 197, 0.08), rgba(66, 153, 225, 0.12), rgba(79, 209, 197, 0.08), transparent);
+    transition: left 0.7s ease-in-out;
+    z-index: 1;
+  }
 
-    @media (max-width: 600px) {
-      .testimonial {
-        max-width: 100%; /* 1 per row on small screens */
-      }
-    }
+  .testimonial:hover::before {
+    left: 100%;
+  }
+
+  .testimonial:hover {
+    transform: translateY(min(-0.75vw, -3px));
+    box-shadow: 0 min(1.25vw, 5px) min(4.5vw, 18px) rgba(79, 209, 197, 0.12);
+  }
+
+  .testimonial > * {
+    position: relative;
+    z-index: 2;
+  }
 
     .testimonial:before {
-      content: "“"; /* OPEN QUOTE */
-      font-size: 3rem;
-      color: #4fd1c5; /* brand light aqua */
+    content: "\201C";
+    font-size: min(6vw, 3rem);
+    color: #4fd1c5;
       position: absolute;
-      left: 1rem;
-      top: 0.2rem;
+    left: min(2vw, 1rem);
+    top: min(1vw, 0.2rem);
       line-height: 1;
     }
 
     .testimonial .author {
       display: block;
-      margin-top: 1rem;
+    margin-top: min(2vw, 1rem);
       font-weight: 600;
       color: #4299e1;
       font-style: normal;
     }
-    /* Final Header Center Fix for Testimonials */
+
     .testimonials h2 {
       text-align: center;
       display: block;
-      margin: 0 auto 1.5rem auto;
+    margin: 0 auto min(3vw, 1.5rem) auto;
       position: relative;
       font-family: 'Poppins', sans-serif;
-      font-size: 2rem;
+    font-size: min(4vw, 2rem);
       font-weight: 700;
       color: #2E2E2E;
     }
+
+  /* ✅ FLUID FAQ */
     .faq {
-      margin-top: 3rem;
+    margin-top: min(4vw, 2rem);
       background: #fff;
-      border-radius: 1.5rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-      padding: 2.5rem 1.5rem;
-    }
+    border-radius: min(2.5vw, 1rem);
+    box-shadow: 0 min(0.5vw, 2px) min(2vw, 8px) rgba(0,0,0,0.04);
+    padding: min(4vw, 2rem) min(3vw, 1rem);
+    padding-bottom: 120px !important;
+  }
+
     .faq h2 {
       text-align: center;
-      margin-bottom: 2rem;
+    margin-bottom: min(3vw, 1.5rem);
     }
+
     .faq-item {
       background: #fff;
-      border-radius: 1rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-      margin-bottom: 0.6rem;
-      padding: 0.5rem 0.8rem;
+    border-radius: min(2vw, 0.75rem);
+    box-shadow: 0 min(0.5vw, 2px) min(2vw, 8px) rgba(0,0,0,0.06);
+    margin-bottom: min(1.5vw, 0.5rem);
+    padding: min(2vw, 0.8rem) min(2.5vw, 1rem);
       transition: box-shadow 0.2s;
     }
+
     .faq-item.active {
-      box-shadow: 0 4px 16px rgba(44,62,80,0.10);
+    box-shadow: 0 min(1vw, 4px) min(4vw, 16px) rgba(44,62,80,0.10);
     }
+
     .faq-item h4 {
       margin: 0 !important;
       padding: 0 !important;
       line-height: 1.1 !important;
-    }
+    font-size: clamp(1rem, 3vw, 1.3rem) !important;
+    color: #1086bc !important;
+  }
+
+  .faq-toggle {
+    color: #1086bc !important;
+    font-weight: bold !important;
+    font-size: clamp(1.2rem, 3.5vw, 1.5rem) !important;
+    cursor: pointer !important;
+    transition: transform 0.3s ease !important;
+    display: inline-block !important;
+  }
+
+  .faq-item.active .faq-toggle {
+    transform: rotate(45deg) !important;
+  }
+
     .faq-item p {
       margin: 0;
       color: #444;
-    }
-    .final-cta {
-      background: linear-gradient(135deg, #1086bc 0%, #309ac7 25%, #00C4CC 50%, #1fc2a7 75%, #4fd1c5 100%);
-      color: #fff;
-      text-align: center;
-      border-radius: 2rem;
-      margin: 3rem 0 2rem;
-      padding: 3rem 1.5rem;
-      position: relative;
+    font-size: clamp(0.9rem, 2.5vw, 1rem);
+  }
+
+  .faq-answer {
+    max-height: 0;
+    opacity: 0;
       overflow: hidden;
+    transition: all 0.3s ease;
+    padding: 0 min(2.5vw, 1rem);
+  }
+  .faq-item.active .faq-answer {
+    max-height: min(50vw, 500px);
+    opacity: 1;
+    padding: min(2.5vw, 1rem);
+  }
+
+  /* ✅ FLOATING CTA SECTION - ALWAYS VISIBLE */
+  .final-cta {
+    position: fixed !important;
+    bottom: env(safe-area-inset-bottom, 15px) !important;
+    left: 0 !important;
+    right: 0 !important;
+    background: linear-gradient(135deg, #1086bc 0%, #309ac7 25%, #00C4CC 50%, #1fc2a7 75%, #4fd1c5 100%) !important;
+    color: #fff !important;
+    text-align: left !important;
+    border-radius: min(2vw, 1rem) min(2vw, 1rem) 0 0 !important;
+    margin: 0 !important;
+    padding: clamp(4px, 1vw, 8px) clamp(16px, 3vw, 24px) !important;
+    overflow: hidden !important;
       box-shadow: 
-        0 20px 40px rgba(16, 134, 188, 0.3),
-        0 8px 24px rgba(0, 0, 0, 0.1);
+      0 -10px 20px rgba(16, 134, 188, 0.3),
+      0 -4px 12px rgba(0, 0, 0, 0.1) !important;
+    z-index: 99999 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
     }
     
     .final-cta::before {
@@ -429,132 +565,300 @@
       bottom: 0;
       background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
       animation: shimmer 3s infinite;
+    z-index: 1;
+  }
+
+  .final-cta > * {
+    position: relative;
+    z-index: 2;
     }
     
     @keyframes shimmer {
       0% { transform: translateX(-100%); }
       100% { transform: translateX(100%); }
     }
-    .final-cta h2 {
-      font-size: 2rem;
-      margin-bottom: 1rem;
+    
+    @keyframes shimmer-bar {
+      0% { opacity: 0.3; transform: scaleX(0.8); }
+      50% { opacity: 1; transform: scaleX(1.1); }
+      100% { opacity: 0.3; transform: scaleX(0.8); }
     }
+
+    .final-cta h2 {
+    font-size: min(2.5vw, 1.2rem);
+    margin: 0 !important;
+    }
+
     .final-cta .cta-btn {
       background: #1fc2a7;
       color: #FFFFFF;
       font-family: 'Poppins', sans-serif;
       font-weight: 700;
-      padding: 16px 32px;
+    padding: clamp(12px, 3vw, 24px) clamp(28px, 7vw, 48px);
       border: none;
-      border-radius: 8px;
-      font-size: 1.1rem;
+    border-radius: clamp(10px, 2.5vw, 18px);
+    font-size: clamp(1.1rem, 3vw, 1.5rem);
       cursor: pointer;
       transition: background-color 0.3s ease, box-shadow 0.3s ease;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
+    box-shadow: 0 clamp(6px, 1.5vw, 12px) clamp(16px, 3vw, 24px) rgba(0,0,0,0.1);
+    animation: pulse 2s infinite;
+    display: inline-block;
+    text-decoration: none;
+    text-align: center;
+    margin: 0 !important;
+    min-width: clamp(180px, 50vw, 280px);
+  }
+
     .final-cta .cta-btn:hover {
       background: #4fd1c5;
       color: #fff;
-      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-    }
-    @media (max-width: 700px) {
-      .services, .testimonial-list, .steps {
-        flex-direction: row !important;
-        flex-wrap: wrap !important;
-        gap: 1.2rem !important;
-        justify-content: center !important;
-      }
-      header, section {
-        padding: 2rem 0.7rem;
-      }
-      .hero {
-        padding: 0;
-      }
-      .final-cta {
-        padding: 2rem 0.7rem;
-      }
-    }
-  /* === GoGoBubbles Highlight Styles === */
+    box-shadow: 0 min(1.5vw, 6px) min(3vw, 12px) rgba(0,0,0,0.15);
+    animation: none;
+    transform: scale(1.05);
+  }
 
-/* Highlight Yellow */
+  .final-cta .cta-btn:active {
+    animation: none;
+    transform: scale(0.98);
+  }
+
+  .final-cta .cta-btn.clicked {
+    animation: none;
+  }
+
+  /* ✅ FLUID QUICK NAV TAB - ALWAYS VISIBLE */
+  .quick-nav-tab {
+    position: fixed;
+    top: clamp(12px, 3vw, 24px);
+    right: clamp(12px, 3vw, 24px);
+    z-index: 99999 !important;
+    background: linear-gradient(135deg,
+      rgba(16,134,188,0.40) 0%,
+      rgba(48,154,199,0.40) 25%,
+      rgba(0,196,204,0.40) 50%,
+      rgba(31,194,167,0.40) 75%,
+      rgba(79,209,197,0.40) 100%
+    );
+    color: #fff;
+    font-family: 'Inter', Arial, sans-serif;
+    font-size: clamp(1rem, 2.5vw, 1.3rem);
+    font-weight: 600;
+    border: none;
+    border-radius: clamp(12px, 2vw, 20px);
+    width: clamp(64px, 12vw, 96px);
+    height: clamp(64px, 12vw, 96px);
+    box-shadow: 0 clamp(4px, 1vw, 8px) clamp(16px, 6vw, 32px) rgba(44,62,80,0.13);
+    backdrop-filter: blur(8px);
+    transition: transform 0.35s cubic-bezier(.77,0,.18,1), opacity 0.3s ease;
+    opacity: 0; /* Hidden by default */
+    display: none; /* Hidden by default */
+    align-items: center;
+    justify-content: center;
+    transform: translateY(-20px); /* Hidden by default */
+  }
+
+  .quick-nav-tab:hover {
+    transform: scale(1.1);
+    background: linear-gradient(135deg,
+      rgba(16,134,188,0.55) 0%,
+      rgba(48,154,199,0.55) 25%,
+      rgba(0,196,204,0.55) 50%,
+      rgba(31,194,167,0.55) 75%,
+      rgba(79,209,197,0.55) 100%
+    );
+    filter: brightness(1.08);
+  }
+
+  /* ✅ FLUID NAVIGATION - POSITIONED ABOVE FOOTER */
+  .peek-nav-drawer {
+    position: fixed;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%) translateX(100%);
+    background: linear-gradient(135deg,
+      rgba(16,134,188,0.6) 0%,
+      rgba(48,154,199,0.6) 25%,
+      rgba(0,196,204,0.6) 50%,
+      rgba(31,194,167,0.6) 75%,
+      rgba(79,209,197,0.6) 100%
+    );
+    backdrop-filter: blur(10px);
+    box-shadow: -4px 0 20px rgba(0,0,0,0.2);
+    z-index: 99999;
+    border-radius: 20px 0 0 20px;
+    padding: 0;
+    transition: all 0.3s cubic-bezier(.4,0,.2,1);
+    opacity: 0;
+    pointer-events: none;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    align-items: center;
+    justify-items: center;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-right: none;
+    min-width: 120px;
+    max-width: 150px;
+  }
+  
+  .peek-nav-drawer.open {
+    transform: translateY(-50%) translateX(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .peek-nav-drawer .footer-nav-icon {
+    width: clamp(80px, 18vw, 120px);
+    height: clamp(80px, 18vw, 120px);
+    transition: all 0.3s cubic-bezier(.4,0,.2,1);
+    border-radius: 0;
+    padding: 16px;
+    background: transparent;
+  }
+
+  .peek-nav-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: #fff;
+    padding: 0;
+    border-radius: 0;
+    transition: all 0.3s ease;
+    min-width: 100px;
+    background: transparent;
+  }
+
+  .peek-nav-link:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateX(-2px);
+  }
+
+  .peek-nav-link:hover .footer-nav-icon {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+  }
+
+  .peek-nav-link:active .footer-nav-icon {
+    transform: scale(1.2);
+  }
+
+  .peek-nav-link .nav-label {
+    font-size: clamp(0.75rem, 2vw, 0.9rem);
+    font-weight: 600;
+    margin-top: 0;
+    text-align: center;
+    color: #fff;
+    line-height: 1.2;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+
+  /* ✅ FLOATING FOOTER - ALWAYS VISIBLE AT BOTTOM */
+  footer {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    background: #ffffff !important;
+    color: #333333 !important;
+    text-align: center !important;
+    padding: clamp(2px, 0.5vw, 4px) clamp(12px, 3vw, 16px) env(safe-area-inset-bottom, clamp(2px, 0.5vw, 4px)) clamp(12px, 3vw, 16px) !important;
+    font-size: 0.8rem !important;
+    z-index: 100000 !important;
+    border-top: 2px solid #1086bc !important;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1) !important;
+    font-weight: 600 !important;
+    margin: 0 !important;
+  }
+
+  /* ✅ HIDE DESKTOP NAVIGATION PANEL */
+  .footer-nav-panel {
+    display: none !important;
+  }
+
+  /* ✅ FLUID LIMITED OFFER */
+  .limited-offer-cta {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: min(4vw, 2rem) auto min(0.5vw, 0.2rem) auto;
+    padding: 0;
+  }
+
+  .limited-offer-label {
+    background: linear-gradient(135deg, #FFD166 0%, #FFB347 100%);
+    color: #2E2E2E;
+    padding: clamp(12px, 3vw, 24px) clamp(20px, 5vw, 32px);
+    border-radius: clamp(6px, 2vw, 12px);
+    display: inline-block;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: clamp(1rem, 3vw, 1.4rem);
+    box-shadow: 0 clamp(2px, 1vw, 6px) clamp(8px, 3vw, 16px) rgba(255, 209, 102, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    margin: 0;
+  }
+
+  /* ✅ FLUID HIGHLIGHT STYLES */
 .highlight-yellow {
     background-color: #FFD166;
     color: #2E2E2E;
-    padding: 8px 16px;
-    border-radius: 6px;
+    padding: min(2vw, 12px) min(3vw, 20px);
+    border-radius: min(1.5vw, 6px);
     display: inline-block;
     font-weight: bold;
     text-align: center;
 }
 
-/* Highlight Red */
 .highlight-red {
     background-color: #E63946;
     color: #FFFFFF;
-    padding: 8px 16px;
-    border-radius: 6px;
+    padding: min(2vw, 12px) min(3vw, 20px);
+    border-radius: min(1.5vw, 6px);
     display: inline-block;
     font-weight: bold;
     text-align: center;
 }
-/* 1️⃣ Enhanced Typography & Visual Hierarchy */
-body {
-    font-family: 'Open Sans', sans-serif;
-    color: #2E2E2E;
-    line-height: 1.7;
-    font-weight: 400;
-    letter-spacing: 0.01em;
-}
 
-h1, h2, h3, h4, h5, h6 {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 700;
-    color: #1a1a1a;
-    letter-spacing: -0.02em;
-    line-height: 1.2;
-}
+  /* ✅ FLUID SERVICE DETAILS */
+  .service-details { 
+    display: none; 
+    transition: max-height 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.3s; 
+    overflow: hidden; 
+  }
+  .service-details.open { 
+    display: block; 
+  }
 
-h1 { font-size: 3.5rem; font-weight: 800; }
-h2 { font-size: 2.5rem; font-weight: 700; margin-bottom: 1.5rem; }
-h3 { font-size: 1.8rem; font-weight: 600; margin-bottom: 1rem; }
-h4 { font-size: 1.4rem; font-weight: 600; margin-bottom: 0.75rem; }
-
-/* Enhanced text contrast and readability */
-p {
-    color: #3a3a3a;
-    line-height: 1.8;
-    font-weight: 400;
-}
-
-.hero h1 {
-    background: linear-gradient(135deg, #1a1a1a 0%, #2E2E2E 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-/* 2️⃣ Premium Gradient Effects & Enhanced Interactive Elements */
-button, .final-cta .cta-btn {
-    background: linear-gradient(135deg, #1fc2a7 0%, #4fd1c5 100%);
+  /* ✅ LEARN MORE BUTTON STYLES */
+  .learn-more-service {
+    background: linear-gradient(135deg, #1086bc 0%, #4fd1c5 100%);
     color: #FFFFFF;
-    padding: 16px 32px;
-    border-radius: 12px;
     font-family: 'Poppins', sans-serif;
-    font-weight: 700;
-    font-size: 1.1rem;
+    font-weight: 600;
+    padding: clamp(10px, 2vw, 16px) clamp(16px, 3vw, 24px);
     border: none;
+    border-radius: clamp(6px, 1.5vw, 10px);
+    font-size: clamp(0.9rem, 2.5vw, 1.1rem);
     cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 
-        0 8px 24px rgba(31, 194, 167, 0.3),
-        0 4px 12px rgba(0, 0, 0, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+    box-shadow: 0 clamp(2px, 0.5vw, 4px) clamp(6px, 2vw, 12px) rgba(16, 134, 188, 0.2);
+    margin-top: clamp(8px, 2vw, 12px);
     position: relative;
     overflow: hidden;
 }
 
-button::before, .final-cta .cta-btn::before {
+  .learn-more-service:hover {
+    transform: translateY(min(-0.5vw, -2px));
+    box-shadow: 0 min(1vw, 4px) min(4vw, 16px) rgba(16, 134, 188, 0.3);
+    background: linear-gradient(135deg, #4fd1c5 0%, #1fc2a7 100%);
+  }
+
+  .learn-more-service:active {
+    transform: translateY(0);
+  }
+
+  .learn-more-service::before {
     content: '';
     position: absolute;
     top: 0;
@@ -562,48 +866,66 @@ button::before, .final-cta .cta-btn::before {
     width: 100%;
     height: 100%;
     background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-    transition: left 0.6s ease;
+    transition: left 0.6s ease-in-out;
+    z-index: 1;
 }
 
-button:hover::before, .final-cta .cta-btn:hover::before {
+  .learn-more-service:hover::before {
     left: 100%;
 }
 
-button:hover, .final-cta .cta-btn:hover {
-    background: linear-gradient(135deg, #4fd1c5 0%, #1fc2a7 100%);
-    transform: translateY(-2px);
-    box-shadow: 
-        0 12px 32px rgba(31, 194, 167, 0.4),
-        0 6px 16px rgba(0, 0, 0, 0.15),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3);
-}
+  .learn-more-service span {
+    position: relative;
+    z-index: 2;
+  }
 
-button:active, .final-cta .cta-btn:active {
-    transform: translateY(0);
-    box-shadow: 
-        0 6px 16px rgba(31, 194, 167, 0.3),
-        0 3px 8px rgba(0, 0, 0, 0.1);
-}
+  /* ✅ SHIMMER EFFECTS */
+  .shimmer-overlay {
+    pointer-events: none;
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    border-radius: inherit;
+    opacity: 0;
+    z-index: 999;
+    background: linear-gradient(90deg, transparent, rgba(31,194,167,0.5), rgba(79,209,197,0.8), rgba(16,134,188,0.5), transparent);
+    transform: skewX(-8deg);
+    mix-blend-mode: screen;
+    will-change: opacity, transform;
+  }
+  .shimmer-animate {
+    animation: shimmer-overlay-anim 0.4s cubic-bezier(0.4,0,0.2,1) forwards;
+    opacity: 1;
+  }
+  @keyframes shimmer-overlay-anim {
+    0% { left: -100%; opacity: 0; }
+    15% { opacity: 1; }
+    85% { opacity: 1; }
+    100% { left: 100%; opacity: 0; }
+  }
+  .shimmer-animate-reverse {
+    animation: shimmer-overlay-anim-reverse 0.4s cubic-bezier(0.4,0,0.2,1) forwards;
+    opacity: 1;
+  }
+  @keyframes shimmer-overlay-anim-reverse {
+    0% { right: -100%; left: auto; opacity: 0; }
+    15% { opacity: 1; }
+    85% { right: 100%; left: auto; opacity: 1; }
+    100% { right: 100%; left: auto; opacity: 0; }
+  }
 
-/* 3️⃣ Enhanced Spacing & Custom Scrollbar */
-.hero {
-    max-width: 100%;
-    margin: 0;
-}
-
-/* Custom gradient scrollbar */
+  /* ✅ FLUID CUSTOM SCROLLBAR */
 ::-webkit-scrollbar {
-    width: 12px;
+    width: min(2vw, 12px);
 }
 
 ::-webkit-scrollbar-track {
     background: rgba(0, 0, 0, 0.05);
-    border-radius: 6px;
+    border-radius: min(1.5vw, 6px);
 }
 
 ::-webkit-scrollbar-thumb {
     background: linear-gradient(135deg, #1086bc, #4fd1c5);
-    border-radius: 6px;
+    border-radius: min(1.5vw, 6px);
     border: 2px solid rgba(255, 255, 255, 0.8);
 }
 
@@ -611,631 +933,219 @@ button:active, .final-cta .cta-btn:active {
     background: linear-gradient(135deg, #4fd1c5, #1fc2a7);
 }
 
-/* Enhanced section spacing */
-section {
-    padding: 80px 20px;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-/* Improved spacing for mobile */
-@media (max-width: 768px) {
-    section {
-        padding: 60px 16px;
-    }
-    
-    .hero {
-        max-width: 100%;
-        margin: 0;
-    }
-    
-    h1 { font-size: 2.5rem; }
-    h2 { font-size: 2rem; }
-    h3 { font-size: 1.5rem; }
-}
-
-/* 4️⃣ Section spacing → Premium brands use more vertical space */
-section {
-    padding: 60px 20px;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-/* 5️⃣ Optional: Alternate section background → Light Gray for modern look */
-section:nth-of-type(even) {
-    background-color: #F7F7F7;
-}
-    /* 1️⃣ Strengthen bottom CTA button */
-.final-cta .cta-btn {
-    background: #1fc2a7;
-    color: #FFFFFF;
-    font-family: 'Poppins', sans-serif;
-    font-weight: 700;
-    padding: 16px 32px;
-    border: none;
-    border-radius: 8px;
-    font-size: 1.1rem;
-    cursor: pointer;
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-}
-
-.final-cta .cta-btn:hover {
-    background: #4fd1c5;
-    color: #fff;
-    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-}
-
-/* Pulsing animation for CTA button */
+  /* ✅ PULSING ANIMATION */
 @keyframes pulse {
     0% {
         transform: scale(1);
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      box-shadow: 0 min(1vw, 4px) min(2.5vw, 10px) rgba(0,0,0,0.1);
     }
     50% {
         transform: scale(1.05);
-        box-shadow: 0 6px 20px rgba(31,194,167,0.3);
+      box-shadow: 0 min(1.5vw, 6px) min(5vw, 20px) rgba(31,194,167,0.3);
     }
     100% {
         transform: scale(1);
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      box-shadow: 0 min(1vw, 4px) min(2.5vw, 10px) rgba(0,0,0,0.1);
     }
-}
+  }
 
-.final-cta .cta-btn {
-    animation: pulse 2s infinite;
-    transition: all 0.3s ease;
-}
-
-.final-cta .cta-btn:hover {
-    animation: none;
-    transform: scale(1.05);
-}
-
-.final-cta .cta-btn:active {
-    animation: none;
-    transform: scale(0.98);
-}
-
-/* Stop pulsing after click */
-.final-cta .cta-btn.clicked {
-    animation: none;
-}
-
-
-
-/* 2️⃣ Improve FAQ question text (FAQ headings) */
-.faq h2 {
-    font-family: 'Poppins', sans-serif;
-    font-size: 2rem;
-    font-weight: 700;
-    color: #2E2E2E;
-    margin-bottom: 2rem;
-}
-
-.faq-item h4 {
-    font-family: 'Poppins', sans-serif;
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: #1086bc;
-    margin-bottom: 0.5rem;
-}
-
-/* Collapsible FAQ Styles */
-.faq-question {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-    padding: 1rem;
-    background: #f8fafc;
-    border-radius: 8px;
-    margin-bottom: 0.2rem;
-    transition: background-color 0.3s ease;
-}
-
-.faq-question:hover {
-    background: #e2e8f0;
-}
-
-.faq-question h4 {
-    margin: 0;
-    padding: 0;
-    line-height: 1.2;
-}
-
-.faq-toggle {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #1086bc;
-    transition: transform 0.3s ease;
-    min-width: 24px;
+  /* ✅ SMOOTH SCROLLING */
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* ✅ LOADING ANIMATIONS & SKELETON SCREENS */
+  .loading-skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading-shimmer 1.5s infinite;
+    border-radius: 4px;
+  }
+  
+  /* ✅ DETAILED STEP SKELETON */
+  .loading-skeleton-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
+    gap: min(3vw, 1.5rem);
+    margin-top: min(4vw, 2rem);
+    border: 2px solid #e0e0e0;
+    padding: 10px;
+    background: #f9f9f9;
+  }
+  
+  .step-skeleton {
+    background: #fff;
+    border-radius: min(2vw, 0.75rem);
+    padding: min(4vw, 1.5rem) min(3vw, 1rem);
+    box-shadow: 0 min(0.5vw, 2px) min(2vw, 8px) rgba(0,0,0,0.04);
     text-align: center;
-}
-
-.faq-item.active .faq-toggle {
-    transform: rotate(45deg);
-}
-
-.faq-answer {
-    max-height: 0;
-    opacity: 0;
-    overflow: hidden;
-    transition: all 0.3s ease;
-    padding: 0 1rem;
-}
-
-.faq-item.active .faq-answer {
-    max-height: 500px;
-    opacity: 1;
-    padding: 1rem;
-}
-
-.faq-answer p {
-    margin: 0;
-    color: #444;
-    line-height: 1.6;
-}
-
-/* Desktop: Show all FAQ answers by default */
-@media (min-width: 768px) {
-    .faq-question {
-        cursor: default;
-        background: transparent;
-        padding: 0;
-        margin-bottom: 0.5rem;
-    }
-    
-    .faq-question:hover {
-        background: transparent;
-    }
-    
-    .faq-toggle {
-        display: none;
-    }
-    
-    .faq-answer {
-        max-height: none;
-        padding: 0;
-    }
-    
-    .faq-item.active .faq-answer {
-        padding: 0;
-    }
-}
-.service-card {
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    background: rgba(255, 255, 255, 0.98);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 20px;
-    padding: 2rem;
-    box-shadow: 
-        0 12px 32px rgba(0, 0, 0, 0.08),
-        0 4px 16px rgba(0, 0, 0, 0.04),
-        inset 0 1px 0 rgba(255, 255, 255, 0.8);
     position: relative;
     overflow: hidden;
-}
-
-.service-card::before {
+    border: 1px solid #ddd;
+  }
+  
+  .step-number-skeleton {
+    width: min(8vw, 40px);
+    height: min(8vw, 40px);
+    border-radius: 50%;
+    margin: 0 auto min(2vw, 0.5rem) auto;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading-shimmer 1.5s infinite;
+    border: 2px solid #ddd;
+  }
+  
+  .step-title-skeleton {
+    height: clamp(1rem, 3vw, 1.3rem);
+    width: 80%;
+    margin: 0 auto clamp(8px, 1.5vw, 12px) auto;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading-shimmer 1.5s infinite;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+  }
+  
+  .step-text-skeleton {
+    height: clamp(0.85rem, 2.5vw, 1rem);
+    width: 90%;
+    margin: 0 auto;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading-shimmer 1.5s infinite;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+  }
+  
+  .step-text-skeleton:before {
     content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(31, 194, 167, 0.08),
-        rgba(79, 209, 197, 0.15),
-        rgba(16, 134, 188, 0.12),
-        rgba(31, 194, 167, 0.08),
-        transparent
-    );
-    transform: skewX(-6deg);
-    opacity: 0;
-    transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    pointer-events: none;
-    animation: var(--shimmer-anim, none);
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
-}
+        display: block;
+    height: clamp(0.85rem, 2.5vw, 1rem);
+    width: 70%;
+    margin: clamp(8px, 1.5vw, 12px) auto 0 auto;
 
-.service-card.active-shimmer::before {
+
+    
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading-shimmer 1.5s infinite;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+  }
+  
+  @keyframes loading-shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  
+  /* ✅ LAZY LOADING STYLES */
+  .lazy-image {
+        opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+  }
+  
+  .lazy-image.loaded {
     opacity: 1;
-    animation: var(--shimmer-anim, iridescent-shimmer 1.2s cubic-bezier(0.4, 0, 0.2, 1)) forwards !important;
-}
-
-.service-card:active::before,
-.service-card:focus:active::before {
-    animation: iridescent-shimmer 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-
-@keyframes iridescent-shimmer {
-    0% {
-        left: -100%;
-        opacity: 0;
-        transform: skewX(-6deg) scaleX(1);
-    }
-    15% {
-        opacity: 0.9;
-    }
-    85% {
-        opacity: 0.9;
-    }
-    100% {
-        left: 100%;
-        opacity: 0;
-        transform: skewX(-6deg) scaleX(1.1);
-    }
-}
-
-/* Mobile-optimized touch interactions */
-@media (hover: none) and (pointer: coarse) {
-    .service-card::before {
-        background: linear-gradient(
-            90deg,
-            transparent,
-            rgba(31, 194, 167, 0.12),
-            rgba(79, 209, 197, 0.2),
-            rgba(16, 134, 188, 0.16),
-            rgba(31, 194, 167, 0.12),
-            transparent
-        );
-    }
-    
-    .service-card:active::before {
-        animation: iridescent-shimmer 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-    }
-}
-
-/* Reduced motion for accessibility */
-@media (prefers-reduced-motion: reduce) {
-    .service-card::before {
-        animation: none;
-        transition: none;
-    }
-    
-    .service-card:hover::before,
-    .service-card:focus-within::before,
-    .service-card:active::before {
-        animation: none;
-    }
-}
-
-.service-card:hover {
-    transform: translateY(-12px) scale(1.05);
-    box-shadow: 
-        0 32px 64px rgba(0, 0, 0, 0.15),
-        0 12px 32px rgba(0, 0, 0, 0.1),
-        0 0 0 1px rgba(255, 255, 255, 0.6),
-        inset 0 1px 0 rgba(255, 255, 255, 0.95);
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
-}
-
-/* Shimmer effect - fast and dramatic */
-.service-card.shimmer-active {
-    transform: translateY(-15px) scale(1.08);
-    box-shadow: 
-        0 40px 80px rgba(0, 0, 0, 0.2),
-        0 16px 40px rgba(0, 0, 0, 0.12),
-        0 0 0 2px rgba(31, 194, 167, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 1);
-    z-index: 999;
-    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
-}
-section h2 {
-    position: relative;
-    display: block;
-    text-align: center;
-    margin-bottom: 2rem;
-    font-family: 'Poppins', sans-serif;
-    font-size: 2rem;
-    font-weight: 700;
-    color: #2E2E2E;
-    -webkit-font-smoothing: antialiased;
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
-}
-
-section h2::after {
-    content: "";
-    display: block;
-    width: 60px;
-    height: 4px;
-    background-color: #4EC5D6; /* Aqua Brand Color */
-    margin: 8px auto 0;
-    border-radius: 2px;
-}
-.service-card h3 {
-    font-family: 'Poppins', sans-serif;
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: #2E2E2E;
-    margin-bottom: 0.5rem;
-    -webkit-font-smoothing: antialiased;
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
-}
-/* Final Polish → Subtle Improvements */
-
-/* Enhanced Testimonials with Premium Styling */
-.testimonial-list {
-  gap: 3rem;
-}
-
-.testimonial {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%);
-  backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: 24px;
-  padding: 2.5rem;
-  box-shadow: 
-    0 16px 40px rgba(0, 0, 0, 0.08),
-    0 6px 20px rgba(0, 0, 0, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-  font-size: 1.1rem;
-  line-height: 1.8;
-  color: #2a2a2a;
-}
-
-.testimonial::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #1086bc, #4fd1c5, #1fc2a7);
-  border-radius: 24px 24px 0 0;
-}
-
-.testimonial:hover {
-  transform: translateY(-6px);
-  box-shadow: 
-    0 24px 56px rgba(0, 0, 0, 0.12),
-    0 8px 24px rgba(0, 0, 0, 0.08),
-    0 0 0 1px rgba(255, 255, 255, 0.6);
-}
-
-.testimonial .author {
-  color: #1086bc !important;
-  font-weight: 700;
-  font-size: 1rem;
-  margin-top: 1rem;
-  display: block;
-}
-
-/* Slightly lighter quote mark */
-.testimonial::before {
-  color: #A2D9CE; /* Softer teal */
-}
-
-/* Slight space below How It Works section */
-.steps {
-  margin-bottom: 2rem;
-}
-
-/* FAQ items spacing fix */
-.faq-item {
-  margin-bottom: 1rem;
-}
-
-/* Final CTA section tweak */
-.final-cta h2 {
-  font-size: 2.2rem;
-  font-weight: 700;
-  margin-bottom: 1.2rem;
-}
-
-.final-cta p {
-  font-size: 1.1rem;
-  margin-bottom: 1.5rem;
-  color: #ffffff;
-}
-
-/* Footer copyright spacing */
-footer {
-  padding: 1.5rem 0;
-  font-size: 0.9rem;
-  color: #888;
-  text-align: center;
+  }
+  
+  /* ✅ TOUCH FEEDBACK */
+  .touch-feedback {
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+  }
+  
+  .touch-feedback:active {
+    transform: scale(0.98);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+  
+  .service-card.touch-feedback:active {
+    transform: scale(0.95);
+  }
+  
+  .cta-btn.touch-feedback:active {
+    transform: scale(0.95);
   }
 
-.learn-more-service {
-  background: linear-gradient(120deg, #1086bc 0%, #309ac7 100%);
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  font-size: 0.9rem;
-  cursor: pointer;
-  margin-top: 1rem;
-  transition: background 0.3s ease;
-}
-
-.learn-more-service:hover {
-  background: linear-gradient(120deg, #309ac7 0%, #4fd1c5 100%);
-}
-
-.service-details {
-  display: none;
-  margin-top: 1rem;
-  padding: 1rem;
-  background: #f8fafc;
-  border-radius: 0.5rem;
-  font-size: 0.95rem;
-  line-height: 1.5;
-}
-
-.service-details p {
-  margin: 0.5rem 0;
-  color: #4a5568;
-}
-
-@media (min-width: 768px) {
+  /* ✅ MOBILE VIEWPORT HANDLING */
+  :root {
+    --vh: 1vh;
+  }
+  
+  body {
+    min-height: calc(var(--vh, 1vh) * 100);
+    overflow-x: hidden;
+  }
+  
   .hero {
+    position: relative;
+  width: 100%;
+    height: 100vh;
+    overflow: hidden;
+  margin: 0;
     padding: 0;
   }
-  .hero img {
-    max-width: 280px;
-  }
-}
 
-@media (max-width: 600px) {
-  .hero {
-    margin-top: 0 !important;
-  }
-}
-
-.final-cta.sticky-cta {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100%;
-  z-index: 1000;
-  margin: 0;
-  border-radius: 1.5rem 1.5rem 0 0;
-  box-shadow: 0 -2px 12px rgba(44,62,80,0.10);
-  padding: 0.75rem 1.5rem;
-  padding-bottom: env(safe-area-inset-bottom, 16px);
-  background: linear-gradient(135deg, #1086bc 0%, #309ac7 25%, #00C4CC 50%, #1fc2a7 75%, #4fd1c5 100%);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  box-sizing: border-box;
-}
-
-.final-cta.sticky-cta h2 {
-  font-size: 1.2rem;
-  margin: 0;
-  color: #fff;
-  line-height: 1.2;
-}
-
-.final-cta.sticky-cta p {
-  display: block;
-  margin: 0;
-  font-size: 0.9rem;
-  color: #e0f7fa;
-  font-weight: 400;
-  line-height: 1.2;
-}
-
-.final-cta.sticky-cta .cta-btn {
-  padding: 0.8rem 1.5rem;
-  font-size: 1rem;
-  flex-shrink: 0;
-}
-
-.sticky-footer-cta {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100%;
-  z-index: 2000;
-  background: linear-gradient(135deg, #1086bc 0%, #309ac7 25%, #00C4CC 50%, #1fc2a7 75%, #4fd1c5 100%);
-  text-align: center;
-  padding: 1rem 0;
-  padding-bottom: env(safe-area-inset-bottom, 16px);
-  box-shadow: 0 -2px 12px rgba(44,62,80,0.10);
-  box-sizing: border-box;
-}
-.sticky-cta-btn {
-  background: #1fc2a7;
-  color: #fff;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 700;
-  font-size: 1.1rem;
-  border: none;
-  border-radius: 8px;
-  padding: 1rem 2.5rem;
+  .how-it-works-card {
+    transition: box-shadow 0.3s, transform 0.3s;
   cursor: pointer;
-  text-decoration: none;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-  transition: background 0.2s;
-}
-.sticky-cta-btn:hover {
-  background: #4299e1;
+  }
+  .how-it-works-card:hover,
+  .how-it-works-card.tapped {
+    box-shadow: 0 8px 24px rgba(16,134,188,0.15);
+    transform: translateY(-6px) scale(1.03);
+    /* Optionally add shimmer/gradient here */
 }
   </style>
 </head>
 <body>
-  <!-- HERO SECTION: Edge-to-edge, hero image with gradient overlay -->
-  <header class="hero">
-    <img src="website_hero.png?v=34" alt="GoGoBubbles - Premium On-Demand Cleaning Services" class="hero-image">
-    <div class="hero-overlay"></div>
-  </header>
+  <!-- HERO SECTION: Full-width hero image with background -->
+  <section class="hero" id="hero">
+    <div class="hero-background"></div>
+    <div class="hero-frame-overlay"></div>
+    <div class="hero-content">
+      <h1>Professional Cleaning Services</h1>
+      <p>Car wash, home cleaning, and laundry services delivered to your doorstep.</p>
+    </div>
+  </section>
   <!-- Standalone Limited Time Offer label below hero -->
   <div class="limited-offer-cta">
     <div class="limited-offer-label">
       Limited Time Introductory Offer
     </div>
   </div>
-  <style>
-  .limited-offer-cta {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 2rem auto 0.1rem auto !important;
-    padding: 0;
-  }
-  .limited-offer-label {
-    background: linear-gradient(135deg, #FFD166 0%, #FFB347 100%);
-    color: #2E2E2E;
-    padding: 12px 24px;
-    border-radius: 8px;
-    display: inline-block;
-    font-family: 'Poppins', sans-serif;
-    font-weight: 700;
-    font-size: 1.1rem;
-    box-shadow: 0 4px 12px rgba(255, 209, 102, 0.3);
-    border: 2px solid rgba(255, 255, 255, 0.8);
-    margin: 0;
-  }
-  </style>
+
 
   <section id="services" style="padding-top: 0.1rem; margin-top: 0.3rem;">
     <h2>Our Services</h2>
     <div class="services">
-      <div class="service-card">
-        <img src="mobilecarwash.png" alt="Mobile Car Wash" style="width:100%;max-width:220px;margin:0 auto 1rem;display:block;">
+      <div class="service-card touch-feedback">
+        <img src="mobilecarwash.png" alt="Mobile Car Wash" class="lazy-image" loading="lazy">
         <h3>Mobile Car Wash</h3>
-        <div class="highlight-red" style="display:inline-block; margin-bottom:0.5rem;">Now Booking!</div>
+        <div class="highlight-red">Now Booking!</div>
         <p>Professional exterior and interior car cleaning - delivered to your location. We bring our own water and power. No mess, no hassle.</p>
-        <button class="learn-more-service" onclick="toggleServiceDetails(this)">Learn More</button>
+        <button class="learn-more-service touch-feedback" onclick="toggleServiceDetails(this)">Learn More</button>
         <div class="service-details">
           <p>Our Express Shine includes a hand-applied exterior wash, window cleaning, and tire shine.</p>
           <p>Upgrade to Signature Shine or Supreme Shine for interior vacuuming, surface wipe-downs, interior scent, and full detailing.</p>
           <p>Add-ons: Clay Bar Treatment, Bug & Tar Removal, Upholstery Cleaning, etc.</p>
         </div>
       </div>
-      <div class="service-card">
-        <img src="homecleaning.png" alt="Home Cleaning" style="width:100%;max-width:220px;margin:0 auto 1rem;display:block;">
+      <div class="service-card touch-feedback">
+        <img src="homecleaning.png" alt="Home Cleaning" class="lazy-image" loading="lazy">
         <h3>Home Cleaning</h3>
         <p>Thorough, reliable home cleaning. Flexible packages for kitchens,bathrooms, living spaces, and more. Enjoy a spotless home without lifting a finger.</p>
-        <button class="learn-more-service" onclick="toggleServiceDetails(this)">Learn More</button>
+        <button class="learn-more-service touch-feedback" onclick="toggleServiceDetails(this)">Learn More</button>
         <div class="service-details">
           <p>Our Refresher Clean includes surface-level dusting, vacuuming, and wipe-downs for kitchens, bathrooms, and common areas.</p>
           <p>Upgrade to Signature Deep Clean for deep dusting, baseboards, blinds, and microwave cleaning.</p>
           <p>Add-ons: Oven Cleaning, Refrigerator Cleaning, Window Cleaning, etc.</p>
         </div>
       </div>
-      <div class="service-card">
-        <img src="laundry.png" alt="Laundry" style="width:100%;max-width:220px;margin:0 auto 1rem;display:block;">
+      <div class="service-card touch-feedback">
+        <img src="laundry.png" alt="Laundry" class="lazy-image" loading="lazy">
         <h3>Laundry</h3>
         <p>Door-to-door laundry pickup and delivery. Fresh, clean, folded, returned to your home. Save time - we do the washing for you.</p>
-        <button class="learn-more-service" onclick="toggleServiceDetails(this)">Learn More</button>
+        <button class="learn-more-service touch-feedback" onclick="toggleServiceDetails(this)">Learn More</button>
         <div class="service-details">
           <p>Our Essentials Bag includes wash, dry, fold, and delivery using unscented detergent and dryer sheets.</p>
           <p>Upgrade with Family Bags for large loads or Add-On Bags for ironing or delicates.</p>
@@ -1248,20 +1158,42 @@ footer {
   <section class="how-it-works" id="how-it-works">
     <h2>How It Works</h2>
     <div class="steps">
+      <!-- Loading Skeleton -->
+      <div id="howItWorksSkeleton" class="loading-skeleton-container" style="display: block;">
+        <div class="step-skeleton">
+          <div class="step-number-skeleton"></div>
+          <div class="step-title-skeleton"></div>
+          <div class="step-text-skeleton"></div>
+        </div>
+        <div class="step-skeleton">
+          <div class="step-number-skeleton"></div>
+          <div class="step-title-skeleton"></div>
+          <div class="step-text-skeleton"></div>
+        </div>
+        <div class="step-skeleton">
+          <div class="step-number-skeleton"></div>
+          <div class="step-title-skeleton"></div>
+          <div class="step-text-skeleton"></div>
+        </div>
+      </div>
+      
+      <!-- Content (initially hidden) -->
+      <div id="howItWorksContent" style="display: none;">
       <div class="step">
         <span>1</span>
-        <div>Book Online in Minutes</div>
+          <h3>Book Online in Minutes</h3>
         <p>Select your services and preferred time — it only takes 2 minutes to schedule.</p>
       </div>
       <div class="step">
         <span>2</span>
-        <div>We Come to You</div>
+          <h3>We Come to You</h3>
             <p>Our pros arrive fully equipped - car wash, home cleaning, or laundry pickup - all done at your location. </p>
       </div>
       <div class="step">
         <span>3</span>
-        <div>You Relax, We Handle the Rest</div>
+          <h3>You Relax, We Handle the Rest</h3>
         <p>Enjoy a spotless car, clean home, and fresh laundry - without lifting a finger. It's that easy.</p>
+        </div>
       </div>
     </div>
   </section>
@@ -1269,6 +1201,11 @@ footer {
   <section class="testimonials" id="testimonials">
     <h2>Hear From Happy GoGoBubbles Customers</h2>
     <div class="testimonial-list">
+      <!-- Loading Skeleton -->
+      <div id="testimonialsSkeleton" class="loading-skeleton" style="height: 300px; width: 100%; margin-bottom: 20px;"></div>
+      
+      <!-- Content (initially hidden) -->
+      <div id="testimonialsContent" style="display: none;">
       <div class="testimonial">
         Super convenient and professional! I booked a car wash and home cleaning bundle - everything was spotless. Highly recommend!
         <span class="author">— Alex R.</span>
@@ -1280,11 +1217,12 @@ footer {
       <div class="testimonial">
         Booked online, got a great deal on a combo service - my car and house both look amazing. GoGoBubbles is my new go-to!
         <span class="author">— Marcus T.</span>
+        </div>
       </div>
     </div>
   </section>
 
-  <section class="faq" id="faq">
+  <section class="faq" id="faq" style="padding-bottom: 150px;">
     <div style="text-align: center; margin: 1.2rem auto 0.5rem auto; width: 100%;">
       <div style="background: linear-gradient(135deg, #FFD166 0%, #FFB347 100%); color: #2E2E2E; padding: 12px 24px; border-radius: 8px; display: inline-block; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 1.1rem; box-shadow: 0 4px 12px rgba(255, 209, 102, 0.3); border: 2px solid rgba(255, 255, 255, 0.8);">
         Proudly Serving the Houston Tri-State Area
@@ -1347,306 +1285,24 @@ footer {
     </div>
   </section>
 
-  <section class="final-cta sticky-cta" id="final-cta">
+  <section class="final-cta" id="final-cta">
     <div>
       <h2>Ready for Effortless Clean?</h2>
+      <div style="width: 100%; height: 2px; background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.6) 50%, transparent 100%); margin: 8px 0; animation: shimmer-bar 2s ease-in-out infinite;"></div>
       <p>Fast and easy online booking.</p>
     </div>
     <a href="booking.html" class="cta-btn">Book Your Service Now</a>
   </section>
 
-  <footer style="text-align:center; color:#888; padding:1.5rem 0 1rem; font-size:0.95rem;">
+  <footer>
     &copy; 2024 GoGoBubbles. All rights reserved.
   </footer>
 
-  <!-- Premium Floating Footer Navigation Panel -->
-<nav class="footer-nav-panel vertical-nav-panel">
-  <a href="#services" class="footer-nav-link">
-    <img src="service_icon.png" alt="Services" class="footer-nav-icon">
-    <span class="nav-label" style="color:#1a365d;">Services</span>
-  </a>
-  <a href="#how-it-works" class="footer-nav-link">
-    <img src="how_it_works_icon.png" alt="How It Works" class="footer-nav-icon">
-    <span class="nav-label" style="color:#1a365d;">How It Works</span>
-  </a>
-  <a href="#testimonials" class="footer-nav-link">
-    <img src="review_icon.png" alt="Reviews" class="footer-nav-icon">
-    <span class="nav-label" style="color:#1a365d;">Reviews</span>
-  </a>
-  <a href="#faq" class="footer-nav-link">
-    <img src="faq_icon.png" alt="FAQ" class="footer-nav-icon">
-    <span class="nav-label" style="color:#1a365d;">FAQs</span>
-  </a>
-</nav>
-
-<style>
-.vertical-nav-panel .nav-label {
-  display: block;
-  text-align: center;
-  font-family: 'Inter', Arial, sans-serif;
-  font-size: 0.6rem;
-  font-weight: 600;
-  margin-top: 0.1rem;
-  letter-spacing: 0.01em;
-  text-shadow: 0 1px 4px rgba(44,62,80,0.10);
-  -webkit-font-smoothing: antialiased;
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
-}
-</style>
-
-<style>
-html, body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-}
-</style>
-
-<style>
-html {
-  scroll-behavior: smooth;
-}
-.vertical-nav-panel {
-  position: fixed;
-  top: 50%;
-  left: 8px;
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  background: linear-gradient(135deg, #1086bc 0%, #309ac7 25%, #00C4CC 50%, #1fc2a7 75%, #4fd1c5 100%);
-  backdrop-filter: blur(8px);
-  border-radius: 0.7rem;
-  box-shadow: 0 2px 8px rgba(44,62,80,0.07);
-  padding: 0.3rem 0.1rem;
-  z-index: 1200;
-  align-items: center;
-  border: 1px solid rgba(44,62,80,0.08);
-  opacity: 0.96;
-}
-.footer-nav-icon {
-  width: 72px;
-  height: 72px;
-  margin: 0;
-  display: block;
-  filter: drop-shadow(0 1px 2px rgba(44,62,80,0.10));
-  transition: transform 0.18s cubic-bezier(.4,0,.2,1), box-shadow 0.18s cubic-bezier(.4,0,.2,1);
-}
-.footer-nav-link {
-  background: none;
-  border: none;
-  box-shadow: none;
-  padding: 0;
-  border-radius: 1rem;
-  transition: background 0.2s, box-shadow 0.2s;
-}
-.footer-nav-link:hover .footer-nav-icon, .footer-nav-link:focus .footer-nav-icon {
-  transform: scale(1.32) translateY(-6px) !important;
-  box-shadow: 0 12px 32px rgba(31,194,167,0.32), 0 2px 12px rgba(44,62,80,0.18) !important;
-  z-index: 2 !important;
-}
-.footer-nav-icon {
-  transition: transform 0.22s cubic-bezier(.4,0,.2,1), box-shadow 0.22s cubic-bezier(.4,0,.2,1) !important;
-}
-@media (max-width: 900px) {
-  .vertical-nav-panel {
-    padding: 0.1rem 0.05rem;
-    gap: 0.1rem;
-    border-radius: 0.5rem;
-  }
-  .footer-nav-icon {
-    width: 64px;
-    height: 64px;
-  }
-}
-@media (max-width: 900px) {
-  .vertical-nav-panel {
-    padding: 0.05rem 0.01rem;
-    gap: 0.05rem;
-    border-radius: 0.3rem;
-  }
-  .footer-nav-icon {
-    width: 56px;
-    height: 56px;
-  }
-}
-@media (max-width: 900px) {
-  .vertical-nav-panel {
-    right: 0;
-    left: auto;
-    top: 16px;
-    transform: translateX(120%);
-    transition: transform 0.28s cubic-bezier(.4,0,.2,1), opacity 0.18s;
-    opacity: 0;
-    border-radius: 1.2rem;
-    box-shadow: 0 2px 16px rgba(44,62,80,0.13);
-    background: linear-gradient(135deg, #1086bc 0%, #309ac7 25%, #00C4CC 50%, #1fc2a7 75%, #4fd1c5 100%);
-    padding: 0.3rem 0.1rem;
-    gap: 0.2rem;
-    display: flex;
-    flex-direction: column;
-    position: fixed;
-    z-index: 2001;
-    align-items: center;
-    width: 68px;
-    height: auto;
-    pointer-events: none;
-  }
-  .vertical-nav-panel.open {
-    transform: translateX(0);
-    opacity: 1;
-    pointer-events: auto;
-  }
-  .nav-toggle-btn {
-    right: 0;
-    left: auto;
-    position: fixed;
-    top: 18px;
-    z-index: 2100;
-    background: #fff;
-    border: none;
-    border-radius: 50%;
-    box-shadow: 0 2px 8px rgba(44,62,80,0.13);
-    padding: 0.3rem;
-    cursor: pointer;
-    transition: box-shadow 0.18s;
-  }
-  .nav-toggle-btn:active {
-    box-shadow: 0 4px 16px rgba(44,62,80,0.18);
-  }
-  body.nav-open::before {
-    content: '';
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(44,62,80,0.13);
-    z-index: 2000;
-    pointer-events: auto;
-  }
-}
-</style>
-
-<!-- Floating Quick Nav Tab (mobile only, appears after scroll) -->
-<button id="quickNavTab" class="quick-nav-tab" aria-label="Open navigation" style="display:none;">
+<!-- Floating Quick Nav Tab (always visible) -->
+<button id="quickNavTab" class="quick-nav-tab" aria-label="Open navigation">
   Quick Nav
 </button>
 
-<style>
-.quick-nav-tab {
-  position: fixed;
-  top: 1.2rem;
-  right: 1.2rem;
-  z-index: 1050;
-  background: linear-gradient(135deg,
-    rgba(16,134,188,0.40) 0%,
-    rgba(48,154,199,0.40) 25%,
-    rgba(0,196,204,0.40) 50%,
-    rgba(31,194,167,0.40) 75%,
-    rgba(79,209,197,0.40) 100%
-  );
-  color: #fff;
-  font-family: 'Inter', Arial, sans-serif;
-  font-size: 1rem;
-  font-weight: 600;
-  border: none;
-  border-radius: 0.7rem;
-  width: 68px;
-  height: 68px;
-  box-shadow: 0 2px 8px rgba(44,62,80,0.13);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s, opacity 0.2s;
-  backdrop-filter: blur(2px);
-  opacity: 0.96;
-}
-.quick-nav-tab:hover {
-  background: linear-gradient(135deg,
-    rgba(16,134,188,0.55) 0%,
-    rgba(48,154,199,0.55) 25%,
-    rgba(0,196,204,0.55) 50%,
-    rgba(31,194,167,0.55) 75%,
-    rgba(79,209,197,0.55) 100%
-  );
-  filter: brightness(1.08);
-}
-@media (max-width: 600px) {
-  .quick-nav-tab {
-    width: 56px;
-    height: 56px;
-    font-size: 0.85rem;
-    top: 0.7rem;
-    right: 0.7rem;
-  }
-}
-
-/* Desktop: Hide drawer */
-.peek-nav-drawer {
-  display: none;
-}
-
-/* Mobile: Show drawer on the right, matching left panel style but translucent */
-@media (max-width: 900px) {
-  .peek-nav-drawer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.2rem;
-    position: fixed;
-    top: 50%;
-    right: 8px;
-    left: auto;
-    transform: translateY(-50%) translateX(120%);
-    min-width: 68px;
-    width: 68px;
-    padding: 0.3rem 0.1rem;
-    background: linear-gradient(135deg,
-      rgba(16,134,188,0.40) 0%,
-      rgba(48,154,199,0.40) 25%,
-      rgba(0,196,204,0.40) 50%,
-      rgba(31,194,167,0.40) 75%,
-      rgba(79,209,197,0.40) 100%
-    );
-    border-radius: 0.7rem;
-    box-shadow: 0 4px 24px rgba(44,62,80,0.13);
-    backdrop-filter: blur(8px);
-    z-index: 1051;
-    transition: transform 0.35s cubic-bezier(.77,0,.18,1), opacity 0.2s;
-    opacity: 1;
-  }
-  .peek-nav-drawer.open {
-    transform: translateY(-50%) translateX(0);
-    opacity: 1;
-  }
-  .peek-nav-drawer .footer-nav-icon {
-    width: 56px;
-    height: 56px;
-    transition: transform 0.22s cubic-bezier(.4,0,.2,1), box-shadow 0.22s cubic-bezier(.4,0,.2,1), background 0.18s;
-  }
-  .peek-nav-drawer .footer-nav-icon:active,
-  .peek-nav-drawer .footer-nav-icon:hover {
-    transform: scale(1.32) translateY(-6px);
-    box-shadow: 0 12px 32px 0 rgba(31,194,167,0.32), 0 2px 12px 0 rgba(44,62,80,0.18);
-    background: rgba(255,255,255,0.18);
-    border-radius: 8px;
-    z-index: 2;
-  }
-  .peek-nav-link {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-decoration: none;
-    color: inherit;
-  }
-  .peek-nav-link .nav-label {
-    font-size: 0.7rem;
-    font-weight: 500;
-    margin-top: 0.2rem;
-    text-align: center;
-  }
-}
-</style>
 <!-- Mobile Drawer Navigation -->
 <div id="mobileNavDrawer" class="peek-nav-drawer">
   <a href="#services" class="peek-nav-link" aria-label="Services">
@@ -1666,302 +1322,214 @@ html {
     <span class="nav-label" style="color:#1a365d;">FAQs</span>
   </a>
 </div>
+
 <script>
+// All test functions removed - functionality is now working properly
+
 (function() {
   var quickTab = document.getElementById('quickNavTab');
   var drawer = document.getElementById('mobileNavDrawer');
-  // Show tab after scrolling 120px (mobile only), but hide in FAQ section
+  
+  // Always show quick navigation tab
   function updateQuickTab() {
-    if (window.innerWidth <= 900 && window.scrollY > 120) {
-      // Check if we're in the FAQ section
-      const faqSection = document.getElementById('faq');
-      if (faqSection) {
-        const faqTop = faqSection.offsetTop;
-        const faqBottom = faqTop + faqSection.offsetHeight;
-        const currentScrollTop = window.scrollY;
-        
-        // Hide if we're in the FAQ section (from top to bottom)
-        if (currentScrollTop >= faqTop && currentScrollTop < faqBottom) {
-          quickTab.style.display = 'none';
-          if (drawer) drawer.classList.remove('open');
-        } else {
-          quickTab.style.display = 'flex';
-        }
-      } else {
-        quickTab.style.display = 'flex';
-      }
+    if (!quickTab) {
+      return;
+    }
+    
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const heroSection = document.querySelector('.hero');
+    const scrollThreshold = heroSection ? heroSection.offsetHeight * 0.6 : 300; // Show after 60% of hero height
+    
+    if (scrollTop > scrollThreshold) {
+      // Show the quick nav tab when scrolled
+      quickTab.style.display = 'flex';
+      quickTab.style.opacity = '1';
+      quickTab.style.transform = 'translateY(0)';
     } else {
+      // Hide the quick nav tab when at top
       quickTab.style.display = 'none';
-      if (drawer) drawer.classList.remove('open');
+      quickTab.style.opacity = '0';
+      quickTab.style.transform = 'translateY(-20px)';
     }
   }
-  window.addEventListener('scroll', updateQuickTab);
-  window.addEventListener('resize', updateQuickTab);
-  document.addEventListener('DOMContentLoaded', updateQuickTab);
-  // Toggle drawer on tab click
-  quickTab.addEventListener('click', function(e) {
-    console.log('Quick Nav clicked');
-    e.stopPropagation();
-    if (drawer) drawer.classList.toggle('open');
-  });
-  // Hide drawer when clicking outside
-  document.addEventListener('click', function(e) {
-    if (drawer && drawer.classList.contains('open') && !quickTab.contains(e.target) && !drawer.contains(e.target)) {
-      drawer.classList.remove('open');
-    }
-  });
-  // Optional: Close drawer on nav link click
-  if (drawer) {
-    drawer.querySelectorAll('a').forEach(function(link) {
-      link.addEventListener('click', function() {
-        drawer.classList.remove('open');
-      });
-    });
-  }
   
-  // FAQ Toggle Functionality (mobile only)
-  function initFAQToggle() {
-    console.log('Initializing FAQ toggle...');
-    const faqItems = document.querySelectorAll('.faq-item');
-    console.log('Found FAQ items:', faqItems.length);
-    
-    faqItems.forEach(function(item, index) {
-      const question = item.querySelector('.faq-question');
-      const answer = item.querySelector('.faq-answer');
-      const toggle = item.querySelector('.faq-toggle');
-      
-      console.log('FAQ item', index, 'question:', question, 'answer:', answer, 'toggle:', toggle);
-      
-      if (question) {
-        // Remove any existing event listeners
-        question.removeEventListener('click', question.faqClickHandler);
-        
-        // Create new click handler
-        question.faqClickHandler = function(e) {
-          console.log('FAQ question clicked, window width:', window.innerWidth);
-          // Only toggle on mobile (screen width <= 768px)
-          if (window.innerWidth <= 768) {
-            const isActive = item.classList.contains('active');
-            console.log('FAQ item active state:', isActive);
-            
-            // Close all other FAQ items
-            faqItems.forEach(function(otherItem) {
-              if (otherItem !== item) {
-                otherItem.classList.remove('active');
-              }
-            });
-            
-            // Toggle current item
-            if (isActive) {
-              item.classList.remove('active');
-              console.log('FAQ item closed');
-            } else {
-              item.classList.add('active');
-              console.log('FAQ item opened');
-            }
-          }
-        };
-        
-        question.addEventListener('click', question.faqClickHandler);
-      }
-    });
-  }
-  
-  // Initialize FAQ toggle on page load
+  // Initialize on page load
   document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM loaded, initializing FAQ...');
-    initFAQToggle();
-  });
-  
-  // Re-initialize on window resize
-  window.addEventListener('resize', function() {
-    console.log('Window resized, reinitializing FAQ...');
-    initFAQToggle();
-  });
-  
-  // Also initialize FAQ toggle in the main DOMContentLoaded
-  document.addEventListener('DOMContentLoaded', function() {
-    // Initialize FAQ toggle
-    initFAQToggle();
-  });
-  
-  // Service Details Toggle Function
-  window.toggleServiceDetails = function(button) {
-    const serviceCard = button.closest('.service-card');
-    const details = serviceCard.querySelector('.service-details');
-    const isVisible = details.classList.contains('open');
-
-    // Close all service details first
-    const allServiceCards = document.querySelectorAll('.service-card');
-    allServiceCards.forEach(function(card) {
-      const otherDetails = card.querySelector('.service-details');
-      const otherButton = card.querySelector('.learn-more-service');
-      if (otherDetails) {
-        otherDetails.classList.remove('open');
-      }
-      if (otherButton) {
-        otherButton.textContent = 'Learn More';
-      }
-    });
-
-    // Toggle current service details
-    if (!isVisible) {
-      details.classList.add('open');
-      button.textContent = 'Show Less';
-    } else {
-      details.classList.remove('open');
-      button.textContent = 'Learn More';
-    }
-
-    // Activate shimmer for the clicked card
-    const overlay = serviceCard.querySelector('.shimmer-overlay');
-    if (overlay) {
-      overlay.classList.remove('shimmer-animate');
-      overlay.classList.remove('shimmer-animate-reverse');
-      void overlay.offsetWidth;
-      overlay.classList.add('shimmer-animate');
-    }
-  };
-  
-  // Stop CTA button pulsing after click
-  document.addEventListener('DOMContentLoaded', function() {
-    // Initialize FAQ toggle
-    initFAQToggle();
+    updateQuickTab(); // Set initial state
     
-    const ctaButtons = document.querySelectorAll('.final-cta .cta-btn');
-    ctaButtons.forEach(function(button) {
-      button.addEventListener('click', function() {
-        this.classList.add('clicked');
-      });
-    });
+    // Initialize loading animations
+    initLoadingAnimations();
     
-    // Smooth scroll behavior
-    document.documentElement.style.scrollBehavior = 'smooth';
+    // Initialize element animations
+    initElementAnimations();
     
-    // --- ULTRA-RESPONSIVE SHIMMER ON SCROLL (ALWAYS RESTART) ---
-    // 1. Add shimmer overlay to each service card (run once on DOMContentLoaded)
-    document.addEventListener('DOMContentLoaded', function() {
-      document.querySelectorAll('.service-card').forEach(function(card) {
-        if (!card.querySelector('.shimmer-overlay')) {
-          const overlay = document.createElement('div');
-          overlay.className = 'shimmer-overlay';
-          card.appendChild(overlay);
-        }
-      });
-    });
-    // Remove old shimmer logic - replaced with enhanced version below
-
-    // Ultra-responsive shimmer effect triggered by service cards
-    let lastScrollY = window.scrollY;
-    let scrollThreshold = 5; // Very low scroll threshold for immediate response
-    let lastShimmerTime = 0;
-    let shimmerInterval = 150; // Very short interval for frequent triggering
+    // Initialize lazy loading
+    initLazyLoading();
     
-    function triggerShimmerOnScroll() {
-      const currentScrollY = window.scrollY;
-      const scrollDistance = Math.abs(currentScrollY - lastScrollY);
-      const now = Date.now();
-      
-      // Trigger on any scroll movement with minimal delay
-      if (scrollDistance < scrollThreshold || (now - lastShimmerTime) < shimmerInterval) {
-        lastScrollY = currentScrollY;
-        return;
-      }
-      
-      const cards = Array.from(document.querySelectorAll('.service-card'));
-      if (!cards.length) return;
-      
-      // Find all visible cards
-      const visibleCards = cards.filter(card => {
-        const rect = card.getBoundingClientRect();
-        return rect.bottom > 0 && rect.top < window.innerHeight;
-      });
-      
-      if (visibleCards.length === 0) return;
-      
-      // Clear all existing shimmers
-      cards.forEach(card => {
-        const overlay = card.querySelector('.shimmer-overlay');
-        if (overlay) {
-          overlay.classList.remove('shimmer-animate');
-          overlay.classList.remove('shimmer-animate-reverse');
-        }
-        card.classList.remove('shimmer-active');
-      });
-      
-      // Select a random visible card
-      const randomCard = visibleCards[Math.floor(Math.random() * visibleCards.length)];
-      const overlay = randomCard.querySelector('.shimmer-overlay');
-      
-      if (overlay) {
-        // Trigger shimmer immediately
-        randomCard.classList.add('shimmer-active');
-        
-        // Reset and trigger animation
-        overlay.classList.remove('shimmer-animate');
-        overlay.classList.remove('shimmer-animate-reverse');
-        void overlay.offsetWidth; // Force reflow
-        
-        const direction = currentScrollY > lastScrollY ? 'down' : 'up';
-        if (direction === 'down') {
-          overlay.classList.add('shimmer-animate');
-        } else {
-          overlay.classList.add('shimmer-animate-reverse');
-        }
-        
-        // Clean up after animation
+    // Initialize touch feedback
+    initTouchFeedback();
+    
+    // Initialize PWA features
+    initPWAFeatures();
+    
+    // Instead, set up scroll trigger for How It Works
+    let howItWorksAnimated = false;
+    function triggerHowItWorksAnimation() {
+      if (howItWorksAnimated) return;
+      const howItWorksSkeleton = document.getElementById('howItWorksSkeleton');
+      const howItWorksContent = document.getElementById('howItWorksContent');
+      const howItWorksSection = document.getElementById('how-it-works');
+      if (!howItWorksSkeleton || !howItWorksContent || !howItWorksSection) return;
+      const rect = howItWorksSection.getBoundingClientRect();
+      if (rect.top < window.innerHeight && rect.bottom > 0) {
+        // Animate
+        howItWorksSkeleton.style.display = 'none';
+        howItWorksContent.style.display = 'block';
+        howItWorksContent.style.opacity = '0';
+        howItWorksContent.style.transform = 'translateY(20px)';
         setTimeout(() => {
-          randomCard.classList.remove('shimmer-active');
-        }, 400);
+          howItWorksContent.style.transition = 'opacity 1s ease-in-out, transform 1s ease-in-out';
+          howItWorksContent.style.opacity = '1';
+          howItWorksContent.style.transform = 'translateY(0)';
+        }, 100);
+        howItWorksAnimated = true;
+        window.removeEventListener('scroll', triggerHowItWorksAnimation);
+      }
+    }
+    window.addEventListener('scroll', triggerHowItWorksAnimation);
+    // Also check on load in case already in view
+    triggerHowItWorksAnimation();
+  });
+  
+  // Loading Animations
+  function initLoadingAnimations() {
+    // Wait a bit for DOM to be fully ready
+    setTimeout(() => {
+      // How It Works Section
+      const howItWorksSkeleton = document.getElementById('howItWorksSkeleton');
+      const howItWorksContent = document.getElementById('howItWorksContent');
+      const howItWorksSection = document.getElementById('how-it-works');
+      
+      // Testimonials Section
+      const testimonialsSkeleton = document.getElementById('testimonialsSkeleton');
+      const testimonialsContent = document.getElementById('testimonialsContent');
+      const testimonialsSection = document.getElementById('testimonials');
+      
+      // Function to animate content
+      function animateContent(skeleton, content, delay = 800) {
+        if (skeleton && content) {
+          setTimeout(() => {
+            skeleton.style.display = 'none';
+            content.style.display = 'block';
+            content.style.opacity = '0';
+            
+            setTimeout(() => {
+              content.style.transition = 'opacity 0.5s ease-in-out';
+              content.style.opacity = '1';
+            }, 100);
+          }, delay);
+        }
       }
       
-      lastScrollY = currentScrollY;
-      lastShimmerTime = now;
-    }
-    
-    // Scroll event handler
-    function handleScroll() {
-      requestAnimationFrame(triggerShimmerOnScroll);
-    }
-    
-    // Add event listeners
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    window.addEventListener('touchmove', handleScroll, { passive: true });
-    window.addEventListener('wheel', handleScroll, { passive: true });
-    
-    // Initialize shimmer on page load
-    document.addEventListener('DOMContentLoaded', function() {
-      // Add shimmer overlays if they don't exist
-      document.querySelectorAll('.service-card').forEach(function(card) {
-        if (!card.querySelector('.shimmer-overlay')) {
-          const overlay = document.createElement('div');
-          overlay.className = 'shimmer-overlay';
-          card.appendChild(overlay);
-        }
+      // Create intersection observer for sections
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          
+          if (entry.isIntersecting) {
+            const sectionId = entry.target.id;
+            
+            if (sectionId === 'how-it-works') {
+              animateContent(howItWorksSkeleton, howItWorksContent, 800);
+            } else if (sectionId === 'testimonials') {
+              animateContent(testimonialsSkeleton, testimonialsContent, 600);
+            }
+            
+            // Stop observing after animation triggers
+            observer.unobserve(entry.target);
+          }
+        });
+      }, {
+        threshold: 0.1,
+        rootMargin: '0px 0px -100px 0px'
       });
       
-      // Trigger initial shimmer after a short delay
-      setTimeout(triggerShimmerOnScroll, 500);
-    });
-    // --- END ULTRA-RESPONSIVE SHIMMER ---
+      // Start observing sections
+      if (howItWorksSection) {
+        observer.observe(howItWorksSection);
+        }
+      if (testimonialsSection) {
+        observer.observe(testimonialsSection);
+      }
+    }, 100); // Small delay to ensure DOM is ready
+  }
+  
+  // Lazy Loading
+  function initLazyLoading() {
+    const lazyImages = document.querySelectorAll('img[loading="lazy"]');
     
-    // Enhanced loading states
-    const images = document.querySelectorAll('img');
-    images.forEach(function(img) {
+    const imageObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const img = entry.target;
+          // Ensure image loads
+          if (img.src) {
+            img.style.opacity = '1';
+            img.style.transform = 'scale(1)';
+          }
+          observer.unobserve(img);
+        }
+      });
+    }, {
+      threshold: 0.1,
+      rootMargin: '50px'
+    });
+    
+    lazyImages.forEach(img => {
       img.style.opacity = '0';
       img.style.transform = 'scale(0.95)';
-      img.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
-      
-      img.addEventListener('load', function() {
-        this.style.opacity = '1';
-        this.style.transform = 'scale(1)';
+      img.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+      imageObserver.observe(img);
+    });
+  }
+  
+  // Individual Element Animations
+  function initElementAnimations() {
+    // Observer for individual service cards and testimonials
+    const elementObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const element = entry.target;
+          
+          // Add shimmer effect
+          element.classList.add('shimmer-trigger');
+          
+          // Remove class after animation completes
+          setTimeout(() => {
+            element.classList.remove('shimmer-trigger');
+          }, 1000);
+          
+          // Stop observing this element
+          elementObserver.unobserve(element);
+        }
       });
+    }, {
+      threshold: 0.5, // Trigger when 50% of element is visible
+      rootMargin: '0px 0px -20px 0px'
     });
     
-    // Touch-friendly interactions for mobile
-    if ('ontouchstart' in window) {
-      const touchElements = document.querySelectorAll('.service-card, .step, .testimonial');
-      touchElements.forEach(function(element) {
+    // Observe all service cards and testimonials
+    const serviceCards = document.querySelectorAll('.service-card');
+    const testimonials = document.querySelectorAll('.testimonial');
+    
+    serviceCards.forEach(card => elementObserver.observe(card));
+    testimonials.forEach(testimonial => elementObserver.observe(testimonial));
+  }
+  
+  // Touch Feedback
+  function initTouchFeedback() {
+    const touchElements = document.querySelectorAll('.touch-feedback');
+    
+    touchElements.forEach(element => {
         element.addEventListener('touchstart', function() {
           this.style.transform = 'scale(0.98)';
         });
@@ -1972,227 +1540,110 @@ html {
       });
     }
     
-    // Auto-retract service cards when interacting with other elements
-    let activeServiceCard = null;
-    let retractTimeout = null;
-    
-    // Function to retract all service cards
-    function retractAllServiceCards() {
-      const serviceCards = document.querySelectorAll('.service-card');
-      serviceCards.forEach(function(card) {
-        card.classList.remove('active-shimmer');
-        const shimmer = card.querySelector('::before');
-        if (shimmer) {
-          shimmer.style.animation = 'none';
-        }
+  // PWA Features
+  function initPWAFeatures() {
+    // Service Worker Registration
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(registration => {
+          })
+          .catch(registrationError => {
+          });
       });
-      activeServiceCard = null;
     }
-    
-    // Function to activate a service card
-    function activateServiceCard(card) {
-      retractAllServiceCards();
-      card.classList.add('active-shimmer');
-      activeServiceCard = card;
-      
-      // Clear any existing timeout
-      if (retractTimeout) {
-        clearTimeout(retractTimeout);
-      }
-    }
-    
-    // Add click listeners to service cards
-    const serviceCards = document.querySelectorAll('.service-card');
-    serviceCards.forEach(function(card) {
-      card.addEventListener('click', function(e) {
-        // Don't activate shimmer if clicking on the learn more button
-        if (e.target.classList.contains('learn-more-service')) {
-          return;
-        }
-        e.stopPropagation();
-        activateServiceCard(this);
-      });
-      
-      card.addEventListener('mouseenter', function(e) {
-        e.stopPropagation();
-        activateServiceCard(this);
-      });
-    });
-    
-    // Retract when clicking outside service cards
-    document.addEventListener('click', function(e) {
-      if (!e.target.closest('.service-card')) {
-        retractAllServiceCards();
-      }
-    });
-    
-    // Retract when hovering over other interactive elements
-    const otherInteractiveElements = document.querySelectorAll('.step, .testimonial, .cta-btn, .faq-item, .hero, .final-cta');
-    otherInteractiveElements.forEach(function(element) {
-      element.addEventListener('mouseenter', function() {
-        retractAllServiceCards();
-      });
-      
-      element.addEventListener('click', function() {
-        retractAllServiceCards();
-      });
-    });
-    
-    // Retract when scrolling
-    window.addEventListener('scroll', function() {
-      retractAllServiceCards();
-    });
-    // Retract on touchmove for mobile real-time responsiveness
-    window.addEventListener('touchmove', function() {
-      retractAllServiceCards();
-    });
+  }
+  
+  // Update viewport height for mobile browsers
+  function setVH() {
+    let vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+  }
+  
+  // Set initial viewport height
+  setVH();
+  
+  // Update on resize and orientation change
+  window.addEventListener('resize', setVH);
+  window.addEventListener('orientationchange', function() {
+    setTimeout(setVH, 100);
   });
-})();
-</script>
-<style>
-.step {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 20px;
-  padding: 2rem;
-  box-shadow: 
-    0 12px 32px rgba(0, 0, 0, 0.06),
-    0 4px 16px rgba(0, 0, 0, 0.03);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-}
-
-.step::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, #1086bc, #4fd1c5, #1fc2a7);
-  transform: scaleX(0);
-  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.step:hover::before {
-  transform: scaleX(1);
-}
-
-.step:hover {
-  transform: translateY(-4px);
-  box-shadow: 
-    0 20px 40px rgba(0, 0, 0, 0.1),
-    0 8px 20px rgba(0, 0, 0, 0.05);
-}
-
-.step span {
-  background: linear-gradient(135deg, #1086bc 0%, #4fd1c5 100%) !important;
-  color: #fff !important;
-  width: 45px;
-  height: 45px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.1rem;
-  font-weight: 700;
-  box-shadow: 
-    0 6px 18px rgba(16, 134, 188, 0.3),
-    0 3px 8px rgba(0, 0, 0, 0.1);
-  margin: 0 auto 1rem auto;
-  position: relative;
-  overflow: hidden;
-}
-
-.step span::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-  transition: left 0.6s ease;
-}
-
-.step:hover span::before {
-  left: 100%;
-}
-.testimonial .author {
-  color: #1086bc !important;
-}
-</style>
-<style>
-.service-details { display: none; transition: max-height 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.3s; overflow: hidden; }
-.service-details.open { display: block; }
-</style>
-<style>
-.shimmer-overlay {
-  pointer-events: none;
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  border-radius: inherit;
-  opacity: 0;
-  z-index: 999;
-  background: linear-gradient(90deg, transparent, rgba(31,194,167,0.5), rgba(79,209,197,0.8), rgba(16,134,188,0.5), transparent);
-  transform: skewX(-8deg);
-  mix-blend-mode: screen;
-  will-change: opacity, transform;
-}
-.shimmer-animate {
-  animation: shimmer-overlay-anim 0.4s cubic-bezier(0.4,0,0.2,1) forwards;
-  opacity: 1;
-}
-@keyframes shimmer-overlay-anim {
-  0% { left: -100%; opacity: 0; }
-  15% { opacity: 1; }
-  85% { opacity: 1; }
-  100% { left: 100%; opacity: 0; }
-}
-</style>
-<style>
-.shimmer-animate-reverse {
-  animation: shimmer-overlay-anim-reverse 0.4s cubic-bezier(0.4,0,0.2,1) forwards;
-  opacity: 1;
-}
-@keyframes shimmer-overlay-anim-reverse {
-  0% { right: -100%; left: auto; opacity: 0; }
-  15% { opacity: 1; }
-  85% { right: 100%; left: auto; opacity: 1; }
-  100% { right: 100%; left: auto; opacity: 0; }
-}
-</style>
-<style>
-.faq-answer {
-  max-height: 0;
-  opacity: 0;
-  overflow: hidden;
-  transition: all 0.3s ease;
-  padding: 0 1rem;
-}
-.faq-item.active .faq-answer {
-  max-height: 500px;
-  opacity: 1;
-  padding: 1rem;
-}
-</style>
-<script>
+  
+  // Update on scroll to handle address bar show/hide
+  let lastScrollTop = 0;
+  let scrollTimeout;
+  
+  window.addEventListener('scroll', function() {
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    
+    // Always update quick nav tab immediately (no throttling)
+    updateQuickTab();
+    
+    // Clear existing timeout
+    clearTimeout(scrollTimeout);
+    
+    // Throttle other scroll events
+    scrollTimeout = setTimeout(function() {
+      // Only update viewport height if there's a significant scroll difference
+      if (Math.abs(scrollTop - lastScrollTop) > 50) {
+        setVH();
+        lastScrollTop = scrollTop;
+      }
+      
+      // Close drawer if open during scroll
+      if (drawer && drawer.classList.contains('open')) {
+        drawer.classList.remove('open');
+      }
+    }, 16); // ~60fps
+  }, { passive: true });
+  
+  // Update on resize
+  window.addEventListener('resize', updateQuickTab);
+  
+  // Toggle drawer on tab click
+  quickTab.addEventListener('click', function(e) {
+    e.stopPropagation();
+    if (drawer) {
+      drawer.classList.toggle('open');
+    }
+  });
+    
+  // Hide drawer when clicking outside
+    document.addEventListener('click', function(e) {
+    if (drawer && drawer.classList.contains('open') && !quickTab.contains(e.target) && !drawer.contains(e.target)) {
+      drawer.classList.remove('open');
+    }
+  });
+  
+  // Close drawer on nav link click
+  if (drawer) {
+    drawer.querySelectorAll('a').forEach(function(link) {
+      link.addEventListener('click', function() {
+        drawer.classList.remove('open');
+      });
+    });
+  }
+  
+  // FAQ Toggle Functionality
 function initFAQToggle() {
   const faqItems = document.querySelectorAll('.faq-item');
+    
   faqItems.forEach(function(item) {
     const question = item.querySelector('.faq-question');
+      
     if (question) {
       question.removeEventListener('click', question.faqClickHandler);
+        
       question.faqClickHandler = function(e) {
         const isActive = item.classList.contains('active');
+          
         // Close all other FAQ items
         faqItems.forEach(function(otherItem) {
           if (otherItem !== item) {
             otherItem.classList.remove('active');
           }
         });
+          
         // Toggle current item
         if (isActive) {
           item.classList.remove('active');
@@ -2200,153 +1651,59 @@ function initFAQToggle() {
           item.classList.add('active');
         }
       };
+        
       question.addEventListener('click', question.faqClickHandler);
     }
   });
 }
+  
+  // Initialize FAQ toggle on page load
 document.addEventListener('DOMContentLoaded', function() {
   initFAQToggle();
 });
-</script>
-
-<style>
-.hero-img-wrap {
-  position: relative;
-  display: inline-block;
-}
-.hero-img-wrap::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  z-index: 1;
-  pointer-events: none;
-  border-radius: 2.5rem;
-  background: linear-gradient(120deg, rgba(0,255,128,0.10) 0%, rgba(0,255,128,0.08) 60%, transparent 100%);
-}
-.hero-img-wrap img {
-  display: block;
-  border-radius: 2.5rem;
-  position: relative;
-  z-index: 2;
-}
-</style>
-
-
-<!-- PWA Service Worker Registration -->
-<script>
-// Register service worker for PWA functionality
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then(registration => {
-        console.log('SW registered: ', registration);
-      })
-      .catch(registrationError => {
-        console.log('SW registration failed: ', registrationError);
-      });
+  
+  // Re-initialize on window resize
+  window.addEventListener('resize', function() {
+    initFAQToggle();
   });
-}
 
-// PWA Install Prompt (minimal, non-intrusive)
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  
-  // Only show prompt after 30 seconds and if user hasn't dismissed it
-  setTimeout(() => {
-    if (!localStorage.getItem('pwaDismissed')) {
-      showInstallPrompt();
-    }
-  }, 30000);
-});
+  // Service Details Toggle Functionality
+  window.toggleServiceDetails = function(button) {
+    const serviceCard = button.closest('.service-card');
+    const details = serviceCard.querySelector('.service-details');
+    
+    if (details) {
+    
+      details.classList.toggle('open');
+      
 
-function showInstallPrompt() {
-  // Create a subtle install prompt
-  const prompt = document.createElement('div');
-  prompt.style.cssText = `
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: #1086bc;
-    color: white;
-    padding: 12px 16px;
-    border-radius: 8px;
-    font-size: 14px;
-    z-index: 10000;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    cursor: pointer;
-    max-width: 200px;
-  `;
-  prompt.innerHTML = '📱 Install App';
-  prompt.onclick = installPWA;
-  document.body.appendChild(prompt);
-  
-  // Auto-hide after 10 seconds
-  setTimeout(() => {
-    if (prompt.parentNode) {
-      prompt.parentNode.removeChild(prompt);
-    }
-  }, 10000);
-}
 
-function installPWA() {
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    deferredPrompt.userChoice.then((choiceResult) => {
-      if (choiceResult.outcome === 'accepted') {
-        console.log('PWA installed');
+      // Update button text
+      if (details.classList.contains('open')) {
+        button.textContent = 'Show Less';
+      } else {
+      
+        button.textContent = 'Learn More';
       }
-      deferredPrompt = null;
+    }
+  };
+
+  // Remove scroll/observer/manual triggers for How It Works
+  // Add tap effect for mobile
+  function enableHowItWorksTapEffect() {
+    document.querySelectorAll('.how-it-works-card').forEach(card => {
+      card.addEventListener('touchstart', function() {
+        card.classList.add('tapped');
+        setTimeout(() => card.classList.remove('tapped'), 600);
+      });
     });
   }
-  localStorage.setItem('pwaDismissed', 'true');
-}
-
-// Offline detection (minimal indicator)
-function updateOnlineStatus() {
-  if (!navigator.onLine) {
-    // Add a small offline indicator
-    if (!document.getElementById('offlineIndicator')) {
-      const indicator = document.createElement('div');
-      indicator.id = 'offlineIndicator';
-      indicator.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        background: #e74c3c;
-        color: white;
-        text-align: center;
-        padding: 4px;
-        font-size: 12px;
-        z-index: 10001;
-      `;
-      indicator.textContent = '📡 Offline - Some features may be limited';
-      document.body.appendChild(indicator);
-    }
-  } else {
-    const indicator = document.getElementById('offlineIndicator');
-    if (indicator) {
-      indicator.remove();
-    }
-  }
-}
-
-window.addEventListener('online', updateOnlineStatus);
-window.addEventListener('offline', updateOnlineStatus);
-
-// Initialize on load
-document.addEventListener('DOMContentLoaded', updateOnlineStatus);
+  document.addEventListener('DOMContentLoaded', function() {
+    enableHowItWorksTapEffect();
+  });
+})();
 </script>
-
-<style>
-.quick-nav-text span {
-  display: block;
-  line-height: 1;
-  margin: 1px 0;
-  -webkit-font-smoothing: antialiased;
-}
-</style>
 </body>
 </html>
+
+
