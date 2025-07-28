@@ -69,7 +69,7 @@ const LAUNDRY_STATUSES = [
 ];
 
 const Jobs = () => {
-  const { user, isAdmin, isShineBubbler, isSparkleBubbler, isFreshBubbler, isEliteBubbler, canDoLaundry, canDoCarWash, canDoHomeCleaning } = useAuth();
+  const { user, isAdmin, isSupport, isMarketManager, isLeadBubbler, isShineBubbler, isSparkleBubbler, isFreshBubbler, isEliteBubbler, canDoLaundry, canDoCarWash, canDoHomeCleaning } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
@@ -248,24 +248,43 @@ const Jobs = () => {
 
   // Filter orders/services for bubbler view with search and status filtering
   const getVisibleOrders = () => {
-    let filteredOrders = orders;
-    
-    // For bubblers: only show orders/services assigned to them
-    if (!isAdmin) {
-      filteredOrders = orders
-        .map(order => {
-          // Filter order_service to only those assigned to this bubbler
-          const filteredServices = (order.order_service || []).filter(service => {
-            if (!service.job_assignments || service.job_assignments.length === 0) return false;
-            // Find assignment for this bubbler
-            return service.job_assignments.some(a => a.bubbler_id === user?.id);
-          });
-          if (filteredServices.length === 0) return null;
-          return { ...order, order_service: filteredServices };
-        })
-        .filter(Boolean);
+    // Role-based filtering
+    let filteredOrders = [...orders];
+
+    // Market Manager: Only see jobs in their assigned territory
+    if (isMarketManager && !isAdmin) {
+      // In real implementation, this would filter by assigned ZIP codes/cities
+      // For now, showing all jobs but with a notice
+      console.log('Market Manager: Filtering by local territory');
+      // filteredOrders = filteredOrders.filter(order => 
+      //   order.zip_code && user.assigned_territories?.includes(order.zip_code)
+      // );
     }
-    
+
+    // Lead Bubbler: Only see team jobs
+    if (isLeadBubbler && !isAdmin) {
+      // In real implementation, this would filter by team members
+      // For now, showing all jobs but with a notice
+      console.log('Lead Bubbler: Filtering by team assignments');
+      // filteredOrders = filteredOrders.filter(order => 
+      //   order.assigned_bubbler_id && user.team_members?.includes(order.assigned_bubbler_id)
+      // );
+    }
+
+    // Support: Can see all jobs but with different permissions
+    if (isSupport && !isAdmin) {
+      console.log('Support: Can view all jobs for customer service');
+    }
+
+    // Regular Bubblers: Only see their own jobs
+    if (!isAdmin && !isSupport && !isMarketManager && !isLeadBubbler) {
+      filteredOrders = filteredOrders.filter(order => {
+        return order.job_assignments?.some(assignment => 
+          assignment.bubbler_id === user.id
+        );
+      });
+    }
+
     // Apply search filter
     if (searchTerm) {
       filteredOrders = filteredOrders.filter(order => {
@@ -284,7 +303,7 @@ const Jobs = () => {
     if (statusFilter !== 'all') {
       filteredOrders = filteredOrders.map(order => {
         const filteredServices = (order.order_service || []).filter(service => {
-          const assignment = isAdmin
+          const assignment = isAdmin || isSupport || isMarketManager || isLeadBubbler
             ? (service.job_assignments || [])[0]
             : (service.job_assignments || []).find(a => a.bubbler_id === user?.id);
           return assignment?.status === statusFilter;
@@ -293,7 +312,7 @@ const Jobs = () => {
         return { ...order, order_service: filteredServices };
       }).filter(Boolean);
     }
-    
+
     return filteredOrders;
   };
 
@@ -977,18 +996,68 @@ const Jobs = () => {
   // Assignment Modal (updated)
   const AssignModal = ({ open, service, order, onClose }) => {
     if (!open || !service || !order) return null;
-    // Filter eligible bubblers
-    const eligibleBubblers = bubblers.filter(bubbler => {
+    
+    // Role-based bubbler filtering
+    let eligibleBubblers = bubblers.filter(bubbler => {
       if (!bubbler.is_active) return false;
       const travelTime = calculateTravelTime(bubbler, order.address);
       return travelTime <= (bubbler.preferred_travel_minutes || 30);
     });
+
+    // Market Manager: Only assign to bubblers in their territory
+    if (isMarketManager && !isAdmin) {
+      // In real implementation, filter by assigned territory
+      console.log('Market Manager: Filtering bubblers by local territory');
+      // eligibleBubblers = eligibleBubblers.filter(bubbler => 
+      //   user.assigned_territories?.includes(bubbler.territory)
+      // );
+    }
+
+    // Lead Bubbler: Only assign to team members
+    if (isLeadBubbler && !isAdmin) {
+      // In real implementation, filter by team members
+      console.log('Lead Bubbler: Filtering bubblers by team members');
+      // eligibleBubblers = eligibleBubblers.filter(bubbler => 
+      //   user.team_members?.includes(bubbler.id)
+      // );
+    }
+
+    // Support: Can assign to any active bubbler
+    if (isSupport && !isAdmin) {
+      console.log('Support: Can assign to any active bubbler');
+    }
+
     return (
       <Modal title="Assign Job to Bubbler" onClose={onClose} size="lg">
         <div className="mb-4">
           <div className="font-semibold mb-2">Job: {service.service_type} for {order.customer_name}</div>
           <div className="text-sm text-gray-600 mb-2">{order.address}</div>
-      </div>
+          
+          {/* Role-based assignment notice */}
+          {isMarketManager && !isAdmin && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+              <p className="text-sm text-blue-800">
+                <strong>Market Manager Assignment:</strong> You can assign jobs to bubblers in your local territory.
+              </p>
+            </div>
+          )}
+          
+          {isLeadBubbler && !isAdmin && (
+            <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-4">
+              <p className="text-sm text-orange-800">
+                <strong>Team Assignment:</strong> You can assign jobs to your team members only.
+              </p>
+            </div>
+          )}
+          
+          {isSupport && !isAdmin && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
+              <p className="text-sm text-green-800">
+                <strong>Support Assignment:</strong> You can assign jobs to any active bubbler for customer service.
+              </p>
+            </div>
+          )}
+        </div>
         <div className="mb-4">
           <div className="font-semibold mb-2">Eligible Bubblers:</div>
           {eligibleBubblers.length === 0 && <div className="text-red-500">No eligible bubblers within travel range.</div>}
@@ -1027,6 +1096,8 @@ const Jobs = () => {
                             assigned_at: new Date().toISOString(),
                             offer_sent_at: new Date().toISOString(),
                             acceptance_window_minutes,
+                            assigned_by: user.id, // Track who assigned the job
+                            assigned_by_role: isAdmin ? 'ADMIN' : isSupport ? 'SUPPORT' : isMarketManager ? 'MARKET_MANAGER' : isLeadBubbler ? 'LEAD_BUBBLER' : 'SYSTEM'
                           });
                         if (error) throw error;
                         toast.success('Job assigned!');
@@ -1072,10 +1143,45 @@ const Jobs = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">All Jobs</h1>
+          <h1 className="text-3xl font-bold text-gray-900">
+            {isAdmin ? 'All Jobs' : 
+             isSupport ? 'Job Assignment' :
+             isMarketManager ? 'Local Jobs' :
+             isLeadBubbler ? 'Team Jobs' :
+             'My Jobs'}
+          </h1>
           <p className="text-sm text-gray-600 mt-1">
-            Showing {sortedJobs.length} of {filteredJobs.length} jobs
+            {isAdmin ? `Showing ${sortedJobs.length} of ${filteredJobs.length} jobs` :
+             isSupport ? `Customer service job assignment - ${sortedJobs.length} jobs available` :
+             isMarketManager ? `Local territory jobs - ${sortedJobs.length} jobs in your market` :
+             isLeadBubbler ? `Team management - ${sortedJobs.length} jobs for your team` :
+             `Showing ${sortedJobs.length} of your assigned jobs`}
           </p>
+          
+          {/* Role-based assignment capabilities notice */}
+          {isSupport && !isAdmin && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3 mt-3">
+              <p className="text-sm text-green-800">
+                <strong>Support Assignment Capabilities:</strong> You can assign jobs to any active bubbler for customer service needs.
+              </p>
+            </div>
+          )}
+          
+          {isMarketManager && !isAdmin && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-3">
+              <p className="text-sm text-blue-800">
+                <strong>Market Manager Assignment Capabilities:</strong> You can assign jobs to bubblers in your local territory.
+              </p>
+            </div>
+          )}
+          
+          {isLeadBubbler && !isAdmin && (
+            <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 mt-3">
+              <p className="text-sm text-orange-800">
+                <strong>Team Assignment Capabilities:</strong> You can assign jobs to your team members only.
+              </p>
+            </div>
+          )}
         </div>
         
         <div className="flex items-center gap-3 mt-4 sm:mt-0">

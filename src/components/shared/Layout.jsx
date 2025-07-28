@@ -79,6 +79,7 @@ const Layout = () => {
   const supportNavItems = [
     { name: 'Dashboard', icon: Home, path: '/dashboard' },
     { name: 'Orders', icon: FileText, path: '/orders' },
+    { name: 'Job Assignment', icon: Calendar, path: '/support/jobs' },
     { name: 'Bubblers', icon: Users, path: '/bubblers' },
     { name: 'Applicants', icon: Users, path: '/applicants' },
     { name: 'Equipment', icon: Briefcase, path: '/equipment' },
@@ -106,7 +107,7 @@ const Layout = () => {
 
   const marketManagerNavItems = [
     { name: 'Dashboard', icon: Home, path: '/dashboard' },
-    { name: 'Local Jobs', icon: Briefcase, path: '/jobs' },
+    { name: 'Local Jobs', icon: Briefcase, path: '/market/jobs' },
     { name: 'Local Bubblers', icon: Users, path: '/bubblers' },
     { name: 'Local Applicants', icon: UserPlus, path: '/applicants' },
     { name: 'Local Equipment', icon: Briefcase, path: '/equipment' },
@@ -116,7 +117,7 @@ const Layout = () => {
 
   const leadBubblerNavItems = [
     { name: 'Dashboard', icon: Home, path: '/dashboard' },
-    { name: 'Team Jobs', icon: Briefcase, path: '/jobs' },
+    { name: 'Team Jobs', icon: Briefcase, path: '/lead/jobs' },
     { name: 'Team Members', icon: Users, path: '/team' },
     { name: 'Equipment Status', icon: Briefcase, path: '/equipment' },
     { name: 'Team Messages', icon: MessageCircle, path: '/messages' },

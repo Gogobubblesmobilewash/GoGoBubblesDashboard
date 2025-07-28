@@ -87,21 +87,41 @@ class ErrorBoundary extends React.Component {
 }
 
 // Protected Route wrapper
-const ProtectedRoute = ({ children, requireAdmin = false, requireBubbler = false }) => {
-  const { isAuthenticated, isAdmin, isBubbler, loading } = useAuth();
+const ProtectedRoute = ({ children, requireAdmin = false, requireBubbler = false, requireSupport = false, requireMarketManager = false, requireLeadBubbler = false }) => {
+  const { user, loading, isAuthenticated, isAdmin, isBubbler, isSupport, isMarketManager, isLeadBubbler } = useAuth();
 
-  // Show loading spinner while checking authentication
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-aqua"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-aqua" />
       </div>
     );
   }
 
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
-  if (requireAdmin && !isAdmin) return <Navigate to="/dashboard" replace />;
-  if (requireBubbler && !isBubbler) return <Navigate to="/dashboard" replace />;
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // Check specific role requirements
+  if (requireAdmin && !isAdmin) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  if (requireBubbler && !isBubbler) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  if (requireSupport && !isSupport) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  if (requireMarketManager && !isMarketManager) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  if (requireLeadBubbler && !isLeadBubbler) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return children;
 };
@@ -246,6 +266,44 @@ function App() {
               element={
                 <ProtectedRoute requireAdmin>
                   <Bubblers />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
+              path="user-management"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <UserManagement />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Support-specific routes */}
+            <Route 
+              path="support/jobs"
+              element={
+                <ProtectedRoute requireSupport>
+                  <Jobs />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Market Manager-specific routes */}
+            <Route 
+              path="market/jobs"
+              element={
+                <ProtectedRoute requireMarketManager>
+                  <Jobs />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Lead Bubbler-specific routes */}
+            <Route 
+              path="lead/jobs"
+              element={
+                <ProtectedRoute requireLeadBubbler>
+                  <Jobs />
                 </ProtectedRoute>
               }
             />
