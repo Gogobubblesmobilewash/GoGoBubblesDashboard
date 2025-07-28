@@ -46,7 +46,7 @@
     .logo-container {
       display: flex;
       justify-content: center;
-      margin-bottom: 1.5rem;
+      margin-bottom: 0;
     }
     .hero-img-enhanced {
       max-width: 220px;
@@ -176,6 +176,22 @@
       background: linear-gradient(135deg, #4fd1c5 0%, #1fc2a7 100%);
       outline: 2px solid #38b2ac;
       box-shadow: 0 0 0 4px rgba(31, 194, 167, 0.15);
+    }
+
+    /* Blinking animation for sticky button */
+    .sticky-btn.blink {
+      animation: buttonBlink 1.5s ease-in-out infinite;
+    }
+
+    @keyframes buttonBlink {
+      0%, 100% {
+        background: linear-gradient(135deg, #1fc2a7 0%, #4fd1c5 100%);
+        box-shadow: 0 -2px 12px rgba(44,62,80,0.10);
+      }
+      50% {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%);
+        box-shadow: 0 -2px 20px rgba(255, 107, 107, 0.3);
+      }
     }
 
     /* Room Selector Styles - Mobile-Friendly Premium Design */
@@ -541,12 +557,18 @@
       border-radius: 0.7rem;
       background: none;
     }
+    
+    /* Make delicates bag icon larger */
+    .laundry-icon img[alt="Delicates"] {
+      max-width: 80px;
+      max-height: 80px;
+    }
   </style>
 </head>
 <body>
   <form class="booking-card" id="gogoBookingForm" autocomplete="off">
     <div class="logo-container">
-      <img src="website_hero.png" alt="GoGoBubbles Logo" class="hero-img-enhanced" style="max-width: 220px; width: 100%; display: block; margin: 0 auto 1.2rem auto;" />
+      <img src="logo.PNG?v=1" alt="GoGoBubbles Logo" style="max-width: 280px; width: 100%; height: auto; display: block; margin: 0 auto 0.5rem auto;" />
     </div>
     <h2 style="text-align:center; font-weight:700; margin-bottom:1.2rem;">Book Your Service</h2>
     <div class="bundle-offer-msg">
@@ -610,7 +632,7 @@
     
     <div id="scheduling-section" style="text-align: center; margin: 2rem 0; padding: 1.5rem; background: #f8fafd; border-radius: 1.2rem; border: 2px solid #4fd1c5;">
       <h3 style="margin-bottom: 1rem; color: #2d3748;">Ready to Schedule Your Appointment?</h3>
-      <p style="margin-bottom: 1.5rem; color: #4a5568;">Choose your preferred date and time for your service below. Your GoGoBubbles services provider will arrive within the 45-minute window you select. Actual service time may vary depending on your booking.</p>
+      <p style="margin-bottom: 1.5rem; color: #4a5568;">Choose your preferred date and time for your service below. Your GoGoBubbles services provider will arrive within the 45-minute window you select.</p>
       
       <iframe src="https://tidycal.com/gogobubblesmobilewash/gogobubbles-booking" width="100%" height="600" frameborder="0" style="border-radius: 0.8rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1);"></iframe>
       
@@ -727,6 +749,13 @@
         this.classList.add('active');
       };
     });
+    
+    // Sticky button click to stop blinking
+    const stickyBtn = document.querySelector('.sticky-btn');
+    if (stickyBtn) {
+      stickyBtn.addEventListener('click', stopButtonBlinking);
+    }
+    
     // Floating service tab navigation
     document.querySelectorAll('.floating-service-tab').forEach(tab => {
       tab.onclick = function() {
@@ -1103,7 +1132,18 @@
         }
       });
       if (state.homeclean.addons.includes('deepbed')) {
-        html += `<label>How many bedrooms for deep clean? <input type="number" class="deepbed-count" min="1" max="${state.homeclean.bedrooms}" value="${state.homeclean.deepbedCount || 1}" /></label>`;
+        html += `<div class="room-selector" style="margin: 1rem 0;">
+          <div class="room-card">
+            <span class="room-icon"><img src="bedroom_icon.PNG" alt="Deep Clean Bedroom" /></span>
+            <span class="room-label">Deep Clean Bedrooms</span>
+            <div class="room-controls">
+              <button type="button" class="room-btn" onclick="changeDeepBedroom(-1)">−</button>
+              <span class="room-value" id="deepbed-value">${state.homeclean.deepbedCount || 1}</span>
+              <button type="button" class="room-btn" onclick="changeDeepBedroom(1)">+</button>
+            </div>
+            <input type="hidden" name="deepbed-count" class="deepbed-count" value="${state.homeclean.deepbedCount || 1}" />
+          </div>
+        </div>`;
       }
       html += `</div></div>`;
     } else if (state.activeService === 'laundry') {
@@ -1112,30 +1152,65 @@
       laundryBags.forEach(bag => {
         const bagState = state.laundry[bag.value];
         let bagIcon = '';
-        if (bag.value === 'essentials') bagIcon = '<span class="laundry-icon"><img src="essential_bag_icon.png" alt="Essentials" /></span>';
-        if (bag.value === 'family') bagIcon = '<span class="laundry-icon"><img src="famil_bag_icon.png" alt="Family" /></span>';
-        if (bag.value === 'delicates') bagIcon = '<span class="laundry-icon"><img src="delicates_icon.png" alt="Delicates" /></span>';
-        if (bag.value === 'ironing') bagIcon = '<span class="laundry-icon"><img src="iron_icon.png" alt="Ironing" /></span>';
-        html += `<div style="margin:1rem 0; padding:1rem; background:#f8f9fa; border-radius:0.5rem; display:flex; align-items:center; gap:1rem;">
-          ${bagIcon}
-          <div style="flex:1;">
-            <label style="display:block;"><b>${bag.label} Bag:</b> <input type="number" class="ld-bag" data-type="${bag.value}" min="0" max="5" value="${bagState.qty}" /> ($${bag.price} each)</label>
-            <div class="info-msg" style="margin-top:0.5rem;">${bag.desc}</div>
+        if (bag.value === 'essentials') bagIcon = '<span class="laundry-icon"><img src="essential_bag_icon.PNG" alt="Essentials" /></span>';
+        if (bag.value === 'family') bagIcon = '<span class="laundry-icon"><img src="family_bag_icon.PNG" alt="Family" /></span>';
+        if (bag.value === 'delicates') bagIcon = '<span class="laundry-icon"><img src="delicates_icon.PNG" alt="Delicates" /></span>';
+        if (bag.value === 'ironing') bagIcon = '<span class="laundry-icon"><img src="iron_icon.PNG" alt="Ironing" /></span>';
+        html += `<div style="margin:1rem 0; padding:1rem; background:#f8f9fa; border-radius:0.5rem;">
+          <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1rem;">
+            ${bagIcon}
+            <div style="flex:1;">
+              <div style="font-weight:600; margin-bottom:0.5rem;">${bag.label} Bag ($${bag.price} each)</div>
+              <div class="info-msg" style="margin-top:0.5rem;">${bag.desc}</div>
+            </div>
+          </div>
+          
+          <!-- Bag Quantity Selection -->
+          <div class="room-selector" style="margin: 1rem 0;">
+            <div class="room-card">
+              <span class="room-icon">${bagIcon}</span>
+              <span class="room-label">Bag Quantity</span>
+              <div class="room-controls">
+                <button type="button" class="room-btn" onclick="changeLaundryBag('${bag.value}', -1)">−</button>
+                <span class="room-value" id="${bag.value}-bag-value">${bagState.qty}</span>
+                <button type="button" class="room-btn" onclick="changeLaundryBag('${bag.value}', 1)">+</button>
+              </div>
+              <input type="hidden" name="ld-bag" class="ld-bag" data-type="${bag.value}" value="${bagState.qty}" />
+            </div>
           </div>`;
+          
         if (bagState.qty > 0) {
             // New Kits
-          html += `<div style="margin:0.5rem 0;">
-              <label><b>How many are new kits (first time)?</b> <input type="number" class="ld-newkit" data-type="${bag.value}" min="0" max="${bagState.qty}" value="${bagState.newKits || 0}" /></label>
+          html += `<div class="room-selector" style="margin: 1rem 0;">
+            <div class="room-card">
+              <span class="room-icon"><img src="essential_bag_icon.PNG" alt="New Kit" style="max-width:40px; max-height:40px;" /></span>
+              <span class="room-label">New Kits (First Time)</span>
+              <div class="room-controls">
+                <button type="button" class="room-btn" onclick="changeLaundryNewKits('${bag.value}', -1)">−</button>
+                <span class="room-value" id="${bag.value}-newkit-value">${bagState.newKits || 0}</span>
+                <button type="button" class="room-btn" onclick="changeLaundryNewKits('${bag.value}', 1)">+</button>
+              </div>
+              <input type="hidden" name="ld-newkit" class="ld-newkit" data-type="${bag.value}" value="${bagState.newKits || 0}" />
+            </div>
           </div>`;
             // Replacements
             const maxReplacements = bagState.qty - (bagState.newKits || 0);
-            html += `<div style="margin:0.5rem 0;">
-              <label><b>How many are replacements?</b> <input type="number" class="ld-replace" data-type="${bag.value}" min="0" max="${maxReplacements}" value="${bagState.replacements || 0}" /></label>
-            </div>`;
+            html += `<div class="room-selector" style="margin: 1rem 0;">
+            <div class="room-card">
+              <span class="room-icon"><img src="replacement_icon.png" alt="Replacement" style="max-width:40px; max-height:40px;" /></span>
+              <span class="room-label">Replacements</span>
+              <div class="room-controls">
+                <button type="button" class="room-btn" onclick="changeLaundryReplacements('${bag.value}', -1)">−</button>
+                <span class="room-value" id="${bag.value}-replace-value">${bagState.replacements || 0}</span>
+                <button type="button" class="room-btn" onclick="changeLaundryReplacements('${bag.value}', 1)">+</button>
+              </div>
+              <input type="hidden" name="ld-replace" class="ld-replace" data-type="${bag.value}" value="${bagState.replacements || 0}" />
+            </div>
+          </div>`;
             // Info: The rest are existing/good shape
             const existingGood = bagState.qty - (bagState.newKits || 0) - (bagState.replacements || 0);
             if (existingGood > 0) {
-              html += `<div class="info-msg">${existingGood} bag(s) are existing and in good shape.</div>`;
+              html += `<div class="info-msg" style="margin-top:1rem; padding:0.5rem; background:#e8f5e8; border-radius:0.5rem; color:#2d5a2d;">${existingGood} bag(s) are existing and in good shape.</div>`;
           }
         }
         html += `</div>`;
@@ -1163,6 +1238,20 @@
     // Initialize room button states after rendering
     setTimeout(() => {
       initializeRoomButtons();
+      // Initialize deep bedroom buttons if deep clean is selected
+      if (state.homeclean.addons.includes('deepbed')) {
+        updateDeepBedroomButtonStates(state.homeclean.deepbedCount || 1, 1, state.homeclean.bedrooms || 1);
+      }
+      // Initialize laundry button states
+      Object.keys(state.laundry).forEach(bagType => {
+        if (state.laundry[bagType] && typeof state.laundry[bagType] === 'object') {
+          updateLaundryBagButtonStates(bagType, state.laundry[bagType].qty || 0, 0, 5);
+          if (state.laundry[bagType].qty > 0) {
+            updateLaundryNewKitsButtonStates(bagType, state.laundry[bagType].newKits || 0, 0, state.laundry[bagType].qty);
+            updateLaundryReplacementsButtonStates(bagType, state.laundry[bagType].replacements || 0, 0, state.laundry[bagType].qty - (state.laundry[bagType].newKits || 0));
+          }
+        }
+      });
     }, 50);
   }
 
@@ -1177,6 +1266,10 @@
     }
     let summaryLines = [];
     let subtotal = 0;
+    
+    // Check if any services are selected for blinking button
+    updateButtonBlinking();
+    
     // Car Wash
     if (state.carwash && state.carwash.length > 0) {
       state.carwash.forEach((vehicle, idx) => {
@@ -1777,6 +1870,234 @@
   function initializeRoomButtons() {
     updateRoomButtonStates('bedrooms', state.homeclean.bedrooms, 0, 5);
     updateRoomButtonStates('bathrooms', state.homeclean.bathrooms, 0, 4);
+  }
+
+  // Deep Clean Bedroom Selection Function
+  function changeDeepBedroom(delta) {
+    const min = 1;
+    const max = state.homeclean.bedrooms || 1;
+    
+    const valueSpan = document.getElementById('deepbed-value');
+    const input = document.querySelector('.deepbed-count');
+    
+    let currentValue = parseInt(valueSpan.textContent, 10);
+    let newValue = currentValue + delta;
+    
+    // Enforce min/max limits
+    if (newValue < min) newValue = min;
+    if (newValue > max) newValue = max;
+    
+    // Update display and hidden input
+    valueSpan.textContent = newValue;
+    if (input) input.value = newValue;
+    
+    // Add animation effect
+    valueSpan.classList.add('updated');
+    setTimeout(() => {
+      valueSpan.classList.remove('updated');
+    }, 300);
+    
+    // Update state
+    state.homeclean.deepbedCount = newValue;
+    
+    // Update button states
+    updateDeepBedroomButtonStates(newValue, min, max);
+    
+    // Re-render to update summary and other dependent elements
+    renderServiceSections();
+  }
+
+  // Update deep bedroom button disabled states
+  function updateDeepBedroomButtonStates(currentValue, min, max) {
+    const minusBtn = document.querySelector(`[onclick="changeDeepBedroom(-1)"]`);
+    const plusBtn = document.querySelector(`[onclick="changeDeepBedroom(1)"]`);
+    
+    if (minusBtn) {
+      minusBtn.disabled = currentValue <= min;
+    }
+    if (plusBtn) {
+      plusBtn.disabled = currentValue >= max;
+    }
+  }
+
+  // Laundry Bag Quantity Selection Functions
+  function changeLaundryBag(bagType, delta) {
+    const min = 0;
+    const max = 5;
+    
+    const valueSpan = document.getElementById(`${bagType}-bag-value`);
+    const input = document.querySelector(`.ld-bag[data-type="${bagType}"]`);
+    
+    let currentValue = parseInt(valueSpan.textContent, 10);
+    let newValue = currentValue + delta;
+    
+    // Enforce min/max limits
+    if (newValue < min) newValue = min;
+    if (newValue > max) newValue = max;
+    
+    // Update display and hidden input
+    valueSpan.textContent = newValue;
+    if (input) input.value = newValue;
+    
+    // Add animation effect
+    valueSpan.classList.add('updated');
+    setTimeout(() => {
+      valueSpan.classList.remove('updated');
+    }, 300);
+    
+    // Update state
+    state.laundry[bagType].qty = newValue;
+    
+    // Adjust related values if needed
+    if (state.laundry[bagType].newKits > newValue) {
+      state.laundry[bagType].newKits = newValue;
+    }
+    if (state.laundry[bagType].replacements > (newValue - state.laundry[bagType].newKits)) {
+      state.laundry[bagType].replacements = newValue - state.laundry[bagType].newKits;
+    }
+    
+    // Update button states
+    updateLaundryBagButtonStates(bagType, newValue, min, max);
+    
+    // Re-render to update summary and other dependent elements
+    renderServiceSections();
+  }
+
+  function changeLaundryNewKits(bagType, delta) {
+    const min = 0;
+    const max = state.laundry[bagType].qty;
+    
+    const valueSpan = document.getElementById(`${bagType}-newkit-value`);
+    const input = document.querySelector(`.ld-newkit[data-type="${bagType}"]`);
+    
+    let currentValue = parseInt(valueSpan.textContent, 10);
+    let newValue = currentValue + delta;
+    
+    // Enforce min/max limits
+    if (newValue < min) newValue = min;
+    if (newValue > max) newValue = max;
+    
+    // Update display and hidden input
+    valueSpan.textContent = newValue;
+    if (input) input.value = newValue;
+    
+    // Add animation effect
+    valueSpan.classList.add('updated');
+    setTimeout(() => {
+      valueSpan.classList.remove('updated');
+    }, 300);
+    
+    // Update state
+    state.laundry[bagType].newKits = newValue;
+    
+    // Adjust replacements if needed
+    if (state.laundry[bagType].replacements > (state.laundry[bagType].qty - newValue)) {
+      state.laundry[bagType].replacements = state.laundry[bagType].qty - newValue;
+    }
+    
+    // Update button states
+    updateLaundryNewKitsButtonStates(bagType, newValue, min, max);
+    
+    // Re-render to update summary and other dependent elements
+    renderServiceSections();
+  }
+
+  function changeLaundryReplacements(bagType, delta) {
+    const min = 0;
+    const max = state.laundry[bagType].qty - state.laundry[bagType].newKits;
+    
+    const valueSpan = document.getElementById(`${bagType}-replace-value`);
+    const input = document.querySelector(`.ld-replace[data-type="${bagType}"]`);
+    
+    let currentValue = parseInt(valueSpan.textContent, 10);
+    let newValue = currentValue + delta;
+    
+    // Enforce min/max limits
+    if (newValue < min) newValue = min;
+    if (newValue > max) newValue = max;
+    
+    // Update display and hidden input
+    valueSpan.textContent = newValue;
+    if (input) input.value = newValue;
+    
+    // Add animation effect
+    valueSpan.classList.add('updated');
+    setTimeout(() => {
+      valueSpan.classList.remove('updated');
+    }, 300);
+    
+    // Update state
+    state.laundry[bagType].replacements = newValue;
+    
+    // Update button states
+    updateLaundryReplacementsButtonStates(bagType, newValue, min, max);
+    
+    // Re-render to update summary and other dependent elements
+    renderServiceSections();
+  }
+
+  // Update laundry button disabled states
+  function updateLaundryBagButtonStates(bagType, currentValue, min, max) {
+    const minusBtn = document.querySelector(`[onclick="changeLaundryBag('${bagType}', -1)"]`);
+    const plusBtn = document.querySelector(`[onclick="changeLaundryBag('${bagType}', 1)"]`);
+    
+    if (minusBtn) {
+      minusBtn.disabled = currentValue <= min;
+    }
+    if (plusBtn) {
+      plusBtn.disabled = currentValue >= max;
+    }
+  }
+
+  function updateLaundryNewKitsButtonStates(bagType, currentValue, min, max) {
+    const minusBtn = document.querySelector(`[onclick="changeLaundryNewKits('${bagType}', -1)"]`);
+    const plusBtn = document.querySelector(`[onclick="changeLaundryNewKits('${bagType}', 1)"]`);
+    
+    if (minusBtn) {
+      minusBtn.disabled = currentValue <= min;
+    }
+    if (plusBtn) {
+      plusBtn.disabled = currentValue >= max;
+    }
+  }
+
+  function updateLaundryReplacementsButtonStates(bagType, currentValue, min, max) {
+    const minusBtn = document.querySelector(`[onclick="changeLaundryReplacements('${bagType}', -1)"]`);
+    const plusBtn = document.querySelector(`[onclick="changeLaundryReplacements('${bagType}', 1)"]`);
+    
+    if (minusBtn) {
+      minusBtn.disabled = currentValue <= min;
+    }
+    if (plusBtn) {
+      plusBtn.disabled = currentValue >= max;
+    }
+  }
+
+  // Function to control button blinking based on service selection
+  function updateButtonBlinking() {
+    const stickyBtn = document.querySelector('.sticky-btn');
+    if (!stickyBtn) return;
+    
+    // Check if any services are selected
+    const hasCarWash = state.carwash && state.carwash.length > 0;
+    const hasHomeClean = state.homeclean && (state.homeclean.bedrooms > 0 && state.homeclean.bathrooms > 0);
+    const hasLaundry = state.laundry && Object.values(state.laundry).some(v => v && typeof v === 'object' && v.qty > 0);
+    
+    const hasAnyService = hasCarWash || hasHomeClean || hasLaundry;
+    
+    if (hasAnyService) {
+      stickyBtn.classList.add('blink');
+    } else {
+      stickyBtn.classList.remove('blink');
+    }
+  }
+
+  // Stop blinking when button is clicked
+  function stopButtonBlinking() {
+    const stickyBtn = document.querySelector('.sticky-btn');
+    if (stickyBtn) {
+      stickyBtn.classList.remove('blink');
+    }
   }
   </script>
 </body>
