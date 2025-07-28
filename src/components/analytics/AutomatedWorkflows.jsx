@@ -295,6 +295,7 @@ const AutomatedWorkflows = () => {
   };
 
   const handleCreateWorkflow = () => {
+    console.log('Create Workflow button clicked!');
     setIsCreatingWorkflow(true);
   };
 
@@ -819,90 +820,92 @@ const AutomatedWorkflows = () => {
         )}
 
         {/* Create Workflow Modal */}
-        {isCreatingWorkflow && (
-          <Modal title="Create New Workflow" onClose={() => setIsCreatingWorkflow(false)}>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Workflow Name</label>
-                <input
-                  type="text"
-                  value={newWorkflow.name}
-                  onChange={(e) => setNewWorkflow({ ...newWorkflow, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter workflow name"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                <textarea
-                  value={newWorkflow.description}
-                  onChange={(e) => setNewWorkflow({ ...newWorkflow, description: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  rows="3"
-                  placeholder="Describe what this workflow does..."
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
-                <select
-                  value={newWorkflow.type}
-                  onChange={(e) => setNewWorkflow({ ...newWorkflow, type: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="operations">Operations</option>
-                  <option value="retention">Retention</option>
-                  <option value="onboarding">Onboarding</option>
-                  <option value="analytics">Analytics</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Frequency</label>
-                <select
-                  value={newWorkflow.frequency}
-                  onChange={(e) => setNewWorkflow({ ...newWorkflow, frequency: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="real-time">Real-time</option>
-                  <option value="hourly">Hourly</option>
-                  <option value="daily">Daily</option>
-                  <option value="weekly">Weekly</option>
-                  <option value="monthly">Monthly</option>
-                </select>
-              </div>
-              <div className="flex space-x-2 pt-4">
-                <button
-                  onClick={() => {
-                    if (!newWorkflow.name || !newWorkflow.description) {
-                      alert('Please fill in all required fields');
-                      return;
-                    }
-                    const workflow = {
-                      id: Date.now(),
-                      ...newWorkflow,
-                      status: 'active',
-                      isActive: true,
-                      successRate: 0,
-                      totalExecutions: 0,
-                      avgExecutionTime: 0,
-                      lastExecuted: null,
-                      nextExecution: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
-                    };
-                    const updatedWorkflows = [workflow, ...workflows];
-                    setWorkflows(updatedWorkflows);
-                    localStorage.setItem('automatedWorkflowsState', JSON.stringify(updatedWorkflows));
-                    setNewWorkflow({ name: '', description: '', type: 'operations', frequency: 'daily', triggers: [], actions: [] });
-                    setIsCreatingWorkflow(false);
-                    alert('Workflow created successfully!');
-                  }}
-                  className="btn-primary flex-1"
-                >
-                  Create Workflow
-                </button>
-                <button onClick={() => setIsCreatingWorkflow(false)} className="btn-secondary flex-1">Cancel</button>
-              </div>
+        <Modal 
+          isOpen={isCreatingWorkflow} 
+          onClose={() => setIsCreatingWorkflow(false)}
+          title="Create New Workflow"
+        >
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Workflow Name</label>
+              <input
+                type="text"
+                value={newWorkflow.name}
+                onChange={(e) => setNewWorkflow({ ...newWorkflow, name: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter workflow name"
+              />
             </div>
-          </Modal>
-        )}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+              <textarea
+                value={newWorkflow.description}
+                onChange={(e) => setNewWorkflow({ ...newWorkflow, description: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                rows="3"
+                placeholder="Describe what this workflow does..."
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+              <select
+                value={newWorkflow.type}
+                onChange={(e) => setNewWorkflow({ ...newWorkflow, type: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="operations">Operations</option>
+                <option value="retention">Retention</option>
+                <option value="onboarding">Onboarding</option>
+                <option value="analytics">Analytics</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Frequency</label>
+              <select
+                value={newWorkflow.frequency}
+                onChange={(e) => setNewWorkflow({ ...newWorkflow, frequency: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="real-time">Real-time</option>
+                <option value="hourly">Hourly</option>
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+              </select>
+            </div>
+            <div className="flex space-x-2 pt-4">
+              <button
+                onClick={() => {
+                  if (!newWorkflow.name || !newWorkflow.description) {
+                    alert('Please fill in all required fields');
+                    return;
+                  }
+                  const workflow = {
+                    id: Date.now(),
+                    ...newWorkflow,
+                    status: 'active',
+                    isActive: true,
+                    successRate: 0,
+                    totalExecutions: 0,
+                    avgExecutionTime: 0,
+                    lastExecuted: null,
+                    nextExecution: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+                  };
+                  const updatedWorkflows = [workflow, ...workflows];
+                  setWorkflows(updatedWorkflows);
+                  localStorage.setItem('automatedWorkflowsState', JSON.stringify(updatedWorkflows));
+                  setNewWorkflow({ name: '', description: '', type: 'operations', frequency: 'daily', triggers: [], actions: [] });
+                  setIsCreatingWorkflow(false);
+                  alert('Workflow created successfully!');
+                }}
+                className="btn-primary flex-1"
+              >
+                Create Workflow
+              </button>
+              <button onClick={() => setIsCreatingWorkflow(false)} className="btn-secondary flex-1">Cancel</button>
+            </div>
+          </div>
+        </Modal>
       </div>
     </div>
   );
