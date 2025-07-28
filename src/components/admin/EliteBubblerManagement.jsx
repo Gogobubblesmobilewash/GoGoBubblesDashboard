@@ -573,7 +573,10 @@ const EliteBubblerManagement = () => {
                           <XCircle className="w-4 h-4" />
                           <span>Reject</span>
                         </button>
-                        <button className="flex items-center space-x-2 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors">
+                        <button
+                          onClick={() => alert(`View Details for ${application.name}\n\nApplication Details:\n- Email: ${application.email}\n- Phone: ${application.phone}\n- Service Type: ${application.serviceType}\n- Experience: ${application.experience} years\n- Current Rating: ${application.currentRating}/5.0\n- Total Assignments: ${application.totalAssignments}\n- Monthly Earnings: $${application.monthlyEarnings}\n- Application Date: ${formatDate(application.applicationDate)}\n\nThis would show detailed application information and performance metrics.`)}
+                          className="flex items-center space-x-2 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors"
+                        >
                           <Eye className="w-4 h-4" />
                         </button>
                       </div>
