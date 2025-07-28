@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   FiHome, 
@@ -17,7 +17,6 @@ import {
   FiCheckCircle,
   FiClock
 } from 'react-icons/fi';
-import useStore from '../../store/useStore';
 import { useAuth } from '../../store/AuthContext';
 
 const Dashboard = () => {
