@@ -4,7 +4,7 @@ import {
   FiTrendingUp,
   FiDownload,
   FiRefreshCw,
-  FiBarChart3,
+  FiBarChart2,
   FiFileText,
   FiCreditCard,
   FiUsers,
@@ -252,7 +252,7 @@ const FinanceDashboard = () => {
         <StatCard
           title="Taxable Sales"
           value={financeData.taxableSales}
-          icon={FiBarChart3}
+          icon={FiBarChart2}
           color="orange"
         />
         <StatCard
@@ -296,7 +296,7 @@ const FinanceDashboard = () => {
         <QuickAction
           title="Financial Analytics"
           description="View detailed financial metrics"
-          icon={FiBarChart3}
+          icon={FiBarChart2}
           color="blue"
           onClick={() => alert('Opening financial analytics...')}
         />
