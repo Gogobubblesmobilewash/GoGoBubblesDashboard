@@ -95,7 +95,7 @@ const Layout = () => {
           {/* Header */}
           <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
             <div className="flex items-center">
-              <img src="/Bubblerlogotransparent.PNG" alt="GoGoBubbles" className="h-10" />
+              <img src="/bubblers_logo.png" alt="GoGoBubbles" className="h-10" />
               <span className="ml-3 text-lg font-bold text-gray-800 font-poppins">Bubbler</span>
             </div>
             <button

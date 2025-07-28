@@ -46,7 +46,7 @@ const Login = () => {
       <div className="max-w-md w-full bg-white rounded-3xl shadow-card p-8 md:p-10">
         <div className="flex flex-col items-center mb-8">
           <img 
-            src="/Bubblerlogotransparent.PNG" 
+            src="/bubblers_logo.png"
             alt="Bubbler Logo" 
             className="h-20 mb-4 logo-float drop-shadow-lg" 
           />

@@ -166,7 +166,7 @@ const Onboarding = () => {
       <div className="bg-white rounded-2xl shadow-card max-w-md w-full">
         {/* Header */}
         <div className="text-center p-8 border-b border-gray-200">
-          <img src="/Bubblerlogotransparent.PNG" alt="GoGoBubbles" className="h-12 mx-auto mb-4" />
+          <img src="/bubblers_logo.png" alt="GoGoBubbles" className="h-12 mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-gray-800 mb-2">Welcome to GoGoBubbles!</h1>
           <p className="text-gray-600">Complete your account setup to get started</p>
         </div>
