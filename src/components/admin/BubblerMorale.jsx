@@ -41,6 +41,16 @@ const BubblerMorale = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingPrograms, setLoadingPrograms] = useState(new Set());
 
+  // Load state from localStorage on component mount
+  useEffect(() => {
+    const savedState = localStorage.getItem('bubblerMoraleState');
+    if (savedState) {
+      setMoralePrograms(JSON.parse(savedState));
+    } else {
+      setMoralePrograms(mockMoralePrograms);
+    }
+  }, []);
+
   // Mock data for morale programs
   const mockMoralePrograms = [
     {
@@ -237,9 +247,16 @@ const BubblerMorale = () => {
   };
 
   const handleToggleProgram = (programId) => {
-    setMoralePrograms(moralePrograms.map(p => 
-      p.id === programId ? { ...p, status: p.status === 'active' ? 'paused' : 'active' } : p
-    ));
+    setMoralePrograms(prevPrograms => {
+      const updatedPrograms = prevPrograms.map(p => 
+        p.id === programId ? { ...p, status: p.status === 'active' ? 'paused' : 'active' } : p
+      );
+      
+      // Save to localStorage
+      localStorage.setItem('bubblerMoraleState', JSON.stringify(updatedPrograms));
+      
+      return updatedPrograms;
+    });
   };
 
   const handleRunProgram = (programId) => {

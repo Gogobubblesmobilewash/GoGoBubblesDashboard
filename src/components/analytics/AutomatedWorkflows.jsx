@@ -40,6 +40,16 @@ const AutomatedWorkflows = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingWorkflows, setLoadingWorkflows] = useState(new Set());
 
+  // Load state from localStorage on component mount
+  useEffect(() => {
+    const savedState = localStorage.getItem('automatedWorkflowsState');
+    if (savedState) {
+      setWorkflows(JSON.parse(savedState));
+    } else {
+      setWorkflows(mockWorkflows);
+    }
+  }, []);
+
   // Mock data for workflows
   const mockWorkflows = [
     {
@@ -280,11 +290,16 @@ const AutomatedWorkflows = () => {
   };
 
   const handleToggleWorkflow = (workflowId) => {
-    setWorkflows(prevWorkflows => 
-      prevWorkflows.map(w => 
+    setWorkflows(prevWorkflows => {
+      const updatedWorkflows = prevWorkflows.map(w => 
         w.id === workflowId ? { ...w, isActive: !w.isActive } : w
-      )
-    );
+      );
+      
+      // Save to localStorage
+      localStorage.setItem('automatedWorkflowsState', JSON.stringify(updatedWorkflows));
+      
+      return updatedWorkflows;
+    });
   };
 
   const handleRunWorkflow = (workflowId) => {
