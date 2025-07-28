@@ -198,6 +198,14 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route 
+              path="qr-scanner" 
+              element={
+                <ProtectedRoute requireBubbler>
+                  <QRScanner />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Admin-specific routes */}
             <Route 
@@ -357,22 +365,6 @@ function App() {
               element={
                 <ProtectedRoute requireAdmin>
                   <Applicants />
-                </ProtectedRoute>
-              }
-            />
-            <Route 
-              path="orders"
-              element={
-                <ProtectedRoute requireAdmin>
-                  <Orders />
-                </ProtectedRoute>
-              }
-            />
-            <Route 
-              path="bubblers"
-              element={
-                <ProtectedRoute requireAdmin>
-                  <Bubblers />
                 </ProtectedRoute>
               }
             />
