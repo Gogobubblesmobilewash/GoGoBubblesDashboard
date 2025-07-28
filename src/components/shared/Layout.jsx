@@ -50,8 +50,8 @@ const Layout = () => {
   const adminNavItems = [
     { name: 'Dashboard', icon: Home, path: '/dashboard' },
     { name: 'Orders', icon: FileText, path: '/orders' },
-    { name: 'All Jobs', icon: Calendar, path: '/jobs' },
-    { name: 'Equipment', icon: Briefcase, path: '/equipment' },
+    { name: 'All Jobs', icon: Calendar, path: '/admin/jobs' },
+    { name: 'Equipment', icon: Briefcase, path: '/admin/equipment' },
     { name: 'Applicants', icon: Users, path: '/applicants' },
     { name: 'Ratings', icon: Star, path: '/ratings' },
     { name: 'Messages', icon: MessageCircle, path: '/messages' },
