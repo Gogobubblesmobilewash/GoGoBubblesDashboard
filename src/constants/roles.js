@@ -26,6 +26,30 @@ export const BUBBLER_ROLES = {
   }
 };
 
+// Support Role Definition
+export const SUPPORT_ROLE = {
+  name: 'Support Representative',
+  permissions: [
+    'view_orders',
+    'view_jobs', 
+    'view_bubblers',
+    'view_applications',
+    'view_equipment',
+    'view_messages',
+    'view_ratings',
+    'view_activity',
+    'view_customer_data',
+    'view_analytics',
+    'view_reports'
+  ],
+  restrictions: [
+    'no_financial_data',
+    'no_payout_info',
+    'no_revenue_data',
+    'no_deposit_info'
+  ]
+};
+
 // Helper function to get role from email
 export const getRoleFromEmail = (email) => {
   if (!email) return null;

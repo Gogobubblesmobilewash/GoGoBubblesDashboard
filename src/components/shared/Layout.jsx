@@ -30,10 +30,10 @@ import MessageNotifications from '../messages/MessageNotifications';
 import NotificationCenter from '../activity/NotificationCenter';
 
 const Layout = () => {
-  const { activeTab, setActiveTab } = useStore();
-  const { user, isAdmin, isBubbler, canDoLaundry, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('dashboard');
   const location = useLocation();
+  const { user, logout, isAdmin, isBubbler, isSupport } = useAuth();
 
   // Debug logging
   console.log('Layout render - user:', user, 'isAdmin:', isAdmin, 'activeTab:', activeTab);
@@ -70,8 +70,19 @@ const Layout = () => {
     { name: 'Bubblers', icon: Users, path: '/bubblers' },
     { name: 'Analytics', icon: BarChart3, path: '/analytics' },
   ];
+
+  const supportNavItems = [
+    { name: 'Dashboard', icon: Home, path: '/dashboard' },
+    { name: 'Orders', icon: FileText, path: '/orders' },
+    { name: 'Bubblers', icon: Users, path: '/bubblers' },
+    { name: 'Applicants', icon: Users, path: '/applicants' },
+    { name: 'Equipment', icon: Briefcase, path: '/equipment' },
+    { name: 'Messages', icon: MessageCircle, path: '/messages' },
+    { name: 'Ratings', icon: Star, path: '/ratings' },
+    { name: 'Activity Feed', icon: Clock, path: '/activity' },
+  ];
   
-  const navItems = isAdmin ? adminNavItems : bubblerNavItems;
+  const navItems = isAdmin ? adminNavItems : isSupport ? supportNavItems : bubblerNavItems;
 
   const handleLogout = () => {
     logout();
@@ -96,7 +107,9 @@ const Layout = () => {
           <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
             <div className="flex items-center">
               <img src="/bubblers_logo.png" alt="GoGoBubbles" className="h-10" />
-              <span className="ml-3 text-lg font-bold text-gray-800 font-poppins">Bubbler</span>
+              <span className="ml-3 text-lg font-bold text-gray-800 font-poppins">
+                {isAdmin ? 'Admin' : isSupport ? 'Support' : 'Bubbler'}
+              </span>
             </div>
             <button
               onClick={() => setSidebarOpen(false)}
@@ -185,7 +198,12 @@ const Layout = () => {
                     Admin
                   </span>
                 )}
-                {isBubbler && !isAdmin && (
+                {isSupport && !isAdmin && (
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-green-600 text-white">
+                    Support
+                  </span>
+                )}
+                {isBubbler && !isAdmin && !isSupport && (
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-brand-aqua text-white">
                     Bubbler
                   </span>
@@ -205,6 +223,8 @@ const Layout = () => {
             <p className="text-blue-100 font-medium">
               {isAdmin
                 ? "Here's what's happening across all operations today."
+                : isSupport
+                ? "Here's what you need to know to help customers today."
                 : 'You have a great day ahead with your scheduled jobs.'}
             </p>
           </div>

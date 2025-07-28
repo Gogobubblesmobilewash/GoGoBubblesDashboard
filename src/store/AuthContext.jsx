@@ -38,6 +38,13 @@ export const AuthProvider = ({ children }) => {
         return;
       }
 
+      // Check if user is support
+      if (userEmail.includes('support')) {
+        console.log('AuthContext: User is support based on email');
+        setUserRole({ type: 'SUPPORT', permissions: ['view_orders', 'view_jobs', 'view_bubblers', 'view_applications', 'view_equipment', 'view_messages', 'view_ratings', 'view_activity', 'view_customer_data', 'view_analytics', 'view_reports'], restrictions: ['no_financial_data', 'no_payout_info', 'no_revenue_data', 'no_deposit_info'] });
+        return;
+      }
+
       // Check bubblers table for role
       const { data, error } = await supabase
         .from('bubblers')
@@ -155,7 +162,8 @@ export const AuthProvider = ({ children }) => {
     logout,
     isAuthenticated: !!user,
     isAdmin: userRole?.type === 'ADMIN',
-    isBubbler: userRole?.type && userRole.type !== 'ADMIN' && ['SHINE', 'SPARKLE', 'FRESH', 'ELITE'].includes(userRole.type),
+    isSupport: userRole?.type === 'SUPPORT',
+    isBubbler: userRole?.type && userRole.type !== 'ADMIN' && userRole.type !== 'SUPPORT' && ['SHINE', 'SPARKLE', 'FRESH', 'ELITE'].includes(userRole.type),
     // Role-specific permissions
     isShineBubbler: userRole?.type === 'SHINE',
     isSparkleBubbler: userRole?.type === 'SPARKLE',
@@ -165,9 +173,15 @@ export const AuthProvider = ({ children }) => {
     canDoLaundry: userRole?.type === 'FRESH' || userRole?.type === 'ELITE',
     canDoCarWash: userRole?.type === 'SHINE' || userRole?.type === 'ELITE',
     canDoHomeCleaning: userRole?.type === 'SPARKLE' || userRole?.type === 'ELITE',
+    // Support permissions
+    canViewFinancialData: userRole?.type === 'ADMIN',
+    canViewPayouts: userRole?.type === 'ADMIN',
+    canViewRevenue: userRole?.type === 'ADMIN',
+    canViewDeposits: userRole?.type === 'ADMIN',
     // Additional role info
     userPermissions: userRole?.permissions || [],
     userServices: userRole?.services || [],
+    userRestrictions: userRole?.restrictions || [],
     isUserActive: userRole?.isActive !== false,
   };
 
@@ -177,7 +191,8 @@ export const AuthProvider = ({ children }) => {
     loading, 
     isAuthenticated: !!user, 
     isAdmin: userRole?.type === 'ADMIN',
-    isBubbler: userRole?.type && userRole.type !== 'ADMIN' && ['SHINE', 'SPARKLE', 'FRESH', 'ELITE'].includes(userRole.type)
+    isSupport: userRole?.type === 'SUPPORT',
+    isBubbler: userRole?.type && userRole.type !== 'ADMIN' && userRole.type !== 'SUPPORT' && ['SHINE', 'SPARKLE', 'FRESH', 'ELITE'].includes(userRole.type)
   });
 
   return (

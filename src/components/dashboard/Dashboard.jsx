@@ -27,18 +27,20 @@ import { supabase } from '../../services/api';
 import { useAuth } from '../../store/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import BubblerDashboard from './BubblerDashboard';
+import SupportDashboard from './SupportDashboard';
 import BreakdownModal from './BreakdownModal';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { setDailyJobs, loading, setLoading } = useStore();
-  const { user, isAdmin, isBubbler } = useAuth();
+  const { user, isAdmin, isBubbler, isSupport } = useAuth();
   
   // Debug logging
   console.log('Dashboard: User role info:', { 
     user: user?.email, 
     isAdmin, 
     isBubbler, 
+    isSupport,
     userRole: user?.user_metadata?.role 
   });
   
@@ -629,14 +631,20 @@ const Dashboard = () => {
   );
 
   // Render bubbler dashboard for bubblers
-  if (isBubbler && !isAdmin) {
+  if (isBubbler && !isAdmin && !isSupport) {
     console.log('Dashboard: Rendering BubblerDashboard for bubbler user');
     return <BubblerDashboard />;
   }
 
+  // Render support dashboard for support users
+  if (isSupport && !isAdmin) {
+    console.log('Dashboard: Rendering SupportDashboard for support user');
+    return <SupportDashboard />;
+  }
+
   // Additional check: if user is not admin and has a role, they should see bubbler dashboard
-  if (!isAdmin && user && user.email && !user.email.includes('admin')) {
-    console.log('Dashboard: User is not admin and has email, rendering BubblerDashboard as fallback');
+  if (!isAdmin && !isSupport && user && user.email && !user.email.includes('admin') && !user.email.includes('support')) {
+    console.log('Dashboard: User is not admin/support and has email, rendering BubblerDashboard as fallback');
     return <BubblerDashboard />;
   }
 
@@ -644,7 +652,7 @@ const Dashboard = () => {
   if (isAdmin) {
     console.log('Dashboard: Rendering Admin Dashboard for admin user');
   } else {
-    console.log('Dashboard: User is neither admin nor bubbler, rendering admin dashboard as fallback');
+    console.log('Dashboard: User is neither admin, support, nor bubbler, rendering admin dashboard as fallback');
   }
 
   if (loading) {
