@@ -284,7 +284,22 @@ const Earnings = () => {
       <div className="card">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold text-gray-800">Payout History</h2>
-          <button className="flex items-center gap-2 text-brand-aqua hover:text-brand-aqua-dark">
+          <button 
+            onClick={() => {
+              const content = `Payout History Export\nGenerated: ${new Date().toLocaleString()}\n\n${payoutHistory.map(p => 
+                `${formatDate(p.created_at)} | ${formatDate(p.period_start)} - ${formatDate(p.period_end)} | $${parseFloat(p.amount).toFixed(2)} | ${p.status} | ${p.job_ids?.length || 0} jobs`
+              ).join('\n')}`;
+              const blob = new Blob([content], { type: 'text/plain' });
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `payout_history_${new Date().toISOString().split('T')[0]}.txt`;
+              a.click();
+              window.URL.revokeObjectURL(url);
+              alert('Payout history exported successfully!');
+            }}
+            className="flex items-center gap-2 text-brand-aqua hover:text-brand-aqua-dark"
+          >
             <FiDownload className="h-4 w-4" />
             Export
           </button>

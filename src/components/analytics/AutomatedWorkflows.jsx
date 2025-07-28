@@ -514,7 +514,10 @@ const AutomatedWorkflows = () => {
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-900">Workflow Templates</h2>
-              <button className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+              <button 
+                onClick={() => alert('Create Template functionality would open a template creation form.')}
+                className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              >
                 <Plus className="w-4 h-4" />
                 <span>Create Template</span>
               </button>
@@ -565,15 +568,24 @@ const AutomatedWorkflows = () => {
                   </div>
 
                   <div className="flex gap-2">
-                    <button className="flex-1 flex items-center justify-center space-x-2 bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                    <button 
+                      onClick={() => alert(`Use Template: ${template.name}\nThis would create a new workflow using this template.`)}
+                      className="flex-1 flex items-center justify-center space-x-2 bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                    >
                       <Plus className="w-4 h-4" />
                       <span>Use Template</span>
                     </button>
-                    <button className="flex items-center justify-center space-x-2 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors">
+                    <button 
+                      onClick={() => alert(`View details for template: ${template.name}\nThis would show detailed template information.`)}
+                      className="flex items-center justify-center space-x-2 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors"
+                    >
                       <Eye className="w-4 h-4" />
                     </button>
                     {!template.isDefault && (
-                      <button className="flex items-center justify-center space-x-2 bg-red-100 text-red-700 px-3 py-2 rounded-lg hover:bg-red-200 transition-colors">
+                      <button 
+                        onClick={() => alert(`Delete template: ${template.name}\nThis would permanently delete this template.`)}
+                        className="flex items-center justify-center space-x-2 bg-red-100 text-red-700 px-3 py-2 rounded-lg hover:bg-red-200 transition-colors"
+                      >
                         <Trash2 className="w-4 h-4" />
                       </button>
                     )}
@@ -588,7 +600,22 @@ const AutomatedWorkflows = () => {
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-900">Execution History</h2>
-              <button className="flex items-center space-x-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors">
+              <button 
+                onClick={() => {
+                  const content = `Workflow Execution History Export\nGenerated: ${new Date().toLocaleString()}\n\n${executions.map(e => 
+                    `${e.workflowName} | ${e.status} | ${formatDate(e.startedAt)} | ${e.executionTime.toFixed(2)}s | ${e.actionsExecuted} actions`
+                  ).join('\n')}`;
+                  const blob = new Blob([content], { type: 'text/plain' });
+                  const url = window.URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `workflow_executions_${new Date().toISOString().split('T')[0]}.txt`;
+                  a.click();
+                  window.URL.revokeObjectURL(url);
+                  alert('Execution history exported successfully!');
+                }}
+                className="flex items-center space-x-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors"
+              >
                 <Download className="w-4 h-4" />
                 <span>Export</span>
               </button>

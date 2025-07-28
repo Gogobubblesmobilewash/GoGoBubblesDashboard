@@ -312,7 +312,22 @@ const EliteBubblerManagement = () => {
                   <option value="car_wash">Car Wash</option>
                 </select>
               </div>
-              <button className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+              <button 
+                onClick={() => {
+                  const content = `Elite Bubbler Export\nGenerated: ${new Date().toLocaleString()}\n\n${filteredEliteBubblers.map(b => 
+                    `${b.name} | ${b.email} | ${b.status} | ${b.totalAssignments} assignments | ${b.avgRating}/5.0 rating | ${formatCurrency(b.monthlyEarnings)}`
+                  ).join('\n')}`;
+                  const blob = new Blob([content], { type: 'text/plain' });
+                  const url = window.URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `elite_bubblers_${new Date().toISOString().split('T')[0]}.txt`;
+                  a.click();
+                  window.URL.revokeObjectURL(url);
+                  alert('Elite bubblers exported successfully!');
+                }}
+                className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              >
                 <Download className="w-4 h-4" />
                 <span>Export</span>
               </button>
@@ -376,11 +391,17 @@ const EliteBubblerManagement = () => {
                   </div>
 
                   <div className="flex gap-2">
-                    <button className="flex-1 flex items-center justify-center space-x-2 bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                    <button 
+                      onClick={() => alert(`View details for ${bubbler.name}\nThis would show detailed bubbler information and performance metrics.`)}
+                      className="flex-1 flex items-center justify-center space-x-2 bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                    >
                       <Eye className="w-4 h-4" />
                       <span>View Details</span>
                     </button>
-                    <button className="flex items-center space-x-2 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors">
+                    <button 
+                      onClick={() => alert(`Settings for ${bubbler.name}\nThis would open elite bubbler configuration settings.`)}
+                      className="flex items-center space-x-2 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors"
+                    >
                       <Settings className="w-4 h-4" />
                     </button>
                   </div>

@@ -248,7 +248,20 @@ const CustomerAnalytics = () => {
               )}
               <span>Refresh</span>
             </button>
-            <button className="flex items-center space-x-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors">
+            <button 
+              onClick={() => {
+                const content = `Customer Analytics Export\nGenerated: ${new Date().toLocaleString()}\n\nTotal Customers: ${formatNumber(mockCustomerData.totalCustomers)}\nNew Customers: ${formatNumber(mockCustomerData.newCustomers)}\nAvg Customer Value: ${formatCurrency(mockCustomerData.avgCustomerValue)}`;
+                const blob = new Blob([content], { type: 'text/plain' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `customer_analytics_${new Date().toISOString().split('T')[0]}.txt`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+                alert('Customer analytics exported successfully!');
+              }}
+              className="flex items-center space-x-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors"
+            >
               <Download className="w-4 h-4" />
               <span>Export</span>
             </button>

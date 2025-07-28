@@ -532,7 +532,22 @@ const JobAssignmentCaps = () => {
                   <option value="overbooked">Overbooked</option>
                 </select>
               </div>
-              <button className="flex items-center space-x-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors">
+              <button 
+                onClick={() => {
+                  const content = `Job Assignment Caps Export\nGenerated: ${new Date().toLocaleString()}\n\n${filteredBubblers.map(b => 
+                    `${b.name} | ${b.email} | ${b.serviceType} | ${b.currentAssignments}/${b.dailyCap} jobs | ${b.weeklyAverage} avg/day | ${b.efficiency}% efficiency`
+                  ).join('\n')}`;
+                  const blob = new Blob([content], { type: 'text/plain' });
+                  const url = window.URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `job_assignment_caps_${new Date().toISOString().split('T')[0]}.txt`;
+                  a.click();
+                  window.URL.revokeObjectURL(url);
+                  alert('Job assignment caps exported successfully!');
+                }}
+                className="flex items-center space-x-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors"
+              >
                 <Download className="w-4 h-4" />
                 <span>Export</span>
               </button>
@@ -606,11 +621,17 @@ const JobAssignmentCaps = () => {
                   </div>
 
                   <div className="flex gap-2">
-                    <button className="flex-1 flex items-center justify-center space-x-2 bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                    <button 
+                      onClick={() => alert(`View details for ${bubbler.name}\nThis would show detailed assignment information and job history.`)}
+                      className="flex-1 flex items-center justify-center space-x-2 bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                    >
                       <Eye className="w-4 h-4" />
                       <span>View Details</span>
                     </button>
-                    <button className="flex items-center space-x-2 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors">
+                    <button 
+                      onClick={() => alert(`Settings for ${bubbler.name}\nThis would open assignment cap configuration settings.`)}
+                      className="flex items-center space-x-2 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors"
+                    >
                       <Settings className="w-4 h-4" />
                     </button>
                   </div>

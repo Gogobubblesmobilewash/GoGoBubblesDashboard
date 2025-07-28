@@ -420,10 +420,16 @@ const BubblerMorale = () => {
                     >
                       {program.status === 'active' ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
                     </button>
-                    <button className="flex items-center space-x-2 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors">
+                    <button 
+                      onClick={() => alert(`Settings for program: ${program.name}\nThis would open program configuration settings.`)}
+                      className="flex items-center space-x-2 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors"
+                    >
                       <Settings className="w-4 h-4" />
                     </button>
-                    <button className="flex items-center space-x-2 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors">
+                    <button 
+                      onClick={() => alert(`View details for program: ${program.name}\nThis would show detailed program information and statistics.`)}
+                      className="flex items-center space-x-2 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors"
+                    >
                       <Eye className="w-4 h-4" />
                     </button>
                   </div>
@@ -502,10 +508,16 @@ const BubblerMorale = () => {
                           {formatDate(bubbler.lastActive)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <button className="text-blue-600 hover:text-blue-900 mr-3">
+                          <button 
+                            onClick={() => alert(`Send message to ${bubbler.name}\nThis would open a messaging interface.`)}
+                            className="text-blue-600 hover:text-blue-900 mr-3"
+                          >
                             Send Message
                           </button>
-                          <button className="text-green-600 hover:text-green-900">
+                          <button 
+                            onClick={() => alert(`Check-in with ${bubbler.name}\nThis would initiate a wellness check-in.`)}
+                            className="text-green-600 hover:text-green-900"
+                          >
                             Check-in
                           </button>
                         </td>
