@@ -301,9 +301,17 @@ const AutomatedWorkflows = () => {
 
   const handleToggleWorkflow = (workflowId) => {
     setWorkflows(prevWorkflows => {
-      const updatedWorkflows = prevWorkflows.map(w => 
-        w.id === workflowId ? { ...w, isActive: !w.isActive } : w
-      );
+      const updatedWorkflows = prevWorkflows.map(w => {
+        if (w.id === workflowId) {
+          const newIsActive = !w.isActive;
+          return { 
+            ...w, 
+            isActive: newIsActive,
+            status: newIsActive ? 'active' : 'paused'
+          };
+        }
+        return w;
+      });
       
       // Save to localStorage
       localStorage.setItem('automatedWorkflowsState', JSON.stringify(updatedWorkflows));
