@@ -39,6 +39,7 @@ const BubblerMorale = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingPrograms, setLoadingPrograms] = useState(new Set());
 
   // Mock data for morale programs
   const mockMoralePrograms = [
