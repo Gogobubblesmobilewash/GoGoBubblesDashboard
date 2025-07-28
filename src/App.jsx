@@ -29,6 +29,7 @@ import CustomerAnalytics from './components/analytics/CustomerAnalytics';
 import EliteBubblerManagement from './components/admin/EliteBubblerManagement';
 import BubblerMorale from './components/admin/BubblerMorale';
 import JobAssignmentCaps from './components/admin/JobAssignmentCaps';
+import UserManagement from './components/admin/UserManagement';
 
 import { useAuth } from './store/AuthContext';
 import { SpeedInsights } from "@vercel/speed-insights/react";
@@ -365,6 +366,14 @@ function App() {
               element={
                 <ProtectedRoute requireAdmin>
                   <Applicants />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
+              path="user-management"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <UserManagement />
                 </ProtectedRoute>
               }
             />

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../services/api';
 import Modal from '../shared/Modal';
+import { SYSTEM_ROLES } from '../../constants/roles';
 import { 
   FiSearch, 
   FiFilter, 
@@ -16,7 +17,9 @@ import {
   FiAlertCircle,
   FiCheck,
   FiXCircle,
-  FiClock as FiWaitlist
+  FiClock as FiWaitlist,
+  FiShield,
+  FiUsers
 } from 'react-icons/fi';
 
 const Applicants = () => {
@@ -335,10 +338,53 @@ const Applicants = () => {
       ));
 
       setEditingNotes(null);
-      alert('Notes updated successfully!');
-    } catch (err) {
-      console.error('Error updating notes:', err);
-      alert('Error updating notes: ' + err.message);
+    } catch (error) {
+      console.error('Error updating notes:', error);
+      alert('Error updating notes. Please try again.');
+    }
+  };
+
+  // Quick role assignment function
+  const handleQuickRoleAssignment = async (application, role) => {
+    if (!confirm(`Grant ${role} dashboard access to ${application.first_name} ${application.last_name}?`)) {
+      return;
+    }
+
+    try {
+      // Create user account in auth system
+      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+        email: application.email,
+        password: 'temporary123', // They'll reset this
+        email_confirm: true,
+        user_metadata: {
+          role: role,
+          first_name: application.first_name,
+          last_name: application.last_name
+        }
+      });
+
+      if (authError) throw authError;
+
+      // Update applicant status
+      const { error: updateError } = await supabase
+        .from('applications')
+        .update({ 
+          application_status: 'approved',
+          assigned_role: role,
+          dashboard_access_granted: true,
+          access_granted_at: new Date().toISOString()
+        })
+        .eq('id', application.id);
+
+      if (updateError) throw updateError;
+
+      // Refresh applications
+      fetchApplications();
+
+      alert(`Dashboard access granted to ${application.first_name} ${application.last_name} as ${role}`);
+    } catch (error) {
+      console.error('Error granting dashboard access:', error);
+      alert('Error granting dashboard access. Please try again.');
     }
   };
 
@@ -609,6 +655,37 @@ const Applicants = () => {
                           >
                             <FiWaitlist className="h-4 w-4" />
                           </button>
+                          
+                          {/* Quick Role Assignment Dropdown */}
+                          <div className="relative inline-block">
+                            <button
+                              className="text-purple-600 hover:text-purple-800"
+                              title="Grant Dashboard Access"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const dropdown = e.target.nextElementSibling;
+                                dropdown.classList.toggle('hidden');
+                              }}
+                            >
+                              <FiShield className="h-4 w-4" />
+                            </button>
+                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 hidden border border-gray-200">
+                              <div className="py-1">
+                                <div className="px-3 py-2 text-xs font-medium text-gray-500 border-b border-gray-100">
+                                  Grant Access As:
+                                </div>
+                                {Object.entries(SYSTEM_ROLES).map(([roleKey, roleData]) => (
+                                  <button
+                                    key={roleKey}
+                                    onClick={() => handleQuickRoleAssignment(app, roleKey)}
+                                    className="block w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                  >
+                                    {roleData.name}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
                         </>
                       )}
                     </div>
@@ -749,6 +826,34 @@ const Applicants = () => {
                 </div>
               )}
             </div>
+
+            {/* Quick Role Assignment */}
+            {selectedApplication.application_status === 'pending' && (
+              <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                <h3 className="text-lg font-semibold mb-3 text-purple-800">Grant Dashboard Access</h3>
+                <p className="text-purple-700 mb-3">
+                  Quickly grant dashboard access to this applicant with a specific role:
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                  {Object.entries(SYSTEM_ROLES).map(([roleKey, roleData]) => (
+                    <button
+                      key={roleKey}
+                      onClick={() => {
+                        handleQuickRoleAssignment(selectedApplication, roleKey);
+                        setShowDetailsModal(false);
+                      }}
+                      className="px-3 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700 transition-colors flex items-center justify-center"
+                    >
+                      <FiShield className="h-4 w-4 mr-2" />
+                      {roleData.name}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs text-purple-600 mt-2">
+                  This will create a user account and grant immediate dashboard access.
+                </p>
+              </div>
+            )}
           </div>
         </Modal>
       )}
