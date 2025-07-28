@@ -79,7 +79,6 @@ const Layout = () => {
     { name: 'Equipment', icon: Briefcase, path: '/equipment' },
     { name: 'Messages', icon: MessageCircle, path: '/messages' },
     { name: 'Ratings', icon: Star, path: '/ratings' },
-    { name: 'Activity Feed', icon: Clock, path: '/activity' },
   ];
   
   const navItems = isAdmin ? adminNavItems : isSupport ? supportNavItems : bubblerNavItems;

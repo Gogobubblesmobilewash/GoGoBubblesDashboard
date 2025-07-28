@@ -41,7 +41,35 @@ export const AuthProvider = ({ children }) => {
       // Check if user is support
       if (userEmail.includes('support')) {
         console.log('AuthContext: User is support based on email');
-        setUserRole({ type: 'SUPPORT', permissions: ['view_orders', 'view_jobs', 'view_bubblers', 'view_applications', 'view_equipment', 'view_messages', 'view_ratings', 'view_activity', 'view_customer_data', 'view_analytics', 'view_reports'], restrictions: ['no_financial_data', 'no_payout_info', 'no_revenue_data', 'no_deposit_info'] });
+        setUserRole({ 
+          type: 'SUPPORT', 
+          permissions: [
+            'view_orders', 
+            'view_jobs', 
+            'view_bubblers', 
+            'view_applications', 
+            'view_equipment', 
+            'view_messages', 
+            'view_ratings', 
+            'view_activity', 
+            'view_customer_data', 
+            'view_analytics', 
+            'view_reports'
+          ], 
+          restrictions: [
+            'no_financial_data',
+            'no_payout_info',
+            'no_revenue_data',
+            'no_deposit_info',
+            'no_stripe_data',
+            'no_payment_history',
+            'no_earnings_data',
+            'no_operating_margins',
+            'no_owner_notes',
+            'no_sales_reports',
+            'no_admin_data'
+          ]
+        });
         return;
       }
 
@@ -178,6 +206,13 @@ export const AuthProvider = ({ children }) => {
     canViewPayouts: userRole?.type === 'ADMIN',
     canViewRevenue: userRole?.type === 'ADMIN',
     canViewDeposits: userRole?.type === 'ADMIN',
+    canViewStripeData: userRole?.type === 'ADMIN',
+    canViewPaymentHistory: userRole?.type === 'ADMIN',
+    canViewEarnings: userRole?.type === 'ADMIN',
+    canViewOperatingMargins: userRole?.type === 'ADMIN',
+    canViewOwnerNotes: userRole?.type === 'ADMIN',
+    canViewSalesReports: userRole?.type === 'ADMIN',
+    canViewAdminData: userRole?.type === 'ADMIN',
     // Additional role info
     userPermissions: userRole?.permissions || [],
     userServices: userRole?.services || [],

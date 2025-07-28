@@ -30,6 +30,14 @@ const SupportDashboard = () => {
   const { loading, setLoading } = useStore();
   const { user, isSupport } = useAuth();
   
+  // Security check - ensure only support users can access this dashboard
+  useEffect(() => {
+    if (!isSupport) {
+      console.warn('SupportDashboard: Non-support user attempted to access support dashboard');
+      navigate('/dashboard');
+    }
+  }, [isSupport, navigate]);
+  
   const [dashboardData, setDashboardData] = useState({
     totalOrders: 0,
     pendingOrders: 0,
@@ -50,10 +58,10 @@ const SupportDashboard = () => {
   const loadSupportData = async () => {
     setLoading(true);
     try {
-      // Fetch orders (non-financial data only)
+      // Fetch orders (non-financial data only) - EXCLUDE all payment/price information
       const { data: orders, error: ordersError } = await supabase
         .from('orders')
-        .select('id, customer_name, service_type, status, created_at, scheduled_date')
+        .select('id, customer_name, service_type, status, created_at, scheduled_date, customer_phone, customer_email')
         .order('created_at', { ascending: false })
         .limit(10);
       
@@ -61,10 +69,10 @@ const SupportDashboard = () => {
       const ordersArray = Array.isArray(orders) ? orders : [];
       setRecentOrders(ordersArray);
 
-      // Fetch applicants
+      // Fetch applicants (non-financial data only)
       const { data: applicants, error: applicantsError } = await supabase
         .from('applications')
-        .select('*')
+        .select('id, first_name, last_name, email, phone, role_applied_for, application_status, created_at, experience_years')
         .order('created_at', { ascending: false })
         .limit(5);
       
@@ -72,24 +80,24 @@ const SupportDashboard = () => {
       const applicantsArray = Array.isArray(applicants) ? applicants : [];
       setRecentApplicants(applicantsArray);
 
-      // Fetch bubblers
+      // Fetch bubblers (non-financial data only) - EXCLUDE earnings/payout information
       const { data: bubblers, error: bubblersError } = await supabase
         .from('bubblers')
-        .select('id, first_name, last_name, email, role, is_active')
+        .select('id, first_name, last_name, email, role, is_active, phone, created_at')
         .eq('is_active', true);
       
       if (bubblersError) console.warn('Bubblers fetch warning:', bubblersError);
       const bubblersArray = Array.isArray(bubblers) ? bubblers : [];
 
-      // Fetch equipment
+      // Fetch equipment (non-financial data only)
       const { data: equipment, error: equipmentError } = await supabase
         .from('equipment')
-        .select('*');
+        .select('id, item, serial_number, condition, status, notes, created_at');
       
       if (equipmentError) console.warn('Equipment fetch warning:', equipmentError);
       const equipmentArray = Array.isArray(equipment) ? equipment : [];
 
-      // Calculate stats (excluding financial data)
+      // Calculate stats (EXCLUDING all financial data)
       const totalOrders = ordersArray.length;
       const pendingOrders = ordersArray.filter(o => o.status === 'pending' || o.status === 'assigned').length;
       const completedOrders = ordersArray.filter(o => o.status === 'completed').length;
@@ -193,6 +201,19 @@ const SupportDashboard = () => {
 
   return (
     <div className="space-y-6">
+      {/* Security Notice */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="flex items-center space-x-3">
+          <FiShield className="h-5 w-5 text-blue-600" />
+          <div>
+            <h4 className="font-medium text-blue-800">Support Access Level</h4>
+            <p className="text-sm text-blue-700">
+              You have access to customer service data only. Financial and business-sensitive information is restricted.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -345,10 +366,23 @@ const SupportDashboard = () => {
         <div className="flex items-center space-x-3">
           <FiShield className="h-5 w-5 text-yellow-600" />
           <div>
-            <h4 className="font-medium text-yellow-800">Financial Data Restricted</h4>
-            <p className="text-sm text-yellow-700">
-              Support representatives cannot view financial information including revenue, deposits, payouts, and payment details.
+            <h4 className="font-medium text-yellow-800">Support Access Restrictions</h4>
+            <p className="text-sm text-yellow-700 mb-2">
+              Support representatives have limited access to protect sensitive business information.
             </p>
+            <div className="text-xs text-yellow-700 space-y-1">
+              <p><strong>❌ Restricted Data:</strong></p>
+              <ul className="list-disc list-inside ml-2 space-y-1">
+                <li>Revenue data and financial reports</li>
+                <li>Stripe payment information</li>
+                <li>Customer payment history</li>
+                <li>Bubbler payout totals and earnings</li>
+                <li>Internal operating margins</li>
+                <li>Owner-level notes and admin data</li>
+                <li>Sales reports and financial analytics</li>
+                <li>Deposit and payment processing details</li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
