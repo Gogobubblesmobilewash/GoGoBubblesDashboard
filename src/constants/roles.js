@@ -26,29 +26,187 @@ export const BUBBLER_ROLES = {
   }
 };
 
-// Support Role Definition
-export const SUPPORT_ROLE = {
-  name: 'Support Representative',
-  permissions: [
-    'view_orders',
-    'view_jobs', 
-    'view_bubblers',
-    'view_applications',
-    'view_equipment',
-    'view_messages',
-    'view_ratings',
-    'view_activity',
-    'view_customer_data',
-    'view_analytics',
-    'view_reports'
-  ],
-  restrictions: [
-    'no_financial_data',
-    'no_payout_info',
-    'no_revenue_data',
-    'no_deposit_info'
-  ]
+// Comprehensive Role Definitions
+export const SYSTEM_ROLES = {
+  ADMIN: {
+    name: 'Admin',
+    permissions: ['all'],
+    access: {
+      jobs: 'all',
+      financials: 'full',
+      applicants: 'full',
+      messaging: 'all',
+      territory: 'all_markets',
+      users: 'all',
+      settings: 'all'
+    },
+    restrictions: []
+  },
+  SUPPORT: {
+    name: 'Support',
+    permissions: [
+      'view_all_jobs',
+      'message_bubblers',
+      'mark_jobs_complete',
+      'handle_reschedules',
+      'view_ratings',
+      'track_standby_queue',
+      'view_contact_info'
+    ],
+    access: {
+      jobs: 'all',
+      financials: 'none',
+      applicants: 'view_only',
+      messaging: 'all',
+      territory: 'all_markets',
+      users: 'view_only',
+      settings: 'none'
+    },
+    restrictions: [
+      'no_financial_data',
+      'no_payout_info',
+      'no_revenue_data',
+      'no_deposit_info',
+      'no_stripe_data',
+      'no_payment_history',
+      'no_earnings_data',
+      'no_operating_margins',
+      'no_owner_notes',
+      'no_sales_reports',
+      'no_admin_data'
+    ]
+  },
+  LEAD_BUBBLER: {
+    name: 'Lead Bubbler',
+    permissions: [
+      'view_team_jobs',
+      'reassign_jobs_with_permission',
+      'view_team_logs',
+      'check_equipment',
+      'message_team'
+    ],
+    access: {
+      jobs: 'team_only',
+      financials: 'none',
+      applicants: 'none',
+      messaging: 'team',
+      territory: 'assigned_only',
+      users: 'team_only',
+      settings: 'none'
+    },
+    restrictions: [
+      'no_financial_data',
+      'no_payout_info',
+      'no_revenue_data',
+      'no_other_bubbler_payouts',
+      'no_admin_data'
+    ]
+  },
+  BUBBLER: {
+    name: 'Bubbler',
+    permissions: [
+      'view_own_assignments',
+      'view_own_ratings',
+      'view_own_payouts',
+      'view_assigned_equipment',
+      'message_center',
+      'clock_in_out',
+      'task_completion'
+    ],
+    access: {
+      jobs: 'self_only',
+      financials: 'self_only',
+      applicants: 'none',
+      messaging: 'optional',
+      territory: 'assigned_only',
+      users: 'none',
+      settings: 'none'
+    },
+    restrictions: [
+      'no_other_bubbler_data',
+      'no_admin_data',
+      'no_applicant_data'
+    ]
+  },
+  FINANCE: {
+    name: 'Finance',
+    permissions: [
+      'view_revenue',
+      'view_deposits',
+      'view_stripe_reports',
+      'view_payout_history',
+      'view_taxable_sales',
+      'export_reports'
+    ],
+    access: {
+      jobs: 'none',
+      financials: 'full',
+      applicants: 'none',
+      messaging: 'none',
+      territory: 'all_markets',
+      users: 'none',
+      settings: 'none'
+    },
+    restrictions: [
+      'no_job_assignment',
+      'no_customer_access',
+      'no_logistics_access'
+    ]
+  },
+  RECRUITER: {
+    name: 'Recruiter/HR',
+    permissions: [
+      'view_applicants',
+      'approve_decline_applications',
+      'view_disqualifiers',
+      'mark_onboarding_status',
+      'add_internal_notes',
+      'schedule_interviews'
+    ],
+    access: {
+      jobs: 'none',
+      financials: 'none',
+      applicants: 'full',
+      messaging: 'none',
+      territory: 'all_markets',
+      users: 'applicants_only',
+      settings: 'none'
+    },
+    restrictions: [
+      'no_job_access',
+      'no_revenue_access',
+      'no_scheduling_access'
+    ]
+  },
+  MARKET_MANAGER: {
+    name: 'Market Manager',
+    permissions: [
+      'view_local_bookings',
+      'view_local_bubblers',
+      'view_local_payouts',
+      'assign_local_jobs',
+      'resolve_local_issues',
+      'onboard_local_team',
+      'view_local_revenue'
+    ],
+    access: {
+      jobs: 'local_only',
+      financials: 'local_only',
+      applicants: 'local_only',
+      messaging: 'local',
+      territory: 'assigned_only',
+      users: 'local_only',
+      settings: 'local_only'
+    },
+    restrictions: [
+      'no_other_market_access',
+      'no_global_admin_data'
+    ]
+  }
 };
+
+// Support Role Definition (legacy - now part of SYSTEM_ROLES)
+export const SUPPORT_ROLE = SYSTEM_ROLES.SUPPORT;
 
 // Helper function to get role from email
 export const getRoleFromEmail = (email) => {

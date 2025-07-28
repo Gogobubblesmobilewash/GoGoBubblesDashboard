@@ -28,12 +28,16 @@ import { useAuth } from '../../store/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import BubblerDashboard from './BubblerDashboard';
 import SupportDashboard from './SupportDashboard';
+import FinanceDashboard from './FinanceDashboard';
+import RecruiterDashboard from './RecruiterDashboard';
+import MarketManagerDashboard from './MarketManagerDashboard';
+import LeadBubblerDashboard from './LeadBubblerDashboard';
 import BreakdownModal from './BreakdownModal';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { setDailyJobs, loading, setLoading } = useStore();
-  const { user, isAdmin, isBubbler, isSupport } = useAuth();
+  const { user, isAdmin, isBubbler, isSupport, isLeadBubbler, isFinance, isRecruiter, isMarketManager } = useAuth();
   
   // Debug logging
   console.log('Dashboard: User role info:', { 
@@ -41,6 +45,10 @@ const Dashboard = () => {
     isAdmin, 
     isBubbler, 
     isSupport,
+    isLeadBubbler,
+    isFinance,
+    isRecruiter,
+    isMarketManager,
     userRole: user?.user_metadata?.role 
   });
   
@@ -630,21 +638,41 @@ const Dashboard = () => {
     </div>
   );
 
-  // Render bubbler dashboard for bubblers
-  if (isBubbler && !isAdmin && !isSupport) {
-    console.log('Dashboard: Rendering BubblerDashboard for bubbler user');
-    return <BubblerDashboard />;
-  }
-
-  // Render support dashboard for support users
+  // Render role-specific dashboards
   if (isSupport && !isAdmin) {
     console.log('Dashboard: Rendering SupportDashboard for support user');
     return <SupportDashboard />;
   }
 
+  if (isFinance && !isAdmin) {
+    console.log('Dashboard: Rendering FinanceDashboard for finance user');
+    return <FinanceDashboard />;
+  }
+
+  if (isRecruiter && !isAdmin) {
+    console.log('Dashboard: Rendering RecruiterDashboard for recruiter user');
+    return <RecruiterDashboard />;
+  }
+
+  if (isMarketManager && !isAdmin) {
+    console.log('Dashboard: Rendering MarketManagerDashboard for market manager user');
+    return <MarketManagerDashboard />;
+  }
+
+  if (isLeadBubbler && !isAdmin) {
+    console.log('Dashboard: Rendering LeadBubblerDashboard for lead bubbler user');
+    return <LeadBubblerDashboard />;
+  }
+
+  // Render bubbler dashboard for regular bubblers
+  if (isBubbler && !isAdmin && !isSupport && !isFinance && !isRecruiter && !isMarketManager && !isLeadBubbler) {
+    console.log('Dashboard: Rendering BubblerDashboard for bubbler user');
+    return <BubblerDashboard />;
+  }
+
   // Additional check: if user is not admin and has a role, they should see bubbler dashboard
-  if (!isAdmin && !isSupport && user && user.email && !user.email.includes('admin') && !user.email.includes('support')) {
-    console.log('Dashboard: User is not admin/support and has email, rendering BubblerDashboard as fallback');
+  if (!isAdmin && !isSupport && !isFinance && !isRecruiter && !isMarketManager && !isLeadBubbler && user && user.email && !user.email.includes('admin') && !user.email.includes('support') && !user.email.includes('finance') && !user.email.includes('recruiter') && !user.email.includes('manager') && !user.email.includes('lead')) {
+    console.log('Dashboard: User is not admin/support/finance/recruiter/manager/lead and has email, rendering BubblerDashboard as fallback');
     return <BubblerDashboard />;
   }
 
@@ -652,7 +680,7 @@ const Dashboard = () => {
   if (isAdmin) {
     console.log('Dashboard: Rendering Admin Dashboard for admin user');
   } else {
-    console.log('Dashboard: User is neither admin, support, nor bubbler, rendering admin dashboard as fallback');
+    console.log('Dashboard: User is neither admin, support, finance, recruiter, market manager, lead bubbler, nor bubbler, rendering admin dashboard as fallback');
   }
 
   if (loading) {

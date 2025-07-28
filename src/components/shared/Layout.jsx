@@ -24,7 +24,11 @@ import {
   FiGitBranch as Workflow,
   FiAward as Award,
   FiHeart as Heart,
-  FiTarget as Target
+  FiTarget as Target,
+  FiCreditCard as CreditCard,
+  FiDownload as Download,
+  FiUserPlus as UserPlus,
+  FiAlertCircle as AlertCircle
 } from 'react-icons/fi';
 import MessageNotifications from '../messages/MessageNotifications';
 import NotificationCenter from '../activity/NotificationCenter';
@@ -33,7 +37,7 @@ const Layout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
   const location = useLocation();
-  const { user, logout, isAdmin, isBubbler, isSupport } = useAuth();
+  const { user, logout, isAdmin, isBubbler, isSupport, isFinance, isRecruiter, isMarketManager, isLeadBubbler } = useAuth();
 
   // Debug logging
   console.log('Layout render - user:', user, 'isAdmin:', isAdmin, 'activeTab:', activeTab);
@@ -80,8 +84,51 @@ const Layout = () => {
     { name: 'Messages', icon: MessageCircle, path: '/messages' },
     { name: 'Ratings', icon: Star, path: '/ratings' },
   ];
+
+  const financeNavItems = [
+    { name: 'Dashboard', icon: Home, path: '/dashboard' },
+    { name: 'Revenue Reports', icon: DollarSign, path: '/revenue' },
+    { name: 'Payout History', icon: TrendingUp, path: '/payouts' },
+    { name: 'Stripe Reports', icon: CreditCard, path: '/stripe' },
+    { name: 'Tax Reports', icon: FileText, path: '/tax-reports' },
+    { name: 'Export Data', icon: Download, path: '/export' },
+  ];
+
+  const recruiterNavItems = [
+    { name: 'Dashboard', icon: Home, path: '/dashboard' },
+    { name: 'Applicants', icon: Users, path: '/applicants' },
+    { name: 'Interview Schedule', icon: Calendar, path: '/interviews' },
+    { name: 'Onboarding Queue', icon: UserPlus, path: '/onboarding' },
+    { name: 'Flagged Applications', icon: AlertCircle, path: '/flagged' },
+    { name: 'Export Reports', icon: Download, path: '/export' },
+  ];
+
+  const marketManagerNavItems = [
+    { name: 'Dashboard', icon: Home, path: '/dashboard' },
+    { name: 'Local Jobs', icon: Briefcase, path: '/jobs' },
+    { name: 'Local Bubblers', icon: Users, path: '/bubblers' },
+    { name: 'Local Applicants', icon: UserPlus, path: '/applicants' },
+    { name: 'Local Equipment', icon: Briefcase, path: '/equipment' },
+    { name: 'Local Messages', icon: MessageCircle, path: '/messages' },
+    { name: 'Local Reports', icon: BarChart3, path: '/reports' },
+  ];
+
+  const leadBubblerNavItems = [
+    { name: 'Dashboard', icon: Home, path: '/dashboard' },
+    { name: 'Team Jobs', icon: Briefcase, path: '/jobs' },
+    { name: 'Team Members', icon: Users, path: '/team' },
+    { name: 'Equipment Status', icon: Briefcase, path: '/equipment' },
+    { name: 'Team Messages', icon: MessageCircle, path: '/messages' },
+    { name: 'Issue Reports', icon: AlertCircle, path: '/issues' },
+  ];
   
-  const navItems = isAdmin ? adminNavItems : isSupport ? supportNavItems : bubblerNavItems;
+  const navItems = isAdmin ? adminNavItems : 
+                  isSupport ? supportNavItems :
+                  isFinance ? financeNavItems :
+                  isRecruiter ? recruiterNavItems :
+                  isMarketManager ? marketManagerNavItems :
+                  isLeadBubbler ? leadBubblerNavItems :
+                  bubblerNavItems;
 
   const handleLogout = () => {
     logout();
@@ -107,7 +154,13 @@ const Layout = () => {
             <div className="flex items-center">
               <img src="/bubblers_logo.png" alt="GoGoBubbles" className="h-10" />
               <span className="ml-3 text-lg font-bold text-gray-800 font-poppins">
-                {isAdmin ? 'Admin' : isSupport ? 'Support' : 'Bubbler'}
+                {isAdmin ? 'Admin' : 
+                 isSupport ? 'Support' : 
+                 isFinance ? 'Finance' :
+                 isRecruiter ? 'Recruiter' :
+                 isMarketManager ? 'Market Manager' :
+                 isLeadBubbler ? 'Lead Bubbler' :
+                 'Bubbler'}
               </span>
             </div>
             <button
@@ -202,7 +255,27 @@ const Layout = () => {
                     Support
                   </span>
                 )}
-                {isBubbler && !isAdmin && !isSupport && (
+                {isFinance && !isAdmin && (
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-600 text-white">
+                    Finance
+                  </span>
+                )}
+                {isRecruiter && !isAdmin && (
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-purple-600 text-white">
+                    Recruiter
+                  </span>
+                )}
+                {isMarketManager && !isAdmin && (
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-indigo-600 text-white">
+                    Market Manager
+                  </span>
+                )}
+                {isLeadBubbler && !isAdmin && (
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-orange-600 text-white">
+                    Lead Bubbler
+                  </span>
+                )}
+                {isBubbler && !isAdmin && !isSupport && !isFinance && !isRecruiter && !isMarketManager && !isLeadBubbler && (
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-brand-aqua text-white">
                     Bubbler
                   </span>
@@ -224,6 +297,14 @@ const Layout = () => {
                 ? "Here's what's happening across all operations today."
                 : isSupport
                 ? "Here's what you need to know to help customers today."
+                : isFinance
+                ? "Here's your financial overview and reporting data."
+                : isRecruiter
+                ? "Here's your applicant management and recruitment overview."
+                : isMarketManager
+                ? "Here's your local market performance and team overview."
+                : isLeadBubbler
+                ? "Here's your team management and performance overview."
                 : 'You have a great day ahead with your scheduled jobs.'}
             </p>
           </div>
