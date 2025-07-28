@@ -185,8 +185,17 @@ const Applicants = () => {
   };
 
   const handleViewDetails = (application) => {
+    console.log('handleViewDetails called with:', application);
     setSelectedApplication(application);
     setShowDetailsModal(true);
+    console.log('Modal should now be visible');
+    
+    // Fallback alert in case modal doesn't show
+    setTimeout(() => {
+      if (!showDetailsModal) {
+        alert(`View Details for ${application.first_name} ${application.last_name}\n\nEmail: ${application.email}\nPhone: ${application.phone}\nRole: ${application.role_applied_for}\nStatus: ${application.application_status}\n\nThis would show detailed application information in a modal.`);
+      }
+    }, 100);
   };
 
   const handleApprove = (application) => {
