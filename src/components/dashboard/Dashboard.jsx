@@ -39,6 +39,9 @@ const Dashboard = () => {
   const { setDailyJobs, loading, setLoading } = useStore();
   const { user, isAdmin, isBubbler, isSupport, isLeadBubbler, isFinance, isRecruiter, isMarketManager } = useAuth();
   
+  // Add error state
+  const [error, setError] = useState(null);
+  
   // Debug logging
   console.log('Dashboard: User role info:', { 
     user: user?.email, 
@@ -51,6 +54,22 @@ const Dashboard = () => {
     isMarketManager,
     userRole: user?.user_metadata?.role 
   });
+  
+  // Error boundary effect
+  useEffect(() => {
+    const handleError = (error) => {
+      console.error('Dashboard: Caught error:', error);
+      setError(error.message || 'Something went wrong');
+    };
+
+    window.addEventListener('error', handleError);
+    window.addEventListener('unhandledrejection', (event) => handleError(event.reason));
+
+    return () => {
+      window.removeEventListener('error', handleError);
+      window.removeEventListener('unhandledrejection', handleError);
+    };
+  }, []);
   
   // Add new state for all business health metrics
   const [dashboardData, setDashboardData] = useState({
@@ -638,42 +657,77 @@ const Dashboard = () => {
     </div>
   );
 
-  // Render role-specific dashboards
+  // Render role-specific dashboards with error handling
   if (isSupport && !isAdmin) {
     console.log('Dashboard: Rendering SupportDashboard for support user');
-    return <SupportDashboard />;
+    try {
+      return <SupportDashboard />;
+    } catch (error) {
+      console.error('Dashboard: Error rendering SupportDashboard:', error);
+      setError('Error loading support dashboard: ' + error.message);
+    }
   }
 
   if (isFinance && !isAdmin) {
     console.log('Dashboard: Rendering FinanceDashboard for finance user');
-    return <FinanceDashboard />;
+    try {
+      return <FinanceDashboard />;
+    } catch (error) {
+      console.error('Dashboard: Error rendering FinanceDashboard:', error);
+      setError('Error loading finance dashboard: ' + error.message);
+    }
   }
 
   if (isRecruiter && !isAdmin) {
     console.log('Dashboard: Rendering RecruiterDashboard for recruiter user');
-    return <RecruiterDashboard />;
+    try {
+      return <RecruiterDashboard />;
+    } catch (error) {
+      console.error('Dashboard: Error rendering RecruiterDashboard:', error);
+      setError('Error loading recruiter dashboard: ' + error.message);
+    }
   }
 
   if (isMarketManager && !isAdmin) {
     console.log('Dashboard: Rendering MarketManagerDashboard for market manager user');
-    return <MarketManagerDashboard />;
+    try {
+      return <MarketManagerDashboard />;
+    } catch (error) {
+      console.error('Dashboard: Error rendering MarketManagerDashboard:', error);
+      setError('Error loading market manager dashboard: ' + error.message);
+    }
   }
 
   if (isLeadBubbler && !isAdmin) {
     console.log('Dashboard: Rendering LeadBubblerDashboard for lead bubbler user');
-    return <LeadBubblerDashboard />;
+    try {
+      return <LeadBubblerDashboard />;
+    } catch (error) {
+      console.error('Dashboard: Error rendering LeadBubblerDashboard:', error);
+      setError('Error loading lead bubbler dashboard: ' + error.message);
+    }
   }
 
   // Render bubbler dashboard for regular bubblers
   if (isBubbler && !isAdmin && !isSupport && !isFinance && !isRecruiter && !isMarketManager && !isLeadBubbler) {
     console.log('Dashboard: Rendering BubblerDashboard for bubbler user');
-    return <BubblerDashboard />;
+    try {
+      return <BubblerDashboard />;
+    } catch (error) {
+      console.error('Dashboard: Error rendering BubblerDashboard:', error);
+      setError('Error loading bubbler dashboard: ' + error.message);
+    }
   }
 
   // Additional check: if user is not admin and has a role, they should see bubbler dashboard
   if (!isAdmin && !isSupport && !isFinance && !isRecruiter && !isMarketManager && !isLeadBubbler && user && user.email && !user.email.includes('admin') && !user.email.includes('support') && !user.email.includes('finance') && !user.email.includes('recruiter') && !user.email.includes('manager') && !user.email.includes('lead')) {
     console.log('Dashboard: User is not admin/support/finance/recruiter/manager/lead and has email, rendering BubblerDashboard as fallback');
-    return <BubblerDashboard />;
+    try {
+      return <BubblerDashboard />;
+    } catch (error) {
+      console.error('Dashboard: Error rendering BubblerDashboard fallback:', error);
+      setError('Error loading dashboard: ' + error.message);
+    }
   }
 
   // Render admin dashboard for admins
@@ -681,6 +735,95 @@ const Dashboard = () => {
     console.log('Dashboard: Rendering Admin Dashboard for admin user');
   } else {
     console.log('Dashboard: User is neither admin, support, finance, recruiter, market manager, lead bubbler, nor bubbler, rendering admin dashboard as fallback');
+  }
+
+  // Show error if there is one
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="text-red-500 text-lg font-semibold mb-2">Something went wrong</div>
+          <div className="text-gray-600 mb-4">{error}</div>
+          <button 
+            onClick={() => {
+              setError(null);
+              window.location.reload();
+            }}
+            className="px-4 py-2 bg-brand-aqua text-white rounded-lg hover:bg-brand-aqua-dark transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Simple fallback dashboard for when role detection fails
+  if (!user || !user.email) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="text-gray-500 text-lg font-semibold mb-2">Loading user information...</div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-aqua mx-auto"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // Fallback dashboard for unknown roles
+  if (!isAdmin && !isSupport && !isFinance && !isRecruiter && !isMarketManager && !isLeadBubbler && !isBubbler) {
+    return (
+      <div className="p-6">
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+          <h2 className="text-lg font-semibold text-yellow-800 mb-2">Role Not Detected</h2>
+          <p className="text-yellow-700 mb-4">
+            Your role could not be automatically detected. Please contact an administrator to assign your proper role.
+          </p>
+          <div className="text-sm text-yellow-600">
+            <p><strong>Email:</strong> {user.email}</p>
+            <p><strong>User ID:</strong> {user.id}</p>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Contact Support</h3>
+            <p className="text-gray-600 mb-4">Get help with your account access</p>
+            <button 
+              onClick={() => alert('Please contact support at support@gogobubbles.com')}
+              className="w-full px-4 py-2 bg-brand-aqua text-white rounded-lg hover:bg-brand-aqua-dark transition-colors"
+            >
+              Contact Support
+            </button>
+          </div>
+          
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Refresh Page</h3>
+            <p className="text-gray-600 mb-4">Try refreshing to reload your session</p>
+            <button 
+              onClick={() => window.location.reload()}
+              className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            >
+              Refresh Page
+            </button>
+          </div>
+          
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Sign Out</h3>
+            <p className="text-gray-600 mb-4">Sign out and try signing in again</p>
+            <button 
+              onClick={() => {
+                localStorage.clear();
+                window.location.href = '/login';
+              }}
+              className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+            >
+              Sign Out
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (loading) {

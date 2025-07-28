@@ -159,33 +159,50 @@ export const AuthProvider = ({ children }) => {
       }
 
       // Check bubblers table for role
+      console.log('AuthContext: Checking bubblers table for role...');
       const { data, error } = await supabase
         .from('bubblers')
         .select('*')
         .eq('email', userEmail)
         .single();
 
-      if (error && error.code !== 'PGRST116') { // PGRST116 is "not found"
-        console.error('Error fetching user role:', error);
-        setUserRole(null);
+      if (error) {
+        console.warn('AuthContext: Error fetching from bubblers table:', error);
+        // If bubblers table doesn't exist or user not found, set as basic bubbler
+        console.log('AuthContext: Setting user as basic bubbler (fallback)');
+        setUserRole({ 
+          type: 'BUBBLER', 
+          permissions: ['view_own_jobs', 'view_own_earnings'],
+          restrictions: ['no_admin_access']
+        });
         return;
       }
 
       if (data) {
-        console.log('AuthContext: Found bubbler role:', data.role);
+        console.log('AuthContext: Found user in bubblers table:', data);
         setUserRole({
-          type: data.role,
-          permissions: data.permissions || [],
+          type: data.role || 'BUBBLER',
+          permissions: data.permissions || ['view_own_jobs', 'view_own_earnings'],
           services: data.services || [],
-          isActive: data.is_active
+          isActive: data.is_active !== false,
+          restrictions: data.restrictions || ['no_admin_access']
         });
       } else {
-        console.log('AuthContext: No role found for user');
-        setUserRole(null);
+        console.log('AuthContext: User not found in bubblers table, setting as basic bubbler');
+        setUserRole({ 
+          type: 'BUBBLER', 
+          permissions: ['view_own_jobs', 'view_own_earnings'],
+          restrictions: ['no_admin_access']
+        });
       }
     } catch (error) {
-      console.error('Exception fetching user role:', error);
-      setUserRole(null);
+      console.error('AuthContext: Exception in fetchUserRole:', error);
+      // Set a default role to prevent complete failure
+      setUserRole({ 
+        type: 'BUBBLER', 
+        permissions: ['view_own_jobs', 'view_own_earnings'],
+        restrictions: ['no_admin_access']
+      });
     }
   };
 
