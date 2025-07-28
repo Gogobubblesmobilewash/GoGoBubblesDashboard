@@ -22,7 +22,8 @@ const Bubblers = () => {
   const [selectedDeviceBubbler, setSelectedDeviceBubbler] = useState(null);
   const [deviceFingerprints, setDeviceFingerprints] = useState([]);
   const [newBubbler, setNewBubbler] = useState({
-    name: '',
+    first_name: '',
+    last_name: '',
     email: '',
     phone: '',
     role: 'SHINE'
@@ -94,9 +95,11 @@ const Bubblers = () => {
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(bubbler => 
-        bubbler.name?.toLowerCase().includes(term) ||
+        (bubbler.first_name?.toLowerCase().includes(term) ||
+        bubbler.last_name?.toLowerCase().includes(term) ||
+        `${bubbler.first_name} ${bubbler.last_name}`.toLowerCase().includes(term) ||
         bubbler.email?.toLowerCase().includes(term) ||
-        bubbler.role?.toLowerCase().includes(term)
+        bubbler.role?.toLowerCase().includes(term))
       );
     }
 
@@ -163,7 +166,8 @@ const Bubblers = () => {
     try {
       const role = BUBBLER_ROLES[newBubbler.role];
       const bubblerData = {
-        name: newBubbler.name,
+        first_name: newBubbler.first_name,
+        last_name: newBubbler.last_name,
         email: newBubbler.email,
         phone: newBubbler.phone,
         role: newBubbler.role,
@@ -188,7 +192,7 @@ const Bubblers = () => {
       if (error) throw error;
 
       // Reset form and close modal
-      setNewBubbler({ name: '', email: '', phone: '', role: 'SHINE' });
+      setNewBubbler({ first_name: '', last_name: '', email: '', phone: '', role: 'SHINE' });
       setShowAddModal(false);
       
       // Refresh bubblers list
@@ -206,7 +210,8 @@ const Bubblers = () => {
     try {
       const role = BUBBLER_ROLES[editingBubbler.role];
       const updateData = {
-        name: editingBubbler.name,
+        first_name: editingBubbler.first_name,
+        last_name: editingBubbler.last_name,
         email: editingBubbler.email,
         phone: editingBubbler.phone,
         role: editingBubbler.role,
@@ -249,6 +254,11 @@ const Bubblers = () => {
       ELITE: 'bg-purple-100 text-purple-800'
     };
     return colors[role] || 'bg-gray-100 text-gray-800';
+  };
+
+  // Helper function to get full name
+  const getFullName = (bubbler) => {
+    return `${bubbler.first_name || ''} ${bubbler.last_name || ''}`.trim();
   };
 
   const handlePayoutClick = async (bubbler) => {
@@ -304,7 +314,7 @@ const Bubblers = () => {
         jobIds
       );
 
-      alert(`Payout record created for ${bubbler.name}: $${weeklyPayout.toFixed(2)}`);
+      alert(`Payout record created for ${getFullName(bubbler)}: $${weeklyPayout.toFixed(2)}`);
       
       // Refresh payout history
       const history = await getPayoutHistory(bubbler.id, 20);
@@ -504,7 +514,7 @@ const Bubblers = () => {
                 className="hover:bg-blue-50"
               >
                 <td className="px-4 py-2 font-medium text-gray-900 cursor-pointer" onClick={() => handleRowClick(bubbler)}>
-                  {bubbler.name}
+                  {getFullName(bubbler)}
                 </td>
                 <td className="px-4 py-2 text-gray-700 cursor-pointer" onClick={() => handleRowClick(bubbler)}>
                   {bubbler.email}
@@ -634,15 +644,15 @@ const Bubblers = () => {
         </table>
       )}
       {showModal && selectedBubbler && (
-        <Modal title={selectedBubbler.name + " Profile"} onClose={() => setShowModal(false)}>
+        <Modal title={getFullName(selectedBubbler) + " Profile"} onClose={() => setShowModal(false)}>
           <div className="space-y-6 max-h-[80vh] overflow-y-auto">
             {/* Profile Header */}
             <div className="flex items-center space-x-4">
               <div className="bg-cyan-100 rounded-full h-16 w-16 flex items-center justify-center font-bold text-3xl text-cyan-700">
-                {selectedBubbler.name[0]}
+                {getFullName(selectedBubbler)[0]}
               </div>
               <div>
-                <div className="text-xl font-semibold text-gray-900">{selectedBubbler.name}</div>
+                <div className="text-xl font-semibold text-gray-900">{getFullName(selectedBubbler)}</div>
                 <div className="text-sm text-gray-600">{selectedBubbler.email}</div>
                 <div className="text-sm text-gray-600">{selectedBubbler.phone}</div>
                 <div className="flex items-center mt-1">
@@ -873,13 +883,23 @@ const Bubblers = () => {
         <Modal title="Add New Bubbler" onClose={() => setShowAddModal(false)}>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
               <input
                 type="text"
-                value={newBubbler.name}
-                onChange={(e) => setNewBubbler({...newBubbler, name: e.target.value})}
+                value={newBubbler.first_name}
+                onChange={(e) => setNewBubbler({...newBubbler, first_name: e.target.value})}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter full name"
+                placeholder="Enter first name"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+              <input
+                type="text"
+                value={newBubbler.last_name}
+                onChange={(e) => setNewBubbler({...newBubbler, last_name: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter last name"
               />
             </div>
             <div>
@@ -925,7 +945,7 @@ const Bubblers = () => {
               </button>
               <button
                 onClick={handleAddBubbler}
-                disabled={!newBubbler.name || !newBubbler.email || !newBubbler.phone}
+                disabled={!newBubbler.first_name || !newBubbler.last_name || !newBubbler.email || !newBubbler.phone}
                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Add Bubbler
@@ -940,13 +960,23 @@ const Bubblers = () => {
         <Modal title="Edit Bubbler" onClose={() => setShowEditModal(false)}>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
               <input
                 type="text"
-                value={editingBubbler.name}
-                onChange={(e) => setEditingBubbler({...editingBubbler, name: e.target.value})}
+                value={editingBubbler.first_name}
+                onChange={(e) => setEditingBubbler({...editingBubbler, first_name: e.target.value})}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter full name"
+                placeholder="Enter first name"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+              <input
+                type="text"
+                value={editingBubbler.last_name}
+                onChange={(e) => setEditingBubbler({...editingBubbler, last_name: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter last name"
               />
             </div>
             <div>
@@ -992,7 +1022,7 @@ const Bubblers = () => {
               </button>
               <button
                 onClick={handleEditBubbler}
-                disabled={!editingBubbler.name || !editingBubbler.email || !editingBubbler.phone}
+                disabled={!editingBubbler.first_name || !editingBubbler.last_name || !editingBubbler.email || !editingBubbler.phone}
                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Update Bubbler
@@ -1004,7 +1034,7 @@ const Bubblers = () => {
 
       {/* Payout Management Modal */}
       {showPayoutModal && selectedPayoutBubbler && (
-        <Modal title={`Payout Management - ${selectedPayoutBubbler.name}`} onClose={() => setShowPayoutModal(false)}>
+        <Modal title={`Payout Management - ${getFullName(selectedPayoutBubbler)}`} onClose={() => setShowPayoutModal(false)}>
           <div className="space-y-6 max-h-[80vh] overflow-y-auto">
             {/* Current Week Payout */}
             <div className="bg-green-50 border border-green-200 rounded-lg p-4">
@@ -1086,7 +1116,7 @@ const Bubblers = () => {
 
       {/* Device Fingerprints Modal */}
       {showDeviceModal && selectedDeviceBubbler && (
-        <Modal title={`Device History - ${selectedDeviceBubbler.name}`} onClose={() => setShowDeviceModal(false)}>
+        <Modal title={`Device History - ${getFullName(selectedDeviceBubbler)}`} onClose={() => setShowDeviceModal(false)}>
           <div className="space-y-6 max-h-[80vh] overflow-y-auto">
             {/* Device Summary */}
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
