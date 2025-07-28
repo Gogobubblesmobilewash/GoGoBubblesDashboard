@@ -141,12 +141,21 @@ const AutomatedReporting = () => {
   };
 
   const handleCreateReport = () => {
-    setIsCreatingReport(true);
+    // Show a modal or navigate to report creation form
+    alert('Create Report functionality would open a report creation form here.');
+    // In a real implementation, this would:
+    // 1. Open a modal with report creation form
+    // 2. Allow user to select template, schedule, recipients
+    // 3. Save the new report to database
   };
 
   const handleEditTemplate = (template) => {
-    setSelectedReport(template);
-    setIsEditingTemplate(true);
+    // Show template editing modal
+    alert(`Edit Template: ${template.name}\nThis would open a template editor with sections and formatting options.`);
+    // In a real implementation, this would:
+    // 1. Open a modal with template editor
+    // 2. Allow editing of sections, formatting, data sources
+    // 3. Save changes to database
   };
 
   const handleRunReport = (reportId) => {
@@ -154,13 +163,44 @@ const AutomatedReporting = () => {
     // Simulate report generation
     setTimeout(() => {
       setIsLoading(false);
-      // Show success message
+      alert(`Report ${reportId} has been generated successfully!\nCheck your email for the report.`);
+      // In a real implementation, this would:
+      // 1. Generate the report using the template
+      // 2. Send to recipients via email
+      // 3. Update the report status in database
     }, 2000);
   };
 
   const handleExportReport = (reportId, format) => {
-    // Simulate export
-    console.log(`Exporting report ${reportId} in ${format} format`);
+    // Simulate export with actual download
+    const report = reports.find(r => r.id === reportId);
+    if (report) {
+      const content = `Report: ${report.name}\nGenerated: ${new Date().toLocaleString()}\nFormat: ${format}`;
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${report.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.${format}`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+      alert(`Report exported as ${format.toUpperCase()} file.`);
+    }
+  };
+
+  const handleUseTemplate = (template) => {
+    alert(`Use Template: ${template.name}\nThis would create a new report using this template.`);
+    // In a real implementation, this would:
+    // 1. Open report creation form with template pre-filled
+    // 2. Allow user to customize settings
+    // 3. Create new report based on template
+  };
+
+  const handleViewDetails = (item, type) => {
+    alert(`View Details: ${item.name}\nType: ${type}\nThis would show detailed information and configuration.`);
+    // In a real implementation, this would:
+    // 1. Open a detailed view modal
+    // 2. Show all configuration options
+    // 3. Allow editing of settings
   };
 
   const filteredReports = reports.filter(report => {
@@ -325,7 +365,10 @@ const AutomatedReporting = () => {
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-900">Report Templates</h2>
-              <button className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+              <button 
+                onClick={() => alert('Create Template functionality would open a template creation form.')}
+                className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              >
                 <Plus className="w-4 h-4" />
                 <span>Create Template</span>
               </button>
@@ -366,13 +409,22 @@ const AutomatedReporting = () => {
 
                   <div className="flex gap-2">
                     <button
+                      onClick={() => handleUseTemplate(template)}
+                      className="flex-1 flex items-center justify-center space-x-2 bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>Use Template</span>
+                    </button>
+                    <button
                       onClick={() => handleEditTemplate(template)}
-                      className="flex-1 flex items-center justify-center space-x-2 bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                      className="flex items-center justify-center space-x-2 bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                     >
                       <Edit className="w-4 h-4" />
-                      <span>Edit</span>
                     </button>
-                    <button className="flex items-center justify-center space-x-2 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors">
+                    <button 
+                      onClick={() => handleViewDetails(template, 'template')}
+                      className="flex items-center justify-center space-x-2 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors"
+                    >
                       <Eye className="w-4 h-4" />
                     </button>
                     {!template.isDefault && (

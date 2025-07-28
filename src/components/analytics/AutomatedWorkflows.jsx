@@ -491,10 +491,16 @@ const AutomatedWorkflows = () => {
                     >
                       {workflow.isActive ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
                     </button>
-                    <button className="flex items-center space-x-2 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors">
+                    <button 
+                      onClick={() => alert(`Settings for workflow: ${workflow.name}\nThis would open workflow configuration settings.`)}
+                      className="flex items-center space-x-2 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors"
+                    >
                       <Settings className="w-4 h-4" />
                     </button>
-                    <button className="flex items-center space-x-2 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors">
+                    <button 
+                      onClick={() => alert(`View details for workflow: ${workflow.name}\nThis would show detailed workflow information and configuration.`)}
+                      className="flex items-center space-x-2 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors"
+                    >
                       <Eye className="w-4 h-4" />
                     </button>
                   </div>
