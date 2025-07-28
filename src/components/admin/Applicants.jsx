@@ -809,6 +809,7 @@ const Applicants = () => {
         </Modal>
       )}
     </div>
+  </div>
   );
 };
 
