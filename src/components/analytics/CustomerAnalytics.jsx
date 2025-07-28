@@ -472,7 +472,10 @@ const CustomerAnalytics = () => {
                       </div>
                     </div>
                     
-                    <button className="w-full bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                    <button 
+                      onClick={() => alert(`View Details for ${segment.name} segment\n\nSegment Details:\n- Size: ${formatNumber(segment.count)} customers\n- Avg Value: ${formatCurrency(segment.avgValue)}\n- Retention Rate: ${segment.retentionRate}%\n- Satisfaction: ${segment.satisfaction}/5.0\n\nThis would show detailed customer segment analysis and individual customer profiles.`)}
+                      className="w-full bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                    >
                       View Details
                     </button>
                   </div>
@@ -554,7 +557,10 @@ const CustomerAnalytics = () => {
                             <span className="text-gray-500">Confidence: {insight.confidence}%</span>
                             <span className="text-gray-500">Segment: {insight.segment}</span>
                           </div>
-                          <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                          <button 
+                            onClick={() => alert(`Action: ${insight.action}\n\nInsight: ${insight.title}\nDescription: ${insight.description}\n\nThis would execute the recommended action for this customer insight.`)}
+                            className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                          >
                             {insight.action}
                           </button>
                         </div>
