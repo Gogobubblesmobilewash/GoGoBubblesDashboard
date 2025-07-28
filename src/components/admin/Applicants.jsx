@@ -44,6 +44,8 @@ const Applicants = () => {
   }, []);
 
   useEffect(() => {
+    console.log('Applications loaded:', applications.length);
+    console.log('Filtered applications:', filteredApplications.length);
     filterApplications();
   }, [applications, searchTerm, roleFilter, statusFilter, equipmentFilter, disqualifiedFilter, languageFilter]);
 
@@ -355,19 +357,36 @@ const Applicants = () => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">Applicant Review</h1>
-          <p className="text-gray-600 text-sm mt-1">
-            Review and manage job applications from potential Bubblers
+    <div className="p-6 bg-gray-50 min-h-screen">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Applicant Management
+          </h1>
+          <p className="text-gray-600">
+            Review and manage bubbler applications
           </p>
+          
+          {/* Test button to verify function works */}
+          <button 
+            onClick={() => {
+              const testApp = {
+                id: 'test',
+                first_name: 'Test',
+                last_name: 'User',
+                email: 'test@example.com',
+                phone: '555-1234',
+                role_applied_for: 'Sparkle',
+                application_status: 'pending'
+              };
+              handleViewDetails(testApp);
+            }}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Test View Details Function
+          </button>
         </div>
-        <div className="mt-4 sm:mt-0 text-sm text-gray-500">
-          {filteredApplications.length} of {applications.length} applications
-        </div>
-      </div>
 
       {/* Filters */}
       <div className="card">
@@ -445,7 +464,17 @@ const Applicants = () => {
       </div>
 
       {/* Applications Table */}
-      <div className="card overflow-hidden">
+      <div className="bg-white shadow-sm rounded-lg overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-900">
+            Applications ({filteredApplications.length} total)
+          </h3>
+          {filteredApplications.length === 0 && (
+            <p className="text-sm text-gray-500 mt-1">
+              No applications found. This might be because there are no applications in the database.
+            </p>
+          )}
+        </div>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
