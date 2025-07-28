@@ -35,6 +35,7 @@ const AutomatedReporting = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingReports, setLoadingReports] = useState(new Set());
 
   // Mock data for reports
   const mockReports = [
@@ -159,10 +160,14 @@ const AutomatedReporting = () => {
   };
 
   const handleRunReport = (reportId) => {
-    setIsLoading(true);
+    setLoadingReports(prev => new Set(prev).add(reportId));
     // Simulate report generation
     setTimeout(() => {
-      setIsLoading(false);
+      setLoadingReports(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(reportId);
+        return newSet;
+      });
       alert(`Report ${reportId} has been generated successfully!\nCheck your email for the report.`);
       // In a real implementation, this would:
       // 1. Generate the report using the template
@@ -335,10 +340,10 @@ const AutomatedReporting = () => {
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleRunReport(report.id)}
-                      disabled={isLoading}
+                      disabled={loadingReports.has(report.id)}
                       className="flex-1 flex items-center justify-center space-x-2 bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
                     >
-                      {isLoading ? (
+                      {loadingReports.has(report.id) ? (
                         <RefreshCw className="w-4 h-4 animate-spin" />
                       ) : (
                         <Eye className="w-4 h-4" />
@@ -351,7 +356,10 @@ const AutomatedReporting = () => {
                     >
                       <Download className="w-4 h-4" />
                     </button>
-                    <button className="flex items-center space-x-2 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors">
+                    <button 
+                      onClick={() => handleViewDetails(report, 'report')}
+                      className="flex items-center space-x-2 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors"
+                    >
                       <Settings className="w-4 h-4" />
                     </button>
                   </div>

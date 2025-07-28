@@ -438,6 +438,104 @@ const Equipment = () => {
         </div>
       )}
 
+      {/* Add Equipment Modal */}
+      {showModal && (
+        <Modal title="Add Equipment" onClose={() => { setShowModal(false); setSelectedEquipment(null); }}>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Equipment Name</label>
+              <input
+                type="text"
+                value={selectedEquipment?.item || ''}
+                onChange={(e) => setSelectedEquipment({ ...selectedEquipment, item: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
+                placeholder="Enter equipment name"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Serial Number</label>
+              <input
+                type="text"
+                value={selectedEquipment?.serialNumber || ''}
+                onChange={(e) => setSelectedEquipment({ ...selectedEquipment, serialNumber: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
+                placeholder="Enter serial number"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Condition</label>
+              <select
+                value={selectedEquipment?.condition || 'good'}
+                onChange={(e) => setSelectedEquipment({ ...selectedEquipment, condition: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
+              >
+                <option value="excellent">Excellent</option>
+                <option value="good">Good</option>
+                <option value="fair">Fair</option>
+                <option value="poor">Poor</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+              <select
+                value={selectedEquipment?.status || 'available'}
+                onChange={(e) => setSelectedEquipment({ ...selectedEquipment, status: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
+              >
+                <option value="available">Available</option>
+                <option value="rented">Rented</option>
+                <option value="returned">Returned</option>
+                <option value="maintenance">Maintenance</option>
+                <option value="damaged">Damaged</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+              <textarea
+                value={selectedEquipment?.notes || ''}
+                onChange={(e) => setSelectedEquipment({ ...selectedEquipment, notes: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
+                rows="3"
+                placeholder="Add notes about this equipment..."
+              />
+            </div>
+            <div className="flex space-x-2 pt-4">
+              <button 
+                onClick={async () => {
+                  if (!selectedEquipment?.item) {
+                    alert('Please enter equipment name');
+                    return;
+                  }
+                  try {
+                    const newEquipment = {
+                      item: selectedEquipment.item,
+                      serialNumber: selectedEquipment.serialNumber || '',
+                      condition: selectedEquipment.condition || 'good',
+                      status: selectedEquipment.status || 'available',
+                      notes: selectedEquipment.notes || '',
+                      created_at: new Date().toISOString()
+                    };
+                    const { data, error } = await supabase.from('equipment').insert([newEquipment]);
+                    if (error) throw error;
+                    alert('Equipment added successfully!');
+                    setShowModal(false);
+                    setSelectedEquipment(null);
+                    loadEquipment();
+                  } catch (error) {
+                    console.error('Error adding equipment:', error);
+                    alert('Error adding equipment. Please try again.');
+                  }
+                }} 
+                className="btn-primary flex-1"
+              >
+                Add Equipment
+              </button>
+              <button onClick={() => { setShowModal(false); setSelectedEquipment(null); }} className="btn-secondary flex-1">Cancel</button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
       {/* Assign Equipment Modal */}
       {showAssignModal && assigningEquipment && (
         <Modal title="Assign Equipment" onClose={() => { setShowAssignModal(false); setAssigningEquipment(null); }}>

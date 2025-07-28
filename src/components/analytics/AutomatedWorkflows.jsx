@@ -38,6 +38,7 @@ const AutomatedWorkflows = () => {
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterType, setFilterType] = useState('all');
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingWorkflows, setLoadingWorkflows] = useState(new Set());
 
   // Mock data for workflows
   const mockWorkflows = [
@@ -279,16 +280,22 @@ const AutomatedWorkflows = () => {
   };
 
   const handleToggleWorkflow = (workflowId) => {
-    setWorkflows(workflows.map(w => 
-      w.id === workflowId ? { ...w, isActive: !w.isActive } : w
-    ));
+    setWorkflows(prevWorkflows => 
+      prevWorkflows.map(w => 
+        w.id === workflowId ? { ...w, isActive: !w.isActive } : w
+      )
+    );
   };
 
   const handleRunWorkflow = (workflowId) => {
-    setIsLoading(true);
+    setLoadingWorkflows(prev => new Set(prev).add(workflowId));
     // Simulate workflow execution
     setTimeout(() => {
-      setIsLoading(false);
+      setLoadingWorkflows(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(workflowId);
+        return newSet;
+      });
       // Add new execution to the list
       const workflow = workflows.find(w => w.id === workflowId);
       const newExecution = {
@@ -471,10 +478,10 @@ const AutomatedWorkflows = () => {
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleRunWorkflow(workflow.id)}
-                      disabled={isLoading}
+                      disabled={loadingWorkflows.has(workflow.id) || !workflow.isActive}
                       className="flex-1 flex items-center justify-center space-x-2 bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
                     >
-                      {isLoading ? (
+                      {loadingWorkflows.has(workflow.id) ? (
                         <RefreshCw className="w-4 h-4 animate-spin" />
                       ) : (
                         <Play className="w-4 h-4" />

@@ -227,7 +227,22 @@ const BusinessIntelligence = () => {
               )}
               <span>Refresh</span>
             </button>
-            <button className="flex items-center space-x-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors">
+            <button 
+              onClick={() => {
+                const content = `Business Intelligence Export\nGenerated: ${new Date().toLocaleString()}\n\nKey Metrics:\n${Object.entries(mockMetrics).map(([key, metric]) => 
+                  `${key}: ${key === 'revenue' ? formatCurrency(metric.current) : key === 'satisfaction' ? metric.current.toFixed(1) : formatNumber(metric.current)} (${metric.change >= 0 ? '+' : ''}${metric.change}%)`
+                ).join('\n')}`;
+                const blob = new Blob([content], { type: 'text/plain' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `business_intelligence_${new Date().toISOString().split('T')[0]}.txt`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+                alert('Business intelligence data exported successfully!');
+              }}
+              className="flex items-center space-x-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors"
+            >
               <Download className="w-4 h-4" />
               <span>Export</span>
             </button>
