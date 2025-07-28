@@ -31,6 +31,32 @@ const Applicants = () => {
   const [adminNotes, setAdminNotes] = useState('');
   const [editingNotes, setEditingNotes] = useState(null);
 
+  // Mock data for testing when no applications exist
+  const mockApplications = [
+    {
+      id: 'mock-1',
+      first_name: 'John',
+      last_name: 'Smith',
+      email: 'john.smith@example.com',
+      phone: '555-123-4567',
+      address: '123 Main St, Anytown, USA',
+      role_applied_for: 'Sparkle',
+      application_status: 'pending',
+      travel_radius_minutes: 30,
+      authorized_to_work: true,
+      age_verified: true,
+      has_transportation: true,
+      primary_language: 'English',
+      english_comfort: 'Fluent',
+      experience: '2 years cleaning experience',
+      availability: 'Weekdays 9AM-5PM',
+      created_at: new Date().toISOString(),
+      equipment_ready: true,
+      disqualified: false,
+      disqualification_reason: null
+    }
+  ];
+
   // Filters
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
@@ -368,24 +394,33 @@ const Applicants = () => {
             Review and manage bubbler applications
           </p>
           
-          {/* Test button to verify function works */}
-          <button 
-            onClick={() => {
-              const testApp = {
-                id: 'test',
-                first_name: 'Test',
-                last_name: 'User',
-                email: 'test@example.com',
-                phone: '555-1234',
-                role_applied_for: 'Sparkle',
-                application_status: 'pending'
-              };
-              handleViewDetails(testApp);
-            }}
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            Test View Details Function
-          </button>
+          {/* Test button to verify eye button functionality */}
+          <div className="mt-4 space-x-4">
+            <button 
+              onClick={() => alert('Eye button test - This confirms the onClick functionality works!')}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+            >
+              Test Eye Button Functionality
+            </button>
+            
+            <button 
+              onClick={() => {
+                const testApp = {
+                  id: 'test',
+                  first_name: 'Test',
+                  last_name: 'User',
+                  email: 'test@example.com',
+                  phone: '555-1234',
+                  role_applied_for: 'Sparkle',
+                  application_status: 'pending'
+                };
+                handleViewDetails(testApp);
+              }}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              Test View Details Modal
+            </button>
+          </div>
         </div>
 
       {/* Filters */}
