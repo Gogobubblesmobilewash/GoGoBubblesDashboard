@@ -34,6 +34,14 @@ const Dashboard = () => {
   const { setDailyJobs, loading, setLoading } = useStore();
   const { user, isAdmin, isBubbler } = useAuth();
   
+  // Debug logging
+  console.log('Dashboard: User role info:', { 
+    user: user?.email, 
+    isAdmin, 
+    isBubbler, 
+    userRole: user?.user_metadata?.role 
+  });
+  
   // Add new state for all business health metrics
   const [dashboardData, setDashboardData] = useState({
     revenueDeposits: 0,
@@ -622,7 +630,21 @@ const Dashboard = () => {
 
   // Render bubbler dashboard for bubblers
   if (isBubbler && !isAdmin) {
+    console.log('Dashboard: Rendering BubblerDashboard for bubbler user');
     return <BubblerDashboard />;
+  }
+
+  // Additional check: if user is not admin and has a role, they should see bubbler dashboard
+  if (!isAdmin && user && user.email && !user.email.includes('admin')) {
+    console.log('Dashboard: User is not admin and has email, rendering BubblerDashboard as fallback');
+    return <BubblerDashboard />;
+  }
+
+  // Render admin dashboard for admins
+  if (isAdmin) {
+    console.log('Dashboard: Rendering Admin Dashboard for admin user');
+  } else {
+    console.log('Dashboard: User is neither admin nor bubbler, rendering admin dashboard as fallback');
   }
 
   if (loading) {

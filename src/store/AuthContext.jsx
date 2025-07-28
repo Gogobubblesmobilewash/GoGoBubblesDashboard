@@ -29,8 +29,11 @@ export const AuthProvider = ({ children }) => {
     }
 
     try {
+      console.log('AuthContext: Fetching role for email:', userEmail);
+      
       // Check if user is admin first
       if (userEmail.includes('admin')) {
+        console.log('AuthContext: User is admin based on email');
         setUserRole({ type: 'ADMIN', permissions: ['all'] });
         return;
       }
@@ -49,6 +52,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       if (data) {
+        console.log('AuthContext: Found bubbler role:', data.role);
         setUserRole({
           type: data.role,
           permissions: data.permissions || [],
@@ -56,6 +60,7 @@ export const AuthProvider = ({ children }) => {
           isActive: data.is_active
         });
       } else {
+        console.log('AuthContext: No role found for user');
         setUserRole(null);
       }
     } catch (error) {
@@ -150,7 +155,7 @@ export const AuthProvider = ({ children }) => {
     logout,
     isAuthenticated: !!user,
     isAdmin: userRole?.type === 'ADMIN',
-    isBubbler: userRole?.type && userRole.type !== 'ADMIN',
+    isBubbler: userRole?.type && userRole.type !== 'ADMIN' && ['SHINE', 'SPARKLE', 'FRESH', 'ELITE'].includes(userRole.type),
     // Role-specific permissions
     isShineBubbler: userRole?.type === 'SHINE',
     isSparkleBubbler: userRole?.type === 'SPARKLE',
@@ -167,11 +172,12 @@ export const AuthProvider = ({ children }) => {
   };
 
   console.log('AuthContext: Current state:', { 
-    user, 
-    userRole, 
+    user: user?.email, 
+    userRole: userRole?.type, 
     loading, 
     isAuthenticated: !!user, 
-    isAdmin: userRole?.type === 'ADMIN' 
+    isAdmin: userRole?.type === 'ADMIN',
+    isBubbler: userRole?.type && userRole.type !== 'ADMIN' && ['SHINE', 'SPARKLE', 'FRESH', 'ELITE'].includes(userRole.type)
   });
 
   return (
