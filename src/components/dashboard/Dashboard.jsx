@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   FiHome, 
@@ -17,314 +17,432 @@ import {
   FiCheckCircle,
   FiClock
 } from 'react-icons/fi';
+import useStore from '../../store/useStore';
 import { useAuth } from '../../store/AuthContext';
+import SupportDashboard from './SupportDashboard';
+import FinanceDashboard from './FinanceDashboard';
+import RecruiterDashboard from './RecruiterDashboard';
+import MarketManagerDashboard from './MarketManagerDashboard';
+import LeadBubblerDashboard from './LeadBubblerDashboard';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isAdmin, isBubbler, isSupport, isFinance, isRecruiter, isMarketManager, isLeadBubbler } = useAuth();
   const location = useLocation();
-  
-  // Mock data that shows what you'll need in Supabase
-  const [mockData] = useState({
-    // Revenue & Financial Data (for 'revenue' table)
-    revenue: {
-      totalRevenue: 125000,
-      totalDeposits: 15000,
-      totalPayouts: 85000,
-      pendingPayouts: 5000,
-      stripeRevenue: 120000,
-      taxableSales: 118000,
-      processingFees: 2000,
-      netRevenue: 123000
-    },
-    
-    // Job Data (for 'jobs' and 'job_assignments' tables)
-    jobs: {
-      totalJobs: 45,
-      pendingAssignments: 12,
-      completedToday: 8,
-      jobsNeedingReassignment: 3,
-      recentJobs: [
-        { id: 1, customer: 'John Smith', service: 'Home Cleaning', status: 'assigned', amount: 150 },
-        { id: 2, customer: 'Sarah Johnson', service: 'Laundry Service', status: 'completed', amount: 85 },
-        { id: 3, customer: 'Mike Davis', service: 'Car Wash', status: 'pending', amount: 75 }
-      ]
-    },
-    
-    // Applicant Data (for 'applicants' table)
-    applicants: {
-      totalApplicants: 23,
-      pendingApplicants: 8,
-      approvedApplicants: 12,
-      declinedApplicants: 3,
-      recentApplicants: [
-        { id: 1, name: 'Alex Wilson', status: 'pending', applied: '2024-01-15' },
-        { id: 2, name: 'Taylor Brown', status: 'approved', applied: '2024-01-14' },
-        { id: 3, name: 'Jordan Lee', status: 'pending', applied: '2024-01-13' }
-      ]
-    },
-    
-    // Bubbler Data (for 'bubblers' table)
-    bubblers: {
-      totalBubblers: 18,
-      activeBubblers: 15,
-      newThisMonth: 3,
-      recentActivity: [
-        { id: 1, name: 'Emma Garcia', action: 'Completed job #123', time: '2 hours ago' },
-        { id: 2, name: 'David Chen', action: 'Started job #124', time: '3 hours ago' },
-        { id: 3, name: 'Lisa Rodriguez', action: 'Updated profile', time: '5 hours ago' }
-      ]
-    },
-    
-    // Equipment Data (for 'equipment' table)
-    equipment: {
-      totalEquipment: 25,
-      availableEquipment: 18,
-      inUse: 7,
-      overdueRentals: 2,
-      equipmentList: [
-        { id: 1, name: 'Vacuum Cleaner', status: 'available', assignedTo: null },
-        { id: 2, name: 'Steam Cleaner', status: 'in_use', assignedTo: 'Emma Garcia' },
-        { id: 3, name: 'Laundry Kit', status: 'overdue', assignedTo: 'David Chen' }
-      ]
-    },
-    
-    // Messages Data (for 'messages' table)
-    messages: {
-      unreadMessages: 5,
-      totalMessages: 23,
-      recentMessages: [
-        { id: 1, from: 'Customer Support', subject: 'Job inquiry', unread: true },
-        { id: 2, from: 'System', subject: 'Payment processed', unread: false },
-        { id: 3, from: 'Admin', subject: 'Schedule update', unread: true }
-      ]
-    },
-    
-    // Ratings Data (for 'ratings' table)
-    ratings: {
-      averageRating: 4.8,
-      totalRatings: 156,
-      lowRatings: 3,
-      recentRatings: [
-        { id: 1, customer: 'John Smith', rating: 5, comment: 'Excellent service!' },
-        { id: 2, customer: 'Sarah Johnson', rating: 4, comment: 'Good work' },
-        { id: 3, customer: 'Mike Davis', rating: 5, comment: 'Highly recommend' }
-      ]
-    }
-  });
+  const { fetchDashboardData, dashboardData, loading, error } = useStore();
 
-  // Only render dashboard content when on the dashboard route
-  if (location.pathname !== '/dashboard') {
-    return null;
+  useEffect(() => {
+    if (user) {
+      fetchDashboardData();
+    }
+  }, [user, fetchDashboardData]);
+
+  // Debug logging
+  console.log('Dashboard render - user:', user, 'isAdmin:', isAdmin, 'isBubbler:', isBubbler, 'isSupport:', isSupport);
+
+  // Role-based dashboard rendering
+  if (isSupport) {
+    return <SupportDashboard />;
   }
 
-  const StatCard = ({ title, value, icon: Icon, color = 'blue', format = 'number' }) => {
-    const formatValue = (val) => {
-      if (format === 'currency') {
-        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
-      }
-      if (format === 'percentage') {
-        return `${val}%`;
-      }
-      return val.toLocaleString();
-    };
+  if (isFinance) {
+    return <FinanceDashboard />;
+  }
 
+  if (isRecruiter) {
+    return <RecruiterDashboard />;
+  }
+
+  if (isMarketManager) {
+    return <MarketManagerDashboard />;
+  }
+
+  if (isLeadBubbler) {
+    return <LeadBubblerDashboard />;
+  }
+
+  // For bubblers, show a simplified dashboard
+  if (isBubbler && !isAdmin) {
     return (
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-gray-600">{title}</p>
-            <p className="text-2xl font-bold text-gray-900">{formatValue(value)}</p>
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Welcome back, {user?.email}</h1>
+          <p className="text-gray-600">Your command center for daily operations</p>
+        </div>
+
+        {/* Bubbler-specific stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <StatCard 
+            title="Today's Jobs" 
+            value={dashboardData?.bubblerStats?.todayJobs || 0} 
+            icon={FiCalendar} 
+            color="blue" 
+          />
+          <StatCard 
+            title="Completed Today" 
+            value={dashboardData?.bubblerStats?.completedToday || 0} 
+            icon={FiCheckCircle} 
+            color="green" 
+          />
+          <StatCard 
+            title="Equipment Available" 
+            value={dashboardData?.bubblerStats?.availableEquipment || 0} 
+            icon={FiBriefcase} 
+            color="purple" 
+          />
+          <StatCard 
+            title="This Week's Earnings" 
+            value={dashboardData?.bubblerStats?.weeklyEarnings || 0} 
+            icon={FiDollarSign} 
+            color="yellow" 
+            format="currency" 
+          />
+        </div>
+
+        {/* Quick actions */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <QuickActionCard 
+            title="View Today's Jobs"
+            description="Check your assigned jobs for today"
+            icon={FiCalendar}
+            color="blue"
+            onClick={() => navigate('/jobs')}
+          />
+          <QuickActionCard 
+            title="Equipment Status"
+            description="Check your equipment availability"
+            icon={FiBriefcase}
+            color="purple"
+            onClick={() => navigate('/equipment')}
+          />
+          <QuickActionCard 
+            title="View Earnings"
+            description="Check your earnings and payouts"
+            icon={FiDollarSign}
+            color="yellow"
+            onClick={() => navigate('/earnings')}
+          />
+        </div>
+
+        {/* Recent activity */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div className="p-6 border-b border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
+            <p className="text-sm text-gray-600">Your latest job activities</p>
           </div>
-          <div className={`p-3 rounded-full bg-${color}-100`}>
-            <Icon className={`h-6 w-6 text-${color}-600`} />
+          <div className="p-6 space-y-4">
+            {dashboardData?.bubblerStats?.recentActivity?.map(item => (
+              <RecentActivityItem key={item.id} item={item} />
+            )) || (
+              <p className="text-gray-500 text-center py-4">No recent activity</p>
+            )}
           </div>
         </div>
       </div>
     );
-  };
+  }
 
-  const QuickAction = ({ title, description, icon: Icon, onClick, color = 'blue' }) => (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow cursor-pointer" onClick={onClick}>
-      <div className={`inline-flex p-3 rounded-full bg-${color}-100 mb-4`}>
-        <Icon className={`h-6 w-6 text-${color}-600`} />
+  // Admin dashboard with full data
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-aqua" />
       </div>
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
-      <p className="text-gray-600">{description}</p>
-    </div>
-  );
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-red-600 mb-4">Error loading dashboard data: {error}</p>
+        <button 
+          onClick={() => fetchDashboardData()} 
+          className="bg-brand-aqua text-white px-4 py-2 rounded hover:bg-brand-aqua-dark"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-sm text-gray-600">
-            Welcome back, {user?.email}! This is mock data showing what you'll need in Supabase.
-          </p>
-        </div>
-        
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => alert('This would refresh real data from Supabase')}
-            className="flex items-center gap-2 px-4 py-2 bg-brand-aqua text-white rounded-lg hover:bg-brand-aqua-dark transition-colors"
-          >
-            <FiRefreshCw className="h-4 w-4" />
-            Refresh Data
-          </button>
-        </div>
+    <div className="max-w-7xl mx-auto">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+        <p className="text-gray-600">Complete overview of GoGoBubbles operations</p>
       </div>
 
-      {/* Supabase Setup Notice */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h2 className="text-lg font-semibold text-blue-800 mb-2">📋 Supabase Tables You'll Need</h2>
-        <p className="text-blue-700 mb-3">
-          This dashboard shows mock data. To make it real, you'll need these Supabase tables:
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 text-sm">
-          <div className="bg-blue-100 rounded p-2">• <strong>revenue</strong> - Financial data</div>
-          <div className="bg-blue-100 rounded p-2">• <strong>jobs</strong> - Job assignments</div>
-          <div className="bg-blue-100 rounded p-2">• <strong>applicants</strong> - Job applications</div>
-          <div className="bg-blue-100 rounded p-2">• <strong>bubblers</strong> - Worker profiles</div>
-          <div className="bg-blue-100 rounded p-2">• <strong>equipment</strong> - Equipment tracking</div>
-          <div className="bg-blue-100 rounded p-2">• <strong>messages</strong> - Communication</div>
-          <div className="bg-blue-100 rounded p-2">• <strong>ratings</strong> - Customer reviews</div>
-        </div>
-      </div>
-
-      {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          title="Total Revenue"
-          value={mockData.revenue.totalRevenue}
-          icon={FiDollarSign}
-          color="green"
-          format="currency"
+      {/* Main stats */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <StatCard 
+          title="Total Revenue" 
+          value={dashboardData?.stats?.totalRevenue || 0} 
+          icon={FiDollarSign} 
+          color="green" 
+          format="currency" 
         />
-        <StatCard
-          title="Active Jobs"
-          value={mockData.jobs.totalJobs}
-          icon={FiCalendar}
-          color="blue"
+        <StatCard 
+          title="Active Bubblers" 
+          value={dashboardData?.stats?.activeBubblers || 0} 
+          icon={FiUsers} 
+          color="blue" 
         />
-        <StatCard
-          title="Active Bubblers"
-          value={mockData.bubblers.activeBubblers}
-          icon={FiUsers}
-          color="purple"
+        <StatCard 
+          title="Pending Applications" 
+          value={dashboardData?.stats?.pendingApplications || 0} 
+          icon={FiFileText} 
+          color="yellow" 
         />
-        <StatCard
-          title="Pending Applicants"
-          value={mockData.applicants.pendingApplicants}
-          icon={FiAlertCircle}
-          color="orange"
+        <StatCard 
+          title="Today's Jobs" 
+          value={dashboardData?.stats?.todayJobs || 0} 
+          icon={FiCalendar} 
+          color="purple" 
         />
       </div>
 
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <QuickAction
-          title="View All Jobs"
-          description="See all job assignments and status"
-          icon={FiCalendar}
-          color="blue"
-          onClick={() => navigate('/admin/jobs')}
-        />
-        <QuickAction
-          title="Manage Bubblers"
-          description="View and manage worker profiles"
-          icon={FiUsers}
-          color="purple"
-          onClick={() => navigate('/bubblers')}
-        />
-        <QuickAction
-          title="Review Applicants"
-          description="Process job applications"
+      {/* Quick actions */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <QuickActionCard 
+          title="Manage Orders"
+          description="View and manage customer orders"
           icon={FiFileText}
-          color="orange"
+          color="blue"
+          onClick={() => navigate('/orders')}
+        />
+        <QuickActionCard 
+          title="Review Applications"
+          description="Review new bubbler applications"
+          icon={FiUsers}
+          color="green"
           onClick={() => navigate('/applicants')}
         />
-        <QuickAction
-          title="Equipment Status"
-          description="Track equipment assignments"
-          icon={FiBriefcase}
-          color="green"
-          onClick={() => navigate('/admin/equipment')}
-        />
-        <QuickAction
-          title="Financial Reports"
-          description="View revenue and payout data"
+        <QuickActionCard 
+          title="View Analytics"
+          description="Access detailed business analytics"
           icon={FiBarChart2}
-          color="indigo"
-          onClick={() => navigate('/earnings')}
-        />
-        <QuickAction
-          title="Messages"
-          description="Check communications"
-          icon={FiMessageCircle}
-          color="pink"
-          onClick={() => navigate('/messages')}
+          color="purple"
+          onClick={() => navigate('/analytics')}
         />
       </div>
 
-      {/* Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Jobs */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="p-6 border-b border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900">Recent Jobs</h3>
-          </div>
-          <div className="p-6 space-y-4">
-            {mockData.jobs.recentJobs.map((job) => (
-              <div key={job.id} className="flex items-center justify-between">
-                <div>
-                  <h4 className="font-medium text-gray-900">{job.customer}</h4>
-                  <p className="text-sm text-gray-600">{job.service}</p>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="font-medium text-gray-900">
-                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(job.amount)}
-                  </span>
-                  <span className={`px-2 py-1 text-xs rounded-full ${
-                    job.status === 'completed' ? 'bg-green-100 text-green-800' : 
-                    job.status === 'assigned' ? 'bg-blue-100 text-blue-800' : 
-                    'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {job.status}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
+      {/* Recent activity */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div className="p-6 border-b border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
+          <p className="text-sm text-gray-600">Latest actions from your team</p>
         </div>
+        <div className="p-6 space-y-4">
+          {dashboardData?.recentActivity?.map(item => (
+            <RecentActivityItem key={item.id} item={item} />
+          )) || (
+            <p className="text-gray-500 text-center py-4">No recent activity</p>
+          )}
+        </div>
+      </div>
 
-        {/* Recent Applicants */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="p-6 border-b border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900">Recent Applicants</h3>
-          </div>
-          <div className="p-6 space-y-4">
-            {mockData.applicants.recentApplicants.map((applicant) => (
-              <div key={applicant.id} className="flex items-center justify-between">
-                <div>
-                  <h4 className="font-medium text-gray-900">{applicant.name}</h4>
-                  <p className="text-sm text-gray-600">Applied: {applicant.applied}</p>
-                </div>
-                <span className={`px-2 py-1 text-xs rounded-full ${
-                  applicant.status === 'approved' ? 'bg-green-100 text-green-800' : 
-                  applicant.status === 'declined' ? 'bg-red-100 text-red-800' : 
-                  'bg-yellow-100 text-yellow-800'
-                }`}>
-                  {applicant.status}
-                </span>
-              </div>
-            ))}
-          </div>
+      {/* Recent jobs */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 mt-6">
+        <div className="p-6 border-b border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-900">Recent Jobs</h3>
+          <p className="text-sm text-gray-600">Latest job assignments and completions</p>
+        </div>
+        <div className="p-6 space-y-4">
+          {dashboardData?.recentJobs?.map(item => (
+            <RecentListItem key={item.id} item={item} type="jobs" />
+          )) || (
+            <p className="text-gray-500 text-center py-4">No recent jobs</p>
+          )}
+        </div>
+      </div>
+
+      {/* Recent applicants */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 mt-6">
+        <div className="p-6 border-b border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-900">Recent Applicants</h3>
+          <p className="text-sm text-gray-600">New applications and their status</p>
+        </div>
+        <div className="p-6 space-y-4">
+          {dashboardData?.recentApplicants?.map(item => (
+            <RecentListItem key={item.id} item={item} type="applicants" />
+          )) || (
+            <p className="text-gray-500 text-center py-4">No recent applicants</p>
+          )}
+        </div>
+      </div>
+
+      {/* Equipment status */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 mt-6">
+        <div className="p-6 border-b border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-900">Equipment Status</h3>
+          <p className="text-sm text-gray-600">Overview of equipment availability</p>
+        </div>
+        <div className="p-6 space-y-4">
+          {dashboardData?.equipmentStatus?.map(item => (
+            <RecentListItem key={item.id} item={item} type="equipment" />
+          )) || (
+            <p className="text-gray-500 text-center py-4">No equipment data</p>
+          )}
+        </div>
+      </div>
+
+      {/* Recent messages */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 mt-6">
+        <div className="p-6 border-b border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-900">Recent Messages</h3>
+          <p className="text-sm text-gray-600">Latest communications</p>
+        </div>
+        <div className="p-6 space-y-4">
+          {dashboardData?.recentMessages?.map(item => (
+            <RecentListItem key={item.id} item={item} type="messages" />
+          )) || (
+            <p className="text-gray-500 text-center py-4">No recent messages</p>
+          )}
+        </div>
+      </div>
+
+      {/* Recent ratings */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 mt-6">
+        <div className="p-6 border-b border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-900">Recent Ratings</h3>
+          <p className="text-sm text-gray-600">Latest customer feedback</p>
+        </div>
+        <div className="p-6 space-y-4">
+          {dashboardData?.recentRatings?.map(item => (
+            <RecentListItem key={item.id} item={item} type="ratings" />
+          )) || (
+            <p className="text-gray-500 text-center py-4">No recent ratings</p>
+          )}
+        </div>
+      </div>
+
+      {/* Revenue trends */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 mt-6">
+        <div className="p-6 border-b border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-900">Revenue Trends</h3>
+          <p className="text-sm text-gray-600">Monthly revenue and payout trends</p>
+        </div>
+        <div className="p-6 space-y-4">
+          {dashboardData?.revenueTrends?.map(item => (
+            <RecentListItem key={item.id} item={item} type="revenue" />
+          )) || (
+            <p className="text-gray-500 text-center py-4">No revenue data</p>
+          )}
+        </div>
+      </div>
+
+      {/* Payout history */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 mt-6">
+        <div className="p-6 border-b border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-900">Payout History</h3>
+          <p className="text-sm text-gray-600">Recent bubbler payouts</p>
+        </div>
+        <div className="p-6 space-y-4">
+          {dashboardData?.recentPayouts?.map(item => (
+            <RecentListItem key={item.id} item={item} type="payouts" />
+          )) || (
+            <p className="text-gray-500 text-center py-4">No payout data</p>
+          )}
+        </div>
+      </div>
+
+      {/* Customer segments */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 mt-6">
+        <div className="p-6 border-b border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-900">Customer Segments</h3>
+          <p className="text-sm text-gray-600">Breakdown of customer types</p>
+        </div>
+        <div className="p-6 space-y-4">
+          {dashboardData?.customerSegments?.map(item => (
+            <RecentListItem key={item.id} item={item} type="customers" />
+          )) || (
+            <p className="text-gray-500 text-center py-4">No customer data</p>
+          )}
+        </div>
+      </div>
+
+      {/* Business insights */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 mt-6">
+        <div className="p-6 border-b border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-900">Business Insights</h3>
+          <p className="text-sm text-gray-600">Key business metrics and recommendations</p>
+        </div>
+        <div className="p-6 space-y-4">
+          {dashboardData?.businessInsights?.map(item => (
+            <RecentListItem key={item.id} item={item} type="insights" />
+          )) || (
+            <p className="text-gray-500 text-center py-4">No insights data</p>
+          )}
         </div>
       </div>
     </div>
   );
 };
+
+const StatCard = ({ title, value, icon: Icon, color = 'blue', format = 'number' }) => {
+  const formatValue = (val) => {
+    if (format === 'currency') {
+      return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
+    }
+    return val;
+  };
+
+  return (
+    <div className={`bg-white rounded-lg shadow-sm p-6 flex items-center justify-between border border-${color}-200`}>
+      <div>
+        <h3 className="text-sm font-medium text-gray-500">{title}</h3>
+        <p className={`mt-1 text-3xl font-bold text-${color}-800`}>{formatValue(value)}</p>
+      </div>
+      <div className={`p-3 rounded-full bg-${color}-100 text-${color}-600`}>
+        <Icon className="h-6 w-6" />
+      </div>
+    </div>
+  );
+};
+
+const QuickActionCard = ({ title, description, icon: Icon, color = 'blue', onClick }) => {
+  return (
+    <div className={`bg-white rounded-lg shadow-sm p-6 flex flex-col items-center text-center border border-${color}-200 cursor-pointer hover:shadow-md transition-shadow`} onClick={onClick}>
+      <div className={`p-3 rounded-full bg-${color}-100 text-${color}-600 mb-4`}>
+        <Icon className="h-6 w-6" />
+      </div>
+      <h3 className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
+      <p className="text-sm text-gray-600 mb-4">{description}</p>
+      <button className={`bg-${color}-600 text-white px-4 py-2 rounded-lg hover:bg-${color}-700 transition-colors`}>
+        View
+      </button>
+    </div>
+  );
+};
+
+const RecentActivityItem = ({ item }) => (
+  <div className="flex items-start space-x-3">
+    <div className="w-2 h-2 bg-brand-aqua rounded-full mt-2 flex-shrink-0" />
+    <div className="flex-1 min-w-0">
+      <p className="text-sm font-medium text-gray-800">{item.action}</p>
+      <p className="text-sm text-gray-500">{item.timestamp}</p>
+    </div>
+  </div>
+);
+
+const RecentListItem = ({ item, type }) => (
+  <div className="flex items-center justify-between">
+    <div>
+      <h4 className="font-medium text-gray-900">
+        {type === 'jobs' ? item.customer : type === 'applicants' ? item.name : item.name}
+      </h4>
+      <p className="text-sm text-gray-500">
+        {type === 'jobs' ? item.service : type === 'applicants' ? item.email : item.description}
+      </p>
+    </div>
+    <div className="flex items-center space-x-2">
+      <span className="text-sm text-gray-500">{item.timestamp}</span>
+      {type === 'jobs' && <span className={`px-2 py-1 text-xs rounded-full ${item.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>{item.status}</span>}
+      {type === 'applicants' && <span className={`px-2 py-1 text-xs rounded-full ${item.status === 'approved' ? 'bg-green-100 text-green-800' : item.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}`}>{item.status}</span>}
+      {type === 'equipment' && <span className={`px-2 py-1 text-xs rounded-full ${item.status === 'available' ? 'bg-green-100 text-green-800' : item.status === 'in_use' ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'}`}>{item.status}</span>}
+      {type === 'messages' && item.unread && <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">New</span>}
+    </div>
+  </div>
+);
 
 export default Dashboard;
