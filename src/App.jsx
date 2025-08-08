@@ -42,11 +42,7 @@ import LeadBubblerShifts from './components/admin/LeadBubblerShifts';
 import TakeoverVerification from './components/admin/TakeoverVerification';
 import ManualLinkGenerator from './components/admin/ManualLinkGenerator';
 
-// Import main site components
-import HomePage from './components/main/HomePage';
-import BookingPage from './components/main/BookingPage';
-import FeedbackPage from './components/main/FeedbackPage';
-import JobsPage from './components/main/JobsPage';
+// Customer-facing components removed - internal dashboard only
 
 import { useAuth } from './store/AuthContext';
 import { SpeedInsights } from "@vercel/speed-insights/react";
@@ -105,11 +101,8 @@ function App() {
     <Router>
       <SpeedInsights />
       <Routes>
-        {/* Public routes */}
-        <Route path="/" element={<HomePage />} />
-        <Route path="/booking" element={<BookingPage />} />
-        <Route path="/feedback" element={<FeedbackPage />} />
-        <Route path="/jobs" element={<JobsPage />} />
+        {/* Redirect root to login for internal-only dashboard */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
         
         {/* Auth routes */}
         <Route path="/login" element={<Login />} />
