@@ -166,104 +166,20 @@ function App() {
           <Route index element={<Dashboard />} />
           
           {/* Bubbler-specific routes */}
-          <Route 
-            path="jobs" 
-            element={
-              <ProtectedRoute requireBubbler>
-                <Jobs />
-              </ProtectedRoute>
-            }
-          />
-          <Route 
-            path="equipment" 
-            element={
-              <ProtectedRoute requireBubbler>
-                <Equipment />
-              </ProtectedRoute>
-            }
-          />
-          <Route 
-            path="profile" 
-            element={
-              <ProtectedRoute requireBubbler>
-                <Profile />
-              </ProtectedRoute>
-            }
-          />
-          <Route 
-            path="earnings" 
-            element={
-              <ProtectedRoute requireBubbler>
-                <Earnings />
-              </ProtectedRoute>
-            }
-          />
-          <Route 
-            path="qr-scanner" 
-            element={
-              <ProtectedRoute requireBubbler>
-                <QRScanner />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="jobs" element={<Jobs />} />
+          <Route path="equipment" element={<Equipment />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="earnings" element={<Earnings />} />
+          <Route path="qr-scanner" element={<QRScanner />} />
 
           {/* Admin-specific routes */}
-          <Route 
-            path="admin/jobs"
-            element={
-              <ProtectedRoute requireAdmin>
-                <Jobs />
-              </ProtectedRoute>
-            }
-          />
-          <Route 
-            path="admin/equipment"
-            element={
-              <ProtectedRoute requireAdmin>
-                <Equipment />
-              </ProtectedRoute>
-            }
-          />
-          <Route 
-            path="admin/dashboard"
-            element={
-              <ProtectedRoute requireAdmin>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route 
-            path="orders"
-            element={
-              <ProtectedRoute requireAdmin>
-                <Orders />
-              </ProtectedRoute>
-            }
-          />
-          <Route 
-            path="bubblers"
-            element={
-              <ProtectedRoute requireAdmin>
-                <Bubblers />
-              </ProtectedRoute>
-            }
-          />
-          <Route 
-            path="admin-notes"
-            element={
-              <ProtectedRoute requireAdmin>
-                <AdminNotes />
-              </ProtectedRoute>
-            }
-          />
-          <Route 
-            path="ratings"
-            element={
-              <ProtectedRoute requireAdmin>
-                <Ratings />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="admin/jobs" element={<Jobs />} />
+          <Route path="admin/equipment" element={<Equipment />} />
+          <Route path="admin/dashboard" element={<Dashboard />} />
+          <Route path="orders" element={<Orders />} />
+          <Route path="bubblers" element={<Bubblers />} />
+          <Route path="admin-notes" element={<AdminNotes />} />
+          <Route path="ratings" element={<Ratings />} />
           <Route 
             path="analytics"
             element={
