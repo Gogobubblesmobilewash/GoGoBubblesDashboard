@@ -86,9 +86,9 @@ const Equipment = () => {
     // Apply search filter
     if (searchTerm) {
       filtered = filtered.filter(item =>
-        item.item.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.serialNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (item.assignedTo && item.assignedTo.toLowerCase().includes(searchTerm.toLowerCase()))
+        (item.item && item.item.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (item.serialNumber && item.serialNumber.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (item.assigned_to && item.assigned_to.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
 

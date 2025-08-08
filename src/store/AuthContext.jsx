@@ -163,7 +163,7 @@ export const AuthProvider = ({ children }) => {
       try {
         const { data, error } = await supabase
           .from('bubblers')
-          .select('*')
+          .select('email, id, role, permissions, services, is_active, restrictions')
           .eq('email', userEmail)
           .single();
 
