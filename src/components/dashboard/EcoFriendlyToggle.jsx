@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FiLeaf, FiInfo, FiCheckCircle } from 'react-icons/fi';
+import { FiCheckCircle, FiInfo } from 'react-icons/fi';
 import { useAuth } from '../../store/AuthContext';
 import { supabase } from '../../services/api';
 import toast from 'react-hot-toast';
@@ -75,7 +75,7 @@ const EcoFriendlyToggle = () => {
     <div className="card">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-gray-800 flex items-center">
-          <FiLeaf className="h-5 w-5 text-green-600 mr-2" />
+          <FiCheckCircle className="h-5 w-5 text-green-600 mr-2" />
           Eco-Friendly Jobs
         </h3>
         <div className="flex items-center">

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FiHome, FiCar, FiPackage, FiCalendar, FiClock, FiMapPin, FiCheckCircle } from 'react-icons/fi';
+import { FiHome, FiTruck, FiPackage, FiCalendar, FiClock, FiMapPin, FiCheckCircle } from 'react-icons/fi';
 
 const BookingPage = () => {
   const [selectedService, setSelectedService] = useState('');
@@ -18,7 +18,7 @@ const BookingPage = () => {
     },
     {
       id: 'mobile-car-wash',
-      icon: FiCar,
+      icon: FiTruck,
       title: 'Mobile Car Wash',
       description: 'Convenient mobile car detailing',
       startingPrice: '$45',

@@ -31,7 +31,7 @@ import {
   FiSquare,
   FiPlay,
   FiPause,
-  FiStop,
+  FiX,
   FiInfo
 } from 'react-icons/fi';
 import { useAuth } from '../../store/AuthContext';
@@ -1352,7 +1352,7 @@ const LeadBubblerDashboard = () => {
                 onClick={handleCheckOut}
                 className="flex items-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
               >
-                <FiStop className="h-4 w-4" />
+                <FiX className="h-4 w-4" />
                 <span>Check Out</span>
               </button>
               <button

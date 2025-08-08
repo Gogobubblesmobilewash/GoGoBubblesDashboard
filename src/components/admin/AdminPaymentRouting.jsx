@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../../config/supabaseClient';
+import { supabase } from '../../services/api';
 import {
   FiDollarSign, FiUser, FiShield, FiTarget, FiMessageCircle,
   FiMapPin, FiUsers, FiActivity, FiClock, FiCheckCircle,

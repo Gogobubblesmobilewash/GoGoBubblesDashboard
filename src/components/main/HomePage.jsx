@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FiHome, FiCar, FiPackage, FiStar, FiClock, FiMapPin, FiCheckCircle, FiArrowRight } from 'react-icons/fi';
+import { FiHome, FiTruck, FiPackage, FiStar, FiClock, FiMapPin, FiCheckCircle, FiArrowRight } from 'react-icons/fi';
 
 const HomePage = () => {
   const services = [
@@ -12,7 +12,7 @@ const HomePage = () => {
       startingPrice: '$89'
     },
     {
-      icon: FiCar,
+      icon: FiTruck,
       title: 'Mobile Car Wash',
       description: 'Convenient mobile car detailing and washing at your location',
       features: ['Express wash', 'Signature detail', 'Supreme detail'],
