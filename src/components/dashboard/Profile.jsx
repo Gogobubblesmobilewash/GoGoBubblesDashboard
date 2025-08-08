@@ -38,9 +38,10 @@ const Profile = () => {
       console.log('Profile: Fetching data for user:', user.email);
       
       // Try a simple query first - check what columns actually exist
+      // Use a more specific select to avoid RLS recursion issues
       const { data, error } = await supabase
         .from('bubblers')
-        .select('*')
+        .select('email, id, created_at')
         .eq('email', user.email)
         .single();
 

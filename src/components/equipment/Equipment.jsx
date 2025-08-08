@@ -48,6 +48,8 @@ const Equipment = () => {
   const loadEquipment = async () => {
     setLoading(true);
     try {
+      console.log('Equipment: Loading equipment for user:', user?.email, 'isAdmin:', isAdmin);
+      
       let query = supabase.from('equipment').select();
       
       // For regular bubblers, only show equipment assigned to them and exclude damaged/maintenance
@@ -58,10 +60,16 @@ const Equipment = () => {
       }
       
       const { data, error } = await query;
-      if (error) throw error;
+      if (error) {
+        console.error('Equipment: Database error:', error);
+        throw error;
+      }
+      
+      console.log('Equipment: Raw data received:', data);
       
       // Ensure data is an array, default to empty array if null/undefined
       const equipmentArray = Array.isArray(data) ? data : [];
+      console.log('Equipment: Processed array:', equipmentArray);
       setEquipment(equipmentArray);
       setFilteredEquipment(equipmentArray);
     } catch (error) {
