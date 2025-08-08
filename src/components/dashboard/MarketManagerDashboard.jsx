@@ -79,9 +79,9 @@ const MarketManagerDashboard = () => {
 
       // Mock local bubblers
       const mockBubblers = [
-        { id: 1, name: 'John Smith', role: 'Elite Bubbler', status: 'active', jobs_completed: 15 },
-        { id: 2, name: 'Maria Garcia', role: 'Shine Bubbler', status: 'active', jobs_completed: 8 },
-        { id: 3, name: 'David Lee', role: 'Fresh Bubbler', status: 'active', jobs_completed: 12 }
+        { id: 1, name: 'John Smith', role: 'EliteBubbler', status: 'active', jobs_completed: 15 },
+        { id: 2, name: 'Maria Garcia', role: 'ShineBubbler', status: 'active', jobs_completed: 8 },
+        { id: 3, name: 'David Lee', role: 'FreshBubbler', status: 'active', jobs_completed: 12 }
       ];
       setLocalBubblers(mockBubblers);
 

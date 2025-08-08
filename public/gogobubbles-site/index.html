@@ -372,7 +372,7 @@
 
     .step span {
       display: inline-block;
-      background: #4299e1;
+      background: #1086bc;
       color: #fff;
       font-weight: 700;
       border-radius: 50%;
@@ -837,7 +837,7 @@
   .service-details { 
     display: none; 
     transition: max-height 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.3s; 
-    overflow: hidden; 
+    overflow: hidden;
   }
   .service-details.open { 
     display: block; 
@@ -853,7 +853,7 @@
     border: none;
     border-radius: clamp(6px, 1.5vw, 10px);
     font-size: clamp(0.9rem, 2.5vw, 1.1rem);
-    cursor: pointer;
+        cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 clamp(2px, 0.5vw, 4px) clamp(6px, 2vw, 12px) rgba(16, 134, 188, 0.2);
     margin-top: clamp(8px, 2vw, 12px);
@@ -898,7 +898,7 @@
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
     border-radius: inherit;
-    opacity: 0;
+        opacity: 0;
     z-index: 999;
     background: linear-gradient(90deg, transparent, rgba(31,194,167,0.5), rgba(79,209,197,0.8), rgba(16,134,188,0.5), transparent);
     transform: skewX(-8deg);
@@ -992,8 +992,8 @@
     padding: min(4vw, 1.5rem) min(3vw, 1rem);
     box-shadow: 0 min(0.5vw, 2px) min(2vw, 8px) rgba(0,0,0,0.04);
     text-align: center;
-    position: relative;
-    overflow: hidden;
+  position: relative;
+  overflow: hidden;
     border: 1px solid #ddd;
   }
   
@@ -1125,10 +1125,11 @@
         <h3>Mobile Car Wash</h3>
         <div class="highlight-red">Now Booking!</div>
         <p>Professional exterior and interior car cleaning - delivered to your location. We bring our own water and power. No mess, no hassle.</p>
+        <p style="color: #4fd1c5; font-size: 0.9em; margin-top: 0.5rem;">— with eco-friendly options available <img src="eco_icon.png" alt="Eco-friendly" style="width: 18px; height: 18px; vertical-align: middle; margin-left: 6px; display: inline-block;"></p>
         <button class="learn-more-service touch-feedback" onclick="toggleServiceDetails(this)">Learn More</button>
         <div class="service-details">
-          <p>Our Express Shine includes a hand-applied exterior wash, window cleaning, and tire shine.</p>
-          <p>Upgrade to Signature Shine or Supreme Shine for interior vacuuming, surface wipe-downs, interior scent, and full detailing.</p>
+          <p>Our ExpressShine includes a hand-applied exterior wash, window cleaning, and tire shine.</p>
+                      <p>Upgrade to SignatureShine or SupremeShine for interior vacuuming, surface wipe-downs, interior scent, and full detailing.</p>
           <p>Add-ons: Clay Bar Treatment, Bug & Tar Removal, Upholstery Cleaning, etc.</p>
         </div>
       </div>
@@ -1136,10 +1137,11 @@
         <img src="homecleaning.png" alt="Home Cleaning" class="lazy-image" loading="lazy">
         <h3>Home Cleaning</h3>
         <p>Thorough, reliable home cleaning. Flexible packages for kitchens,bathrooms, living spaces, and more. Enjoy a spotless home without lifting a finger.</p>
+        <p style="color: #4fd1c5; font-size: 0.9em; margin-top: 0.5rem;">— with plant-based product options for eco-conscious homes <img src="eco_icon.png" alt="Eco-friendly" style="width: 18px; height: 18px; vertical-align: middle; margin-left: 6px; display: inline-block;"></p>
         <button class="learn-more-service touch-feedback" onclick="toggleServiceDetails(this)">Learn More</button>
         <div class="service-details">
-          <p>Our Refresher Clean includes surface-level dusting, vacuuming, and wipe-downs for kitchens, bathrooms, and common areas.</p>
-          <p>Upgrade to Signature Deep Clean for deep dusting, baseboards, blinds, and microwave cleaning.</p>
+          <p>Our RefresherClean includes surface-level dusting, vacuuming, and wipe-downs for kitchens, bathrooms, and common areas.</p>
+                      <p>Upgrade to SignatureDeepClean for deep dusting, baseboards, blinds, and microwave cleaning.</p>
           <p>Add-ons: Oven Cleaning, Refrigerator Cleaning, Window Cleaning, etc.</p>
         </div>
       </div>
@@ -1147,11 +1149,12 @@
         <img src="laundry.png" alt="Laundry" class="lazy-image" loading="lazy">
         <h3>Laundry</h3>
         <p>Door-to-door laundry pickup and delivery. Fresh, clean, folded, returned to your home. Save time - we do the washing for you.</p>
+        <p style="color: #4fd1c5; font-size: 0.9em; margin-top: 0.5rem;">Sensitive skin? Eco detergents available <img src="eco_icon.png" alt="Eco-friendly" style="width: 18px; height: 18px; vertical-align: middle; margin-left: 6px; display: inline-block;"></p>
         <button class="learn-more-service touch-feedback" onclick="toggleServiceDetails(this)">Learn More</button>
         <div class="service-details">
-          <p>Our Essentials Bag includes wash, dry, fold, and delivery using unscented detergent and dryer sheets.</p>
+          <p>Our BubbleFresh bags include wash, dry, fold, and delivery using unscented detergent and dryer sheets.</p>
           <p>Upgrade with Family Bags for large loads or Add-On Bags for ironing or delicates.</p>
-          <p>Add-ons: Eco Detergent (skin-sensitive), Same-Day Service, Ironing Kit with hangers, etc.</p>
+          <p>Add-ons: Eco Detergent (skin-sensitive), Express Service - 24 hours, Ironing Kit with hangers, etc.</p>
         </div>
       </div>
     </div>
@@ -1210,15 +1213,15 @@
       <div id="testimonialsContent" style="display: none;">
       <div class="testimonial">
         Super convenient and professional! I booked a car wash and home cleaning bundle - everything was spotless. Highly recommend!
-        <span class="author">— Alex R.</span>
+        <span class="author" style="color: #1086bc; font-weight: 600;">— Alex R.</span>
       </div>
       <div class="testimonial">
         Laundry pickup and delivery saved me so much time this week. My clothes came back fresh and perfectly folded. Super easy process.
-        <span class="author">— Priya S.</span>
+        <span class="author" style="color: #1086bc; font-weight: 600;">— Priya S.</span>
       </div>
       <div class="testimonial">
         Booked online, got a great deal on a combo service - my car and house both look amazing. GoGoBubbles is my new go-to!
-        <span class="author">— Marcus T.</span>
+        <span class="author" style="color: #1086bc; font-weight: 600;">— Marcus T.</span>
         </div>
       </div>
     </div>
@@ -1233,13 +1236,14 @@
     <h2>Got Questions? We've Got Answers.</h2>
     <div class="faq-item">
       <div class="faq-question">
-        <h4>Do you bring your own water and equipment?</h4>
+        <h4>Why do you ask for my property type?</h4>
         <span class="faq-toggle">+</span>
       </div>
       <div class="faq-answer">
-        <p>Yes - our pros arrive fully equipped. We bring our own water, power, and cleaning supplies. We never use your utilities unless requested.</p>
+        <p>Because a 2-bedroom apartment takes less time than a 2-bedroom house, and we only charge you for what we clean! Different property types have different cleaning requirements and timeframes.</p>
       </div>
     </div>
+
     <div class="faq-item">
       <div class="faq-question">
         <h4>Do I need to be home for the services?</h4>
@@ -1251,11 +1255,11 @@
     </div>
     <div class="faq-item">
       <div class="faq-question">
-        <h4>How does same-day laundry work?</h4>
+        <h4>How does Laundry Express Service - 24 hours work?</h4>
         <span class="faq-toggle">+</span>
       </div>
       <div class="faq-answer">
-        <p>Book before 10 a.m. for guaranteed same-day return. After that, we'll try based on driver availability.</p>
+        <p>Express Service guarantees pickup and return within 24 hours for Laundry. Just select the Express add-on during booking.</p>
       </div>
     </div>
     <div class="faq-item">
@@ -1285,6 +1289,56 @@
         <p>We use non-scented detergent by default. If you'd like eco-friendly or skin-sensitive detergent, just add it to your order.</p>
       </div>
     </div>
+    <div class="faq-item">
+      <div class="faq-question">
+        <h4>Do you bring your own water and equipment?</h4>
+        <span class="faq-toggle">+</span>
+      </div>
+      <div class="faq-answer">
+        <p>
+          <strong>For Mobile Car Wash:</strong> Yes — our pros arrive fully equipped with water, power, and supplies. We never use your utilities.<br><br>
+          <strong>For Home Cleaning:</strong> We bring our own vacuums and cleaning products, but we'll use your water to fill mop buckets and clean surfaces as needed.<br><br>
+          <strong>For Laundry:</strong> Everything is done off-site using commercial-grade washers and dryers — your utilities are never used.
+        </p>
+      </div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-question">
+        <h4>What if I have special instructions or needs?</h4>
+        <span class="faq-toggle">+</span>
+      </div>
+      <div class="faq-answer">
+        <p>You'll have the option to leave special notes when booking (e.g. gate codes, bag placement, pet reminders). We'll review your request before your service begins.</p>
+      </div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-question">
+        <h4>Is tipping required?</h4>
+        <span class="faq-toggle">+</span>
+      </div>
+      <div class="faq-answer">
+        <p>Tipping is never required, but always appreciated. 100% of tips go directly to your assigned Bubbler. You'll have the option to tip digitally after service.</p>
+      </div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-question">
+        <h4>How do I reschedule or cancel?</h4>
+        <span class="faq-toggle">+</span>
+      </div>
+      <div class="faq-answer">
+        <p>You can reschedule up to 24 hours before your appointment through your confirmation link. Need to cancel? Your deposit is non-refundable, but we'll help you reschedule as needed.</p>
+      </div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-question">
+        <h4>Why is my deposit non-refundable?</h4>
+        <span class="faq-toggle">+</span>
+      </div>
+      <div class="faq-answer">
+        <p>We reserve your appointment time and begin scheduling your Bubbler as soon as your booking is received. Your deposit helps us cover time-sensitive preparation and holds your slot in our schedule. Because we're reserving labor and resources in advance, we're unable to refund deposits if a cancellation occurs.</p>
+        <p>You can still reschedule your appointment at no extra cost — your deposit will carry over to your new time.</p>
+      </div>
+    </div>
   </section>
 
   <section class="final-cta" id="final-cta">
@@ -1294,6 +1348,24 @@
       <p>Fast and easy online booking.</p>
     </div>
     <a href="booking.html" class="cta-btn">Book Your Service Now</a>
+  </section>
+
+  <!-- Become a Bubbler CTA Section -->
+  <section style="padding: 4rem 1rem 8rem 1rem; background: #f8f9fa; text-align: center; margin: 0; position: relative; z-index: 10;">
+    <div style="max-width: 800px; margin: 0 auto; padding: 0 1rem;">
+      <p style="font-size: 1.1rem; color: #4a5568; margin-bottom: 2rem; line-height: 1.6;">
+        Ready to make a splash with us? Join a welcoming team, redefine convenience for busy families where every day is a new adventure. Come be a part of something special, become a BUBBLER today and start your GoGoBubbles journey.
+      </p>
+      <div style="display: flex; justify-content: center;">
+        <a href="jobs.html" 
+           style="background: #1086bc; color: #ffffff; padding: 1rem 2rem; border-radius: 8px; font-weight: 600; font-size: 1.1rem; text-decoration: none; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(16, 134, 188, 0.2); display: inline-block;"
+           onmouseover="this.style.background='#0f7aa8'; this.style.transform='scale(1.05)'"
+           onmouseout="this.style.background='#1086bc'; this.style.transform='scale(1)'"
+           aria-label="Become a BUBBLER – Join the GoGoBubbles team">
+          Become a BUBBLER
+        </a>
+      </div>
+    </div>
   </section>
 
   <footer>
@@ -1344,7 +1416,7 @@
     
     if (scrollTop > scrollThreshold) {
       // Show the quick nav tab when scrolled
-      quickTab.style.display = 'flex';
+        quickTab.style.display = 'flex';
       quickTab.style.opacity = '1';
       quickTab.style.transform = 'translateY(0)';
     } else {
@@ -1506,7 +1578,7 @@
           element.classList.add('shimmer-trigger');
           
           // Remove class after animation completes
-          setTimeout(() => {
+        setTimeout(() => {
             element.classList.remove('shimmer-trigger');
           }, 1000);
           
@@ -1575,7 +1647,7 @@
   let lastScrollTop = 0;
   let scrollTimeout;
   
-  window.addEventListener('scroll', function() {
+    window.addEventListener('scroll', function() {
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
     
     // Always update quick nav tab immediately (no throttling)
@@ -1685,7 +1757,7 @@ document.addEventListener('DOMContentLoaded', function() {
       // Update button text
       if (details.classList.contains('open')) {
         button.textContent = 'Show Less';
-      } else {
+  } else {
       
         button.textContent = 'Learn More';
       }

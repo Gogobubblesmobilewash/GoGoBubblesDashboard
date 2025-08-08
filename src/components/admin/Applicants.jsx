@@ -494,10 +494,10 @@ const Applicants = () => {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">All Roles</option>
-              <option value="shine">Shine Bubbler</option>
-              <option value="sparkle">Sparkle Bubbler</option>
-              <option value="fresh">Fresh Bubbler</option>
-              <option value="elite">Elite Bubbler</option>
+                              <option value="shine">ShineBubbler</option>
+                <option value="sparkle">SparkleBubbler</option>
+                <option value="fresh">FreshBubbler</option>
+                <option value="elite">EliteBubbler</option>
             </select>
           </div>
 

@@ -34,6 +34,8 @@ const UserManagement = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [editingUser, setEditingUser] = useState(null);
+  const [showRoleDetails, setShowRoleDetails] = useState(false);
+  const [selectedRole, setSelectedRole] = useState(null);
 
   // Load all users data
   const loadUsers = async () => {
@@ -149,25 +151,72 @@ const UserManagement = () => {
     }
   };
 
-  // Update bubbler role
+  // Update bubbler role with enhanced permissions
   const updateBubblerRole = async (bubbler, newRole) => {
     try {
-      const { error } = await supabase
+      // Get role details for confirmation
+      const roleDetails = SYSTEM_ROLES[newRole] || BUBBLER_ROLES[newRole];
+      const roleName = roleDetails?.name || newRole;
+      
+      if (!confirm(`Are you sure you want to change ${bubbler.first_name} ${bubbler.last_name}'s role to ${roleName}?\n\nThis will update their permissions and access levels.`)) {
+        return;
+      }
+
+      // Update role in bubblers table
+      const { error: bubblerError } = await supabase
         .from('bubblers')
         .update({ 
           role: newRole,
+          last_promotion_date: new Date().toISOString(),
           updated_at: new Date().toISOString()
         })
         .eq('id', bubbler.id);
 
-      if (error) throw error;
+      if (bubblerError) throw bubblerError;
 
-      alert(`Role updated for ${bubbler.first_name} ${bubbler.last_name} to ${newRole}`);
+      // Update auth user metadata if it's a system role
+      if (SYSTEM_ROLES[newRole]) {
+        const { error: authError } = await supabase.auth.admin.updateUserById(
+          bubbler.id,
+          { 
+            user_metadata: { 
+              role: newRole.toLowerCase(),
+              first_name: bubbler.first_name,
+              last_name: bubbler.last_name
+            }
+          }
+        );
+        
+        if (authError) {
+          console.warn('Auth metadata update warning:', authError);
+        }
+      }
+
+      // Log the promotion for tracking
+      const { error: promotionError } = await supabase
+        .from('promotions')
+        .insert({
+          bubbler_id: bubbler.id,
+          recommended_by: user.id,
+          action_type: 'promote',
+          reason: `Role changed from ${bubbler.role || 'None'} to ${newRole} by admin`,
+          current_role: bubbler.role || 'None',
+          proposed_role: newRole,
+          status: 'approved',
+          approved_by: user.id,
+          approved_at: new Date().toISOString()
+        });
+
+      if (promotionError) {
+        console.warn('Promotion logging warning:', promotionError);
+      }
+
+      alert(`✅ Role successfully updated for ${bubbler.first_name} ${bubbler.last_name} to ${roleName}`);
       loadUsers();
 
     } catch (error) {
       console.error('Error updating bubbler role:', error);
-      alert('Error updating role. Please try again.');
+      alert('❌ Error updating role. Please try again.');
     }
   };
 
@@ -298,6 +347,20 @@ const UserManagement = () => {
                     user.role === role 
                       ? 'bg-green-600 text-white' 
                       : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
+                  title={`Assign ${role} role`}
+                >
+                  {role}
+                </button>
+              ))}
+              {Object.keys(SYSTEM_ROLES).map(role => (
+                <button
+                  key={role}
+                  onClick={() => updateBubblerRole(user, role)}
+                  className={`px-2 py-1 text-xs rounded transition-colors ${
+                    user.role === role 
+                      ? 'bg-purple-600 text-white' 
+                      : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
                   }`}
                   title={`Assign ${role} role`}
                 >
@@ -473,6 +536,49 @@ const UserManagement = () => {
         </div>
       )}
 
+      {/* Role Information Section */}
+      <div className="bg-white rounded-lg shadow p-6 mb-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Role Management Guide</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <h4 className="font-medium text-gray-900 mb-3">Bubbler Roles</h4>
+            <div className="space-y-3">
+              {Object.entries(BUBBLER_ROLES).map(([role, details]) => (
+                <div key={role} className="border border-gray-200 rounded-lg p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-medium text-gray-900">{details.name}</span>
+                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Bubbler</span>
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    <p><strong>Services:</strong> {details.services.join(', ')}</p>
+                    <p><strong>Permissions:</strong> {details.permissions.join(', ')}</p>
+                    <p><strong>QR Scanner:</strong> {details.qrScanner ? 'Yes' : 'No'}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div>
+            <h4 className="font-medium text-gray-900 mb-3">System Roles</h4>
+            <div className="space-y-3">
+              {Object.entries(SYSTEM_ROLES).map(([role, details]) => (
+                <div key={role} className="border border-gray-200 rounded-lg p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-medium text-gray-900">{details.name}</span>
+                    <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">System</span>
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    <p><strong>Access Level:</strong> {details.access.jobs}</p>
+                    <p><strong>Financial Access:</strong> {details.access.financials}</p>
+                    <p><strong>Restrictions:</strong> {details.restrictions.length > 0 ? details.restrictions.length + ' restrictions' : 'None'}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* User Details Modal */}
       {selectedUser && (
         <Modal
@@ -541,23 +647,47 @@ const UserManagement = () => {
             {selectedUser.type === 'bubbler' && (
               <div className="pt-4 border-t border-gray-200">
                 <h4 className="font-medium text-gray-900 mb-2">Update Role</h4>
-                <div className="flex flex-wrap gap-2">
-                  {Object.keys(BUBBLER_ROLES).map(role => (
-                    <button
-                      key={role}
-                      onClick={() => {
-                        updateBubblerRole(selectedUser, role);
-                        setSelectedUser(null);
-                      }}
-                      className={`px-3 py-1 text-sm rounded transition-colors ${
-                        selectedUser.role === role 
-                          ? 'bg-green-600 text-white' 
-                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                      }`}
-                    >
-                      {role}
-                    </button>
-                  ))}
+                <div className="mb-3">
+                  <p className="text-sm text-gray-600 mb-2">Bubbler Roles:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {Object.keys(BUBBLER_ROLES).map(role => (
+                      <button
+                        key={role}
+                        onClick={() => {
+                          updateBubblerRole(selectedUser, role);
+                          setSelectedUser(null);
+                        }}
+                        className={`px-3 py-1 text-sm rounded transition-colors ${
+                          selectedUser.role === role 
+                            ? 'bg-green-600 text-white' 
+                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
+                      >
+                        {role}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600 mb-2">System Roles:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {Object.keys(SYSTEM_ROLES).map(role => (
+                      <button
+                        key={role}
+                        onClick={() => {
+                          updateBubblerRole(selectedUser, role);
+                          setSelectedUser(null);
+                        }}
+                        className={`px-3 py-1 text-sm rounded transition-colors ${
+                          selectedUser.role === role 
+                            ? 'bg-purple-600 text-white' 
+                            : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+                        }`}
+                      >
+                        {role}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}

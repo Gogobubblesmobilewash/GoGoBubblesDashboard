@@ -111,7 +111,7 @@ const Orders = () => {
           .from('orders')
           .select('*', { count: 'exact', head: true })
           .eq('email', order.email)
-          .contains('services', [{ service: 'Home Cleaning', tier: 'Refresh Clean' }])
+          .contains('services', [{ service: 'Home Cleaning', tier: 'RefresherClean' }])
           .gte('created_at', oneYearAgo.toISOString())
           .lt('created_at', order.created_at);
         
@@ -120,7 +120,7 @@ const Orders = () => {
           .from('orders')
           .select('*', { count: 'exact', head: true })
           .eq('email', order.email)
-          .contains('services', [{ service: 'Mobile Car Wash', tier: 'Signature Shine' }])
+          .contains('services', [{ service: 'Mobile Car Wash', tier: 'SignatureShine' }])
           .gte('created_at', oneYearAgo.toISOString())
           .lt('created_at', order.created_at);
         

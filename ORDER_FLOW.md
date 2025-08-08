@@ -27,7 +27,7 @@ This document explains the comprehensive order flow implementation that separate
 ### 3️⃣ Laundry Service
 - **Always treated as one job**, even if multiple bags
 - **Bag Types**: Essentials Bag, Family Bag, Delicates Bag, Ironing Bag
-- **Add-ons**: Eco-friendly detergent, Same-day service
+- **Add-ons**: Eco-friendly detergent, Express Service - 24 hours
 - **Photo Logic**: **MANDATORY** 2 photos required (pickup, delivery)
 - **QR Tracking**: Individual bag scanning for pickup and delivery
 - **Perk rules**: None — but maintain required photos and QR tracking

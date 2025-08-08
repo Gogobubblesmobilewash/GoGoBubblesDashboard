@@ -41,10 +41,10 @@ const BubblerDashboard = () => {
   const [upcomingJobs, setUpcomingJobs] = useState([]);
 
   const getBubblerRole = () => {
-    if (isEliteBubbler) return 'Elite Bubbler';
-    if (isShineBubbler) return 'Shine Bubbler';
-    if (isSparkleBubbler) return 'Sparkle Bubbler';
-    if (isFreshBubbler) return 'Fresh Bubbler';
+    if (isEliteBubbler) return 'EliteBubbler';
+    if (isShineBubbler) return 'ShineBubbler';
+    if (isSparkleBubbler) return 'SparkleBubbler';
+    if (isFreshBubbler) return 'FreshBubbler';
     return 'Bubbler';
   };
 
@@ -59,7 +59,10 @@ const BubblerDashboard = () => {
   const loadBubblerData = async () => {
     setLoading(true);
     try {
-      // Fetch bubbler profile
+      // Get user role for payment view selection
+      const userRole = user?.role || (isEliteBubbler ? 'elite' : isShineBubbler ? 'shine' : isSparkleBubbler ? 'sparkle' : isFreshBubbler ? 'fresh' : 'bubbler');
+      
+      // Get bubbler profile
       const { data: profile, error: profileError } = await supabase
         .from('bubblers')
         .select('*')
@@ -93,8 +96,8 @@ const BubblerDashboard = () => {
       const thisWeekJobs = jobsArray.filter(j => new Date(j.created_at) >= oneWeekAgo);
       const thisWeekEarnings = thisWeekJobs.reduce((sum, j) => sum + (parseFloat(j.earnings) || 0), 0);
 
-      // Get weekly payout balance
-      const weeklyPayoutData = await getWeeklyPayoutBalance(profile.id);
+      // Get weekly payout balance using role-appropriate view
+      const weeklyPayoutData = await getWeeklyPayoutBalance(profile.id, userRole);
 
       // Fetch ratings for this bubbler
       const { data: ratings, error: ratingsError } = await supabase

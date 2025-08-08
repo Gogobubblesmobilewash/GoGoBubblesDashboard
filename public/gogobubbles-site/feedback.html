@@ -10,10 +10,11 @@
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
   <meta http-equiv="Strict-Transport-Security" content="max-age=31536000; includeSubDomains">
   
-  <title>GoGoBubbles - Rate Your Service</title>
+  <title>GOGOBUBBLES - Rate Your Service</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <style>
     * {
       margin: 0;
@@ -374,9 +375,9 @@
 <body>
   <div class="container">
     <div class="header">
-      <img src="bubblers_logo.png" alt="GoGoBubbles Logo" class="logo">
+              <img src="bubblers_logo.png" alt="GOGOBUBBLES Logo" class="logo">
       <h1>We Value Your Feedback!</h1>
-      <p>Help us improve our services by sharing your experience with your Bubbler</p>
+              <p>Help us improve our services by sharing your experience with your BUBBLER</p>
     </div>
 
     <div class="form-container">
@@ -399,7 +400,7 @@
         </div>
 
         <div class="form-group">
-          <label for="bubblerName">Bubbler Name (Optional)</label>
+                      <label for="bubblerName">Bubbler Name (Optional)</label>
           <input 
             type="text" 
             id="bubblerName" 
@@ -447,25 +448,32 @@
           ></textarea>
         </div>
 
-        <button type="submit" class="submit-btn" id="submitBtn">
-          <span class="btn-text">Submit Feedback</span>
-          <span class="btn-loading" style="display: none;">
-            <span class="loading"></span>Submitting...
-          </span>
-        </button>
+        <!-- Submit button will be moved below tipping section -->
+        <div id="submit-button-container">
+          <button type="submit" class="submit-btn" id="submitBtn">
+            <span class="btn-text">Submit Feedback</span>
+            <span class="btn-loading" style="display: none;">
+              <span class="loading"></span>Submitting...
+            </span>
+          </button>
+        </div>
       </form>
 
       <div id="result" class="result" style="display: none;"></div>
     </div>
 
     <div class="footer">
-      <p>Thank you for choosing GoGoBubbles! 🧼✨</p>
+              <img src="thanks_icon.png" alt="Thank you for choosing GOGOBUBBLES" style="max-width: 200px; width: 100%; height: auto; display: block; margin: 0 auto;" />
     </div>
   </div>
 
   <script>
-    // Google Apps Script API endpoint
-    const API_BASE = 'https://script.google.com/macros/s/AKfycby5ZHGHWMWWge-a5KTKo11e21hYFjs5pWwdK040q0iZ1Oj4Qi0JWCQzwnoSdXV4v2KOSg/exec';
+    // Supabase configuration
+    const SUPABASE_URL = 'https://your-project.supabase.co'; // Replace with your actual Supabase URL
+    const SUPABASE_ANON_KEY = 'your-anon-key'; // Replace with your actual anon key
+    
+    // Initialize Supabase client
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // Utility functions
     const sanitizeInput = (input) => {
@@ -497,10 +505,11 @@
     };
 
     // Autofill from URL
-    window.addEventListener("DOMContentLoaded", () => {
+    window.addEventListener("DOMContentLoaded", async () => {
       const params = new URLSearchParams(window.location.search);
 
       const jobId = params.get("jobId") || "";
+      const orderId = params.get("order_id") || "";
       const bubblerName = params.get("bubblerName") || "";
       const serviceType = params.get("serviceType") || "";
       const customerName = params.get("customerName") || "";
@@ -518,29 +527,78 @@
       if (document.getElementById("customerName")) {
         document.getElementById("customerName").value = customerName;
       }
+
+      // Auto-fill bubbler name and service type from order_id if available
+      if (orderId && !bubblerName && !serviceType) {
+        try {
+          // Get order details from Supabase
+          const { data: order, error: orderError } = await supabase
+            .from('orders')
+            .select(`
+              id,
+              customer_name,
+              service_type,
+              job_assignments (
+                id,
+                bubbler_id,
+                bubblers (
+                  id,
+                  first_name,
+                  last_name
+                )
+              )
+            `)
+            .eq('id', orderId)
+            .single();
+
+          if (orderError) {
+            console.log('Could not fetch order details:', orderError);
+          } else if (order) {
+            // Pre-fill customer name
+            if (!customerName && order.customer_name) {
+              const customerNameField = document.getElementById('customerName');
+              if (customerNameField) {
+                customerNameField.value = order.customer_name;
+              }
+            }
+
+            // Pre-fill service type
+            if (!serviceType && order.service_type) {
+              const serviceTypeField = document.getElementById('serviceType');
+              if (serviceTypeField) {
+                serviceTypeField.value = order.service_type;
+              }
+            }
+
+            // Pre-fill bubbler name
+            if (!bubblerName && order.job_assignments && order.job_assignments.length > 0) {
+              const jobAssignment = order.job_assignments[0];
+              if (jobAssignment.bubblers) {
+                const bubblerNameField = document.getElementById('bubblerName');
+                if (bubblerNameField) {
+                  const fullName = `${jobAssignment.bubblers.first_name} ${jobAssignment.bubblers.last_name}`;
+                  bubblerNameField.value = fullName;
+                }
+              }
+            }
+          }
+        } catch (error) {
+          console.log('Error auto-filling form data:', error);
+        }
+      }
     });
 
     // Star rating functionality
     const starButtons = document.querySelectorAll('.star-btn');
-    const starsInput = document.getElementById('stars');
     const ratingLabel = document.getElementById('ratingLabel');
-    let selectedRating = 0;
+    const starsInput = document.getElementById('stars');
+    let currentRating = 0;
 
-    const ratingLabels = {
-      1: 'Poor - We need to improve',
-      2: 'Fair - Room for improvement',
-      3: 'Good - Satisfactory service',
-      4: 'Very Good - Great experience',
-      5: 'Excellent - Outstanding service!'
-    };
-
-    starButtons.forEach((btn, index) => {
-      const rating = index + 1;
-      
-      btn.addEventListener('click', () => {
-        selectedRating = rating;
+    starButtons.forEach((button, index) => {
+      button.addEventListener('click', () => {
+        const rating = index + 1;
+        currentRating = rating;
         starsInput.value = rating;
-        clearError('stars');
         
         // Update star display
         starButtons.forEach((star, starIndex) => {
@@ -551,31 +609,42 @@
           }
         });
         
-        ratingLabel.textContent = ratingLabels[rating];
+        // Update rating label
+        const ratingTexts = [
+          'Poor',
+          'Fair', 
+          'Good',
+          'Very Good',
+          'Excellent'
+        ];
+        ratingLabel.textContent = ratingTexts[rating - 1];
+        
+        // Show tipping section after rating is selected
+        showTippingSection();
       });
-
-      // Touch and hover effects
-      btn.addEventListener('mouseenter', () => {
-        const rating = index + 1;
+      
+      // Hover effects
+      button.addEventListener('mouseenter', () => {
+        const hoverRating = index + 1;
         starButtons.forEach((star, starIndex) => {
-          if (starIndex < rating) {
-            star.style.color = '#fbbf24';
+          if (starIndex < hoverRating) {
+            star.classList.add('hover');
+          } else {
+            star.classList.remove('hover');
           }
         });
       });
-
-      btn.addEventListener('mouseleave', () => {
+      
+      button.addEventListener('mouseleave', () => {
+        starButtons.forEach(star => star.classList.remove('hover'));
+        // Restore current rating display
         starButtons.forEach((star, starIndex) => {
-          if (starIndex >= selectedRating) {
-            star.style.color = '#d1d5db';
+          if (starIndex < currentRating) {
+            star.classList.add('active');
+          } else {
+            star.classList.remove('active');
           }
         });
-      });
-
-      // Touch events for mobile
-      btn.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        btn.click();
       });
     });
 
@@ -596,7 +665,7 @@
       }
 
       // Rating validation
-      if (!selectedRating) {
+      if (!currentRating) {
         showError('stars', 'Please select a rating');
         isValid = false;
       } else {
@@ -616,12 +685,12 @@
       }
     });
 
-    // Form submission with stricter star validation
+    // Form submission with Supabase
     document.getElementById('feedbackForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       
       // Validate
-      if (!selectedRating) {
+      if (!currentRating) {
         showError('stars', 'Please select a rating before submitting.');
         return;
       }
@@ -639,134 +708,162 @@
       resultDiv.style.display = 'none';
 
       try {
-        const formData = {
-          action: "addRating",
-          "Job ID": sanitizeInput(form.jobId.value),
-          "Customer Name": sanitizeInput(form.customerName.value),
-          "Bubbler Name": sanitizeInput(form.bubblerName.value),
-          "Service Type": sanitizeInput(form.serviceType.value),
-          "Stars": parseInt(form.stars.value),
-          "Comment": sanitizeInput(form.comment.value),
-          "Timestamp": new Date().toISOString(),
-          "User Agent": navigator.userAgent,
-          "Platform": navigator.platform
+        // Get bubbler ID from job assignment if jobId is provided
+        let bubblerId = null;
+        if (form.jobId.value) {
+          const { data: jobAssignment } = await supabase
+            .from('job_assignments')
+            .select('bubbler_id')
+            .eq('id', form.jobId.value)
+            .single();
+          
+          if (jobAssignment) {
+            bubblerId = jobAssignment.bubbler_id;
+          }
+        }
+
+        // Prepare rating data for Supabase
+        const ratingData = {
+          bubbler_id: bubblerId,
+          job_assignment_id: form.jobId.value || null,
+          rating: parseInt(form.stars.value),
+          review: sanitizeInput(form.comment.value),
+          customer_name: sanitizeInput(form.customerName.value),
+          service_type: sanitizeInput(form.serviceType.value),
+          created_at: new Date().toISOString()
         };
 
-        console.log('Submitting to:', API_BASE);
-        console.log('Form data:', formData);
-        console.log('JSON stringified data:', JSON.stringify(formData));
+        console.log('Submitting rating to Supabase:', ratingData);
 
-        // Convert form data to URL parameters for GET request
-        const params = new URLSearchParams();
-        params.append('action', 'addRating');
-        params.append('Job ID', formData['Job ID']);
-        params.append('Customer Name', formData['Customer Name']);
-        params.append('Bubbler Name', formData['Bubbler Name']);
-        params.append('Service Type', formData['Service Type']);
-        params.append('Stars', formData['Stars']);
-        params.append('Comment', formData['Comment']);
-        params.append('Timestamp', formData['Timestamp']);
-        params.append('User Agent', formData['User Agent']);
-        params.append('Platform', formData['Platform']);
+        // Insert rating into Supabase
+        const { data, error } = await supabase
+          .from('ratings')
+          .insert([ratingData]);
 
-        const getUrl = `${API_BASE}?${params.toString()}`;
-        console.log('GET URL:', getUrl);
-
-        let response = await fetch(getUrl, {
-          method: 'GET'
-        });
-
-        console.log('Response status:', response.status);
-        console.log('Response headers:', response.headers);
-        console.log('Response ok:', response.ok);
-
-        // Log the raw response regardless of status
-        let responseText = await response.text();
-        console.log('Raw response (first 1000 chars):', responseText.substring(0, 1000));
-
-
-
-        if (!response.ok) {
-          console.error('Response error text:', responseText);
-          throw new Error(`HTTP error! status: ${response.status}, response: ${responseText.substring(0, 200)}`);
+        if (error) {
+          console.error('Supabase error:', error);
+          throw new Error(`Database error: ${error.message}`);
         }
 
-        // Try to parse JSON, but handle HTML responses gracefully
-        let result;
-        try {
-          result = JSON.parse(responseText);
-          console.log('Response result:', result);
-        } catch (parseError) {
-          console.log('Response is not JSON, but data may have been submitted successfully');
-          console.log('Parse error:', parseError);
-          // Treat this as success since data is appearing in spreadsheet
-          result = { success: true, message: "Data submitted successfully" };
-        }
-        
-        // If we get here, assume success since data is being saved to spreadsheet
-        if (!result || !result.success) {
-          console.log('Treating as success since data is being saved to spreadsheet');
-          result = { success: true, message: "Data submitted successfully" };
-        }
-        
-        if (result.success) {
-          // Hide form
-          form.style.display = "none";
-          // Show a thank-you message
-          resultDiv.textContent = "Thank you for your feedback! We appreciate you taking the time to share your experience.";
-          resultDiv.className = "result success";
-          resultDiv.style.display = "block";
-          resultDiv.scrollIntoView({ behavior: "smooth", block: "center" });
-        } else {
-          showResult(`Error: ${result.message || 'Something went wrong. Please try again.'}`, 'error');
-        }
+        console.log('Rating submitted successfully:', data);
+
+        // Hide form and show success message
+        form.style.display = "none";
+        resultDiv.textContent = "Thank you for your feedback! We appreciate you taking the time to share your experience.";
+        resultDiv.className = "result success";
+        resultDiv.style.display = "block";
+        resultDiv.scrollIntoView({ behavior: "smooth", block: "center" });
+
+        // Show tipping section after successful submission
+        showTippingSection();
+
       } catch (error) {
         console.error('Submission error:', error);
         
-        // Check if this might be a successful submission that returned HTML instead of JSON
-        if (error.message.includes('Unexpected token') || error.message.includes('JSON')) {
-          // This might be a successful submission that returned HTML instead of JSON
-          // Since you mentioned data is appearing in the spreadsheet, let's treat this as success
-          console.log('Data may have been submitted successfully despite JSON parsing error');
-          
-          // Hide form
-          form.style.display = "none";
-          // Show a thank-you message
-          resultDiv.textContent = "Thank you for your feedback! We appreciate you taking the time to share your experience.";
-          resultDiv.className = "result success";
-          resultDiv.style.display = "block";
-          resultDiv.scrollIntoView({ behavior: "smooth", block: "center" });
-          return;
-        }
-        
-        // More specific error messages
-        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-          showResult('Network error: Unable to connect to the server. Please check your internet connection and try again.', 'error');
-        } else if (error.message.includes('HTTP error! status: 404')) {
-          // Even 404 might be successful if data is being saved
-          console.log('404 error, but treating as success since data is being saved to spreadsheet');
-          form.style.display = "none";
-          resultDiv.textContent = "Thank you for your feedback! We appreciate you taking the time to share your experience.";
-          resultDiv.className = "result success";
-          resultDiv.style.display = "block";
-          resultDiv.scrollIntoView({ behavior: "smooth", block: "center" });
-        } else if (error.message.includes('HTTP error! status: 403')) {
-          showResult('Access denied: The feedback service is not accessible. Please contact support.', 'error');
-        } else {
-          // For any other error, assume success since data is being saved
-          console.log('Other error, but treating as success since data is being saved to spreadsheet');
-          form.style.display = "none";
-          resultDiv.textContent = "Thank you for your feedback! We appreciate you taking the time to share your experience.";
-          resultDiv.className = "result success";
-          resultDiv.style.display = "block";
-          resultDiv.scrollIntoView({ behavior: "smooth", block: "center" });
-        }
+        // Show error message
+        resultDiv.textContent = `Error: ${error.message || 'Something went wrong. Please try again.'}`;
+        resultDiv.className = "result error";
+        resultDiv.style.display = "block";
+        resultDiv.scrollIntoView({ behavior: "smooth", block: "center" });
       } finally {
         submitBtn.disabled = false;
         btnText.style.display = 'inline';
         btnLoading.style.display = 'none';
       }
     });
+
+    // Tipping functionality
+    function showTippingSection() {
+      // Check if tipping section already exists
+      const existingTippingSection = document.querySelector('.tip-thankyou');
+      if (existingTippingSection) {
+        return; // Already exists, don't create another
+      }
+
+      const tippingSection = document.createElement('div');
+      tippingSection.className = 'tip-thankyou';
+      tippingSection.style.cssText = `
+        margin-top: 2rem;
+        padding: 2rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 1.2rem;
+        border: 2px solid #4fd1c5;
+        text-align: center;
+      `;
+      
+      tippingSection.innerHTML = `
+        <h3 style="color: #2d3748; margin-bottom: 1rem; font-size: 1.5rem;">Want to leave a tip?</h3>
+        <p style="color: #4a5568; margin-bottom: 1.5rem; font-size: 1.1rem;">Your BUBBLER will appreciate it! 100% of tips go directly to them.</p>
+        
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1.5rem;">
+          <button onclick="startTipCheckout(5)" style="background: #4fd1c5; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 1rem;">$5 Tip</button>
+          <button onclick="startTipCheckout(10)" style="background: #4fd1c5; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 1rem;">$10 Tip</button>
+          <button onclick="startTipCheckout(15)" style="background: #4fd1c5; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 1rem;">$15 Tip</button>
+        </div>
+        
+        <div style="display: flex; gap: 1rem; justify-content: center; align-items: center; flex-wrap: wrap; margin-bottom: 2rem;">
+          <input type="number" id="customTip" placeholder="Other amount" style="padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; width: 150px;" min="1" step="0.01" />
+          <button onclick="startTipCheckoutCustom()" style="background: #1086bc; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 1rem;">Send Custom Tip</button>
+        </div>
+        
+        <hr style="margin: 2rem 0; border: none; border-top: 1px solid #ddd;">
+        
+        <div style="text-align: center;">
+          <p style="color: #6b7280; margin-bottom: 1rem; font-size: 1rem;">Ready to submit your feedback?</p>
+          <div id="moved-submit-button-container"></div>
+        </div>
+      `;
+      
+      document.querySelector('.form-container').appendChild(tippingSection);
+      
+      // Move the submit button below the tipping section
+      const submitButtonContainer = document.getElementById('submit-button-container');
+      const movedSubmitButtonContainer = document.getElementById('moved-submit-button-container');
+      
+      if (submitButtonContainer && movedSubmitButtonContainer) {
+        const submitButton = submitButtonContainer.querySelector('.submit-btn');
+        if (submitButton) {
+          movedSubmitButtonContainer.appendChild(submitButton);
+        }
+      }
+    }
+
+    async function startTipCheckout(amount) {
+      const orderId = getUrlParam('order_id');
+      const bubblerId = getUrlParam('bubbler_id');
+
+      try {
+        const response = await fetch('/api/create-tip-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ amount, orderId, bubblerId }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to create tip session');
+        }
+
+        const { checkoutUrl } = await response.json();
+        window.location.href = checkoutUrl;
+      } catch (error) {
+        console.error('Error creating tip session:', error);
+        alert('Unable to process tip at this time. Please try again later.');
+      }
+    }
+
+    async function startTipCheckoutCustom() {
+      const customAmount = parseFloat(document.getElementById('customTip').value);
+      if (customAmount > 0) {
+        await startTipCheckout(customAmount);
+      } else {
+        alert('Please enter a valid tip amount.');
+      }
+    }
+
+    function getUrlParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
 
     function showResult(message, type) {
       const resultDiv = document.getElementById('result');
@@ -793,7 +890,51 @@
       if (firstInput) {
         firstInput.focus();
       }
+      
+      // Check if customer just completed a tip
+      const urlParams = new URLSearchParams(window.location.search);
+      const tipSuccess = urlParams.get('tip_success');
+      const tipAmount = urlParams.get('tip_amount');
+      
+      if (tipSuccess === 'true' && tipAmount) {
+        showTipSuccessMessage(tipAmount);
+      }
     });
+
+    // Show tip success message
+    function showTipSuccessMessage(amount) {
+      const successMessage = document.createElement('div');
+      successMessage.style.cssText = `
+        margin: 1rem 0;
+        padding: 1rem;
+        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        border: 1px solid #28a745;
+        border-radius: 8px;
+        color: #155724;
+        text-align: center;
+        font-weight: 600;
+      `;
+      successMessage.innerHTML = `
+        ✅ Thank you for your $${amount} tip! Your BUBBLER will appreciate it.
+      `;
+      
+      // Insert at the top of the form container
+      const formContainer = document.querySelector('.form-container');
+      if (formContainer) {
+        formContainer.insertBefore(successMessage, formContainer.firstChild);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+          successMessage.style.opacity = '0';
+          successMessage.style.transition = 'opacity 0.5s ease';
+          setTimeout(() => {
+            if (successMessage.parentNode) {
+              successMessage.parentNode.removeChild(successMessage);
+            }
+          }, 500);
+        }, 5000);
+      }
+    }
 
     // Handle offline/online status
     window.addEventListener('online', () => {
@@ -806,4 +947,4 @@
 
   </script>
 </body>
-</html> 
+</html>

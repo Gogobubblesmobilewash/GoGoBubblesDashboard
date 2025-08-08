@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../../services/api';
 import { useAuth } from '../../store/AuthContext';
 import DeviceBindingService from '../../services/deviceBinding';
+import EcoFriendlyToggle from './EcoFriendlyToggle';
 import { 
   FiUser, 
   FiMail, 
@@ -212,10 +213,10 @@ const Profile = () => {
 
   const getRoleDisplayName = (role) => {
     const roleNames = {
-      'SHINE': 'Shine Bubbler (Mobile Car Wash)',
-      'SPARKLE': 'Sparkle Bubbler (Home Cleaning)',
-      'FRESH': 'Fresh Bubbler (Laundry Service)',
-      'ELITE': 'Elite Bubbler (Multi-Service)'
+      'SHINE': 'ShineBubbler (Mobile Car Wash)',
+      'SPARKLE': 'SparkleBubbler (Home Cleaning)',
+      'FRESH': 'FreshBubbler (Laundry Service)',
+      'ELITE': 'EliteBubbler (Multi-Service)'
     };
     return roleNames[role] || role;
   };
@@ -509,6 +510,13 @@ const Profile = () => {
           </div>
         </div>
       </div>
+
+      {/* Eco-Friendly Jobs Section */}
+      {!isAdmin && (
+        <div className="mb-6">
+          <EcoFriendlyToggle />
+        </div>
+      )}
 
       {/* Password Reset Section */}
       {!isAdmin && (

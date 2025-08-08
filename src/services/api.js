@@ -52,10 +52,9 @@ export const mockData = {
 export const SERVICE_CONFIG = {
   'Mobile Car Wash': {
     tiers: ['Express Shine', 'Signature Shine', 'Supreme Shine'],
-    vehicleTypes: ['Car', 'SUV', 'Truck', 'Minivan'],
     addons: [
       'Clay Bar Treatment',
-      'Bug & Tar Removal', 
+      'Bug & Tar Removal',
       'Plastic Trim Restoration',
       'Upholstery Shampoo',
       'Interior Shampoo'
@@ -63,10 +62,10 @@ export const SERVICE_CONFIG = {
     maxVehiclesPerOrder: 3,
     perks: {
       'Express Shine': { firstTime: 'Free Car Freshener' },
-      'Signature Shine': { always: 'Free Car Freshener' },
-      'Supreme Shine': { always: 'Free Car Freshener' }
+      'Signature Shine': { always: 'Free Air Freshener, Free Tire Shine' },
+      'Supreme Shine': { always: 'Free Air Freshener, Free Tire Shine' }
     },
-    photoRequired: ['Interior Shampoo', 'Upholstery Shampoo']
+    photoRequired: ['Interior Shampoo', 'Upholstery Shampoo', 'Express Shine', 'Signature Shine', 'Supreme Shine']
   },
   'Home Cleaning': {
     tiers: ['Refresh Clean', 'Signature Deep Clean'],
@@ -77,19 +76,20 @@ export const SERVICE_CONFIG = {
       'Oven Cleaning',
       'Freezer Cleaning',
       'Carpet Cleaning',
-      'Steam Mopping'
+      'Steam Mopping',
+      'Cabinet Cleaning'
     ],
     perks: {
       'Signature Deep Clean': { always: 'Free Candle' },
       'Refresh Clean': { everyThird: 'Free Candle' }
     },
-    photoRequired: ['Signature Deep Clean']
+    photoRequired: ['Signature Deep Clean', 'Refrigerator Cleaning', 'Oven Cleaning', 'Freezer Cleaning', 'Cabinet Cleaning']
   },
   'Laundry Service': {
     bagTypes: ['Essentials Bag', 'Family Bag', 'Delicates Bag', 'Ironing Bag'],
     addons: [
       'Eco-friendly detergent',
-      'Same-day service'
+      'Express Service - 24 hours'
     ],
     alwaysGrouped: true, // Laundry is always one job regardless of bag count
     photoRequired: ['pickup', 'delivery'], // Always requires 2 photos
@@ -136,11 +136,17 @@ export const getPerks = (serviceType, tier, isFirstTime = false, signatureWashCo
       perks.push('Free air freshener (First-time customer)');
     }
     
-    // Signature and Supreme tiers get free air freshener
+    // Express Shine: Free car freshener for first-time customers only
+    if (tier === 'Express Shine' && isFirstTime) {
+      perks.push('Free car freshener');
+    }
+    
+    // Signature and Supreme tiers get free air freshener always
     if (tier === 'Signature Shine' || tier === 'Supreme Shine') {
       perks.push('Free air freshener');
-  }
-  
+      perks.push('Free tire shine');
+    }
+    
     // Every 3rd Signature wash within a year gets free tire shine
     if (tier === 'Signature Shine' && signatureWashCount > 0 && signatureWashCount % 3 === 0) {
       perks.push('Free tire shine (Every 3rd Signature wash)');
@@ -158,11 +164,17 @@ export const getPerks = (serviceType, tier, isFirstTime = false, signatureWashCo
     if (tier === 'Refresh Clean' && refreshCleanCount > 0 && refreshCleanCount % 3 === 0) {
       perks.push('Free candle (Every 3rd Refresh Clean)');
     }
+    
+    // Loyalty discount after 3+ cleans
+    if (refreshCleanCount >= 3) {
+      perks.push('Loyalty discount');
+    }
   }
   
-  // Laundry Service Perks (no specific perks mentioned, but keeping structure)
+  // Laundry Service Perks (no specific perks currently, but keeping structure)
   if (serviceType === 'Laundry Service') {
     // Could add laundry-specific perks in the future
+    // Examples: Free fabric softener, Free stain treatment, etc.
   }
   
   return perks;
@@ -214,8 +226,35 @@ export const getPayoutRules = (serviceType, tier, addons = []) => {
   };
 };
 
-// Weekly payout balance functions
-export const getWeeklyPayoutBalance = async (bubblerId) => {
+// Role-aware payment functions
+export const getPayoutHistory = async (bubblerId, limit = 10, userRole = null) => {
+  try {
+    // Determine which view to use based on user role
+    let viewName = 'bubbler_safe_payments_view'; // Default for regular bubblers
+    
+    if (userRole === 'support' || userRole === 'support_bubbler') {
+      viewName = 'safe_payment_view'; // Support gets slightly more detail but still safe
+    } else if (userRole === 'admin' || userRole === 'admin_bubbler') {
+      viewName = 'payouts'; // Admin gets full access
+    }
+    
+    const { data: payouts, error } = await supabase
+      .from(viewName)
+      .select('*')
+      .eq('bubbler_id', bubblerId)
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    if (error) throw error;
+    return payouts || [];
+  } catch (error) {
+    console.error('Error getting payout history:', error);
+    throw error;
+  }
+};
+
+// Weekly payout balance functions - role-aware
+export const getWeeklyPayoutBalance = async (bubblerId, userRole = null) => {
   try {
     // Get the current week's start (Monday)
     const now = new Date();
@@ -225,51 +264,89 @@ export const getWeeklyPayoutBalance = async (bubblerId) => {
     weekStart.setDate(now.getDate() - daysToMonday);
     weekStart.setHours(0, 0, 0, 0);
 
-    // Get completed jobs for this week
-    const { data: jobs, error } = await supabase
-      .from('job_assignments')
-      .select(`
-        *,
-        orders!inner(
-          service_type,
-          tier,
-          addons,
-          status
-        )
-      `)
+    // Determine which view to use based on user role
+    let viewName = 'bubbler_safe_payments_view'; // Default for regular bubblers
+    
+    if (userRole === 'support' || userRole === 'support_bubbler') {
+      viewName = 'safe_payment_view'; // Support gets slightly more detail but still safe
+    } else if (userRole === 'admin' || userRole === 'admin_bubbler') {
+      // Admin can access full job_assignments for detailed breakdown
+      const { data: jobs, error } = await supabase
+        .from('job_assignments')
+        .select(`
+          *,
+          orders!inner(
+            service_type,
+            tier,
+            addons,
+            status
+          )
+        `)
+        .eq('bubbler_id', bubblerId)
+        .eq('orders.status', 'completed')
+        .gte('created_at', weekStart.toISOString());
+
+      if (error) throw error;
+
+      // Calculate total payout for the week
+      let weeklyPayout = 0;
+      const jobBreakdown = [];
+
+      jobs.forEach(job => {
+        const order = job.orders;
+        const payoutRules = getPayoutRules(
+          order.service_type,
+          order.tier,
+          order.addons || []
+        );
+        
+        weeklyPayout += payoutRules.total;
+        jobBreakdown.push({
+          jobId: job.id,
+          orderId: order.id,
+          serviceType: order.service_type,
+          tier: order.tier,
+          addons: order.addons || [],
+          payout: payoutRules.total,
+          completedAt: job.updated_at
+        });
+      });
+
+      return {
+        weeklyPayout,
+        jobCount: jobs.length,
+        weekStart: weekStart.toISOString(),
+        jobBreakdown
+      };
+    }
+
+    // For non-admin users, use the safe view
+    const { data: payments, error } = await supabase
+      .from(viewName)
+      .select('*')
       .eq('bubbler_id', bubblerId)
-      .eq('orders.status', 'completed')
       .gte('created_at', weekStart.toISOString());
 
     if (error) throw error;
 
-    // Calculate total payout for the week
+    // Calculate total payout for the week from safe view
     let weeklyPayout = 0;
     const jobBreakdown = [];
 
-    jobs.forEach(job => {
-      const order = job.orders;
-      const payoutRules = getPayoutRules(
-        order.service_type,
-        order.tier,
-        order.addons || []
-      );
-      
-      weeklyPayout += payoutRules.total;
+    payments.forEach(payment => {
+      weeklyPayout += payment.payout_amount || 0;
       jobBreakdown.push({
-        jobId: job.id,
-        orderId: order.id,
-        serviceType: order.service_type,
-        tier: order.tier,
-        addons: order.addons || [],
-        payout: payoutRules.total,
-        completedAt: job.updated_at
+        jobId: payment.job_id,
+        orderId: payment.order_id,
+        serviceType: payment.service_type,
+        payout: payment.payout_amount || 0,
+        completedAt: payment.created_at
       });
     });
 
     return {
       weeklyPayout,
-      jobCount: jobs.length,
+      jobCount: payments.length,
       weekStart: weekStart.toISOString(),
       jobBreakdown
     };
@@ -279,8 +356,14 @@ export const getWeeklyPayoutBalance = async (bubblerId) => {
   }
 };
 
-export const getAllBubblersWeeklyPayouts = async () => {
+export const getAllBubblersWeeklyPayouts = async (userRole = null) => {
   try {
+    // Only admin and support can access all bubblers' payouts
+    if (userRole !== 'admin' && userRole !== 'admin_bubbler' && 
+        userRole !== 'support' && userRole !== 'support_bubbler') {
+      throw new Error('Insufficient permissions to access all bubblers payouts');
+    }
+
     const { data: bubblers, error: bubblersError } = await supabase
       .from('bubblers')
       .select('id, name, email, role');
@@ -290,7 +373,7 @@ export const getAllBubblersWeeklyPayouts = async () => {
     const payouts = await Promise.all(
       bubblers.map(async (bubbler) => {
         try {
-          const weeklyPayout = await getWeeklyPayoutBalance(bubbler.id);
+          const weeklyPayout = await getWeeklyPayoutBalance(bubbler.id, userRole);
           return {
             ...bubbler,
             weeklyPayout: weeklyPayout.weeklyPayout,
@@ -310,23 +393,6 @@ export const getAllBubblersWeeklyPayouts = async () => {
     return payouts;
   } catch (error) {
     console.error('Error getting all bubblers weekly payouts:', error);
-    throw error;
-  }
-};
-
-export const getPayoutHistory = async (bubblerId, limit = 10) => {
-  try {
-    const { data: payouts, error } = await supabase
-      .from('payouts')
-      .select('*')
-      .eq('bubbler_id', bubblerId)
-      .order('created_at', { ascending: false })
-      .limit(limit);
-
-    if (error) throw error;
-    return payouts || [];
-  } catch (error) {
-    console.error('Error getting payout history:', error);
     throw error;
   }
 };
@@ -458,4 +524,120 @@ export const fetchBubblersWithTravelPrefs = async () => {
     .select('id, name, email, phone, home_location, preferred_travel_minutes, preferred_travel_type, is_active, travel_badge');
   if (error) throw error;
   return data || [];
+}; 
+
+// Fetch payment status for job assignments using secure view
+export const getJobPaymentStatus = async (orderId, userRole = null) => {
+  try {
+    // Determine which view to use based on user role
+    let viewName = 'bubbler_safe_payments_view'; // Default for regular bubblers
+    
+    if (userRole === 'support' || userRole === 'support_bubbler') {
+      viewName = 'safe_payment_view'; // Support gets slightly more detail but still safe
+    } else if (userRole === 'admin' || userRole === 'admin_bubbler') {
+      viewName = 'payments'; // Admin gets full access
+    }
+    
+    const { data, error } = await supabase
+      .from(viewName)
+      .select('*')
+      .eq('order_id', orderId);
+
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Error getting job payment status:', error);
+    throw error;
+  }
+};
+
+// Perk tracking functions
+export const checkFirstTimeEligibility = async (email, phone) => {
+  try {
+    const { data, error } = await supabase
+      .rpc('check_first_time_eligibility', {
+        p_email: email,
+        p_phone: phone
+      });
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error checking first-time eligibility:', error);
+    throw error;
+  }
+};
+
+export const createFirstTimePerk = async (email, phone, orderTotal, promoCode = null) => {
+  try {
+    const { data, error } = await supabase
+      .rpc('create_first_time_perk', {
+        p_email: email,
+        p_phone: phone,
+        p_order_total: orderTotal,
+        p_promo_code: promoCode
+      });
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error creating first-time perk:', error);
+    throw error;
+  }
+};
+
+export const usePerk = async (perkId, orderId) => {
+  try {
+    const { data, error } = await supabase
+      .rpc('use_perk', {
+        p_perk_id: perkId,
+        p_order_id: orderId
+      });
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error using perk:', error);
+    throw error;
+  }
+};
+
+export const validatePromoCode = async (promoCode) => {
+  try {
+    const { data, error } = await supabase
+      .from('perk_tracker')
+      .select('*')
+      .eq('perk_type', 'promo_code')
+      .eq('promo_code', promoCode.toUpperCase())
+      .eq('is_used', false)
+      .is('expires_at', null) // Never expires
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return null; // No promo code found
+      }
+      throw error;
+    }
+    return data;
+  } catch (error) {
+    console.error('Error validating promo code:', error);
+    throw error;
+  }
+};
+
+export const getCustomerPerkHistory = async (email, phone) => {
+  try {
+    const { data, error } = await supabase
+      .from('perk_tracker')
+      .select('*')
+      .or(`customer_email.eq.${email},customer_phone.eq.${phone}`)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Error getting customer perk history:', error);
+    throw error;
+  }
 }; 

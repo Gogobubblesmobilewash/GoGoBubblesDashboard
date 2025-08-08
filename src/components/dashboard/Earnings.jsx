@@ -4,7 +4,7 @@ import { useAuth } from '../../store/AuthContext';
 import { supabase, getWeeklyPayoutBalance, getPayoutHistory } from '../../services/api';
 
 const Earnings = () => {
-  const { user } = useAuth();
+  const { user, isAdmin, isSupport } = useAuth();
   const [loading, setLoading] = useState(true);
   const [weeklyPayout, setWeeklyPayout] = useState(null);
   const [payoutHistory, setPayoutHistory] = useState([]);
@@ -25,6 +25,9 @@ const Earnings = () => {
   const loadEarningsData = async () => {
     setLoading(true);
     try {
+      // Get user role for payment view selection
+      const userRole = user?.role || (isAdmin ? 'admin' : isSupport ? 'support' : 'bubbler');
+      
       // Get bubbler profile
       const { data: profile, error: profileError } = await supabase
         .from('bubblers')
@@ -34,12 +37,12 @@ const Earnings = () => {
       
       if (profileError) throw profileError;
 
-      // Get weekly payout balance
-      const weeklyData = await getWeeklyPayoutBalance(profile.id);
+      // Get weekly payout balance using role-appropriate view
+      const weeklyData = await getWeeklyPayoutBalance(profile.id, userRole);
       setWeeklyPayout(weeklyData);
 
-      // Get payout history
-      const history = await getPayoutHistory(profile.id, 20);
+      // Get payout history using role-appropriate view
+      const history = await getPayoutHistory(profile.id, 20, userRole);
       setPayoutHistory(history);
 
       // Calculate earnings breakdown
@@ -132,13 +135,13 @@ const Earnings = () => {
     const basePayouts = {
       'Mobile Car Wash': {
         'Express Wash': 12,
-        'Signature Shine': 18,
-        'Supreme Shine': 25,
+        'SignatureShine': 18,
+        'SupremeShine': 25,
         default: 12
       },
       'Home Cleaning': {
-        'Refresh Clean': 20,
-        'Signature Deep Clean': 30,
+        'RefresherClean': 20,
+        'SignatureDeepClean': 30,
         'Supreme Deep Clean': 45,
         default: 20
       },

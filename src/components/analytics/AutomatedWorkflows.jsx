@@ -63,8 +63,8 @@ const AutomatedWorkflows = () => {
   const mockWorkflows = [
     {
       id: 1,
-      name: 'Elite Bubbler Assignment Automation',
-      description: 'Automatically assign elite bubblers to multiple job assignments within orders based on permissions and availability',
+              name: 'EliteBubbler Assignment Automation',
+        description: 'Automatically assign elite bubblers to multiple job assignments within orders based on permissions and availability',
       type: 'operations',
       status: 'active',
       triggers: ['new_order_with_multiple_services', 'elite_bubbler_available', 'split_order_approved'],
@@ -79,7 +79,7 @@ const AutomatedWorkflows = () => {
     },
     {
       id: 2,
-      name: 'Elite Bubbler Eligibility Notification',
+              name: 'EliteBubbler Eligibility Notification',
       description: 'Automatically notify bubblers when they become eligible for elite status (10+ assignments, 4.5+ rating)',
       type: 'operations',
       status: 'active',
@@ -163,8 +163,8 @@ const AutomatedWorkflows = () => {
   const mockTemplates = [
     {
       id: 1,
-      name: 'Elite Bubbler Management',
-      description: 'Automated workflows for elite bubbler assignment and eligibility management',
+              name: 'EliteBubbler Management',
+        description: 'Automated workflows for elite bubbler assignment and eligibility management',
       category: 'operations',
       triggers: ['elite_eligibility_met', 'multiple_service_order', 'split_order_approved'],
       actions: ['check_eligibility', 'assign_elite_bubbler', 'send_notification'],

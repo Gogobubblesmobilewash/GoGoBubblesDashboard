@@ -242,7 +242,7 @@ const EliteBubblerManagement = () => {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Elite Bubbler Management
+            EliteBubbler Management
           </h1>
           <p className="text-gray-600">
             Manage elite bubblers, eligibility criteria, and split order assignments
@@ -254,7 +254,7 @@ const EliteBubblerManagement = () => {
           <div className="border-b border-gray-200">
             <nav className="-mb-px flex space-x-8">
               {[
-                { id: 'elite', name: 'Elite Bubblers', icon: Award },
+                { id: 'elite', name: 'EliteBubblers', icon: Award },
                 { id: 'eligible', name: 'Eligible Bubblers', icon: UserCheck },
                 { id: 'applications', name: 'Pending Applications', icon: Clock },
                 { id: 'analytics', name: 'Analytics', icon: BarChart3 }
@@ -314,7 +314,7 @@ const EliteBubblerManagement = () => {
               </div>
               <button 
                 onClick={() => {
-                  const content = `Elite Bubbler Export\nGenerated: ${new Date().toLocaleString()}\n\n${filteredEliteBubblers.map(b => 
+                  const content = `EliteBubbler Export\nGenerated: ${new Date().toLocaleString()}\n\n${filteredEliteBubblers.map(b => 
                     `${b.name} | ${b.email} | ${b.status} | ${b.totalAssignments} assignments | ${b.avgRating}/5.0 rating | ${formatCurrency(b.monthlyEarnings)}`
                   ).join('\n')}`;
                   const blob = new Blob([content], { type: 'text/plain' });
@@ -324,7 +324,7 @@ const EliteBubblerManagement = () => {
                   a.download = `elite_bubblers_${new Date().toISOString().split('T')[0]}.txt`;
                   a.click();
                   window.URL.revokeObjectURL(url);
-                  alert('Elite bubblers exported successfully!');
+                  alert('EliteBubblers exported successfully!');
                 }}
                 className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
               >
@@ -333,7 +333,7 @@ const EliteBubblerManagement = () => {
               </button>
             </div>
 
-            {/* Elite Bubblers Grid */}
+            {/* EliteBubblers Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
               {filteredEliteBubblers.map((bubbler) => (
                 <div key={bubbler.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -399,7 +399,7 @@ const EliteBubblerManagement = () => {
                       <span>View Details</span>
                     </button>
                     <button 
-                      onClick={() => alert(`Settings for ${bubbler.name}\nThis would open elite bubbler configuration settings.`)}
+                      onClick={() => alert(`Settings for ${bubbler.name}\nThis would open eliteBubbler configuration settings.`)}
                       className="flex items-center space-x-2 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors"
                     >
                       <Settings className="w-4 h-4" />
@@ -591,7 +591,7 @@ const EliteBubblerManagement = () => {
         {activeTab === 'analytics' && (
           <div className="space-y-6">
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-6">Elite Bubbler Analytics</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-6">EliteBubbler Analytics</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <div className="bg-blue-50 rounded-lg p-4">
@@ -600,11 +600,11 @@ const EliteBubblerManagement = () => {
                       <Award className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">Total Elite Bubblers</h3>
+                      <h3 className="font-semibold text-gray-900">Total EliteBubblers</h3>
                       <p className="text-2xl font-bold text-blue-600">{eliteBubblers.length}</p>
                     </div>
                   </div>
-                  <p className="text-sm text-gray-600">Active elite bubblers</p>
+                  <p className="text-sm text-gray-600">Active eliteBubblers</p>
                 </div>
 
                 <div className="bg-green-50 rounded-lg p-4">
@@ -649,7 +649,7 @@ const EliteBubblerManagement = () => {
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="space-y-4">
-                  <h4 className="font-medium text-gray-900">Elite Bubbler Performance</h4>
+                  <h4 className="font-medium text-gray-900">EliteBubbler Performance</h4>
                   <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
                     <div className="text-center">
                       <BarChart3 className="w-12 h-12 text-gray-400 mx-auto mb-2" />

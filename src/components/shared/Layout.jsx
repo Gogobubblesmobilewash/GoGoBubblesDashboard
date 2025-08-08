@@ -28,10 +28,12 @@ import {
   FiCreditCard as CreditCard,
   FiDownload as Download,
   FiUserPlus as UserPlus,
-  FiAlertCircle as AlertCircle
+  FiAlertCircle as AlertCircle,
+  FiEye as Eye
 } from 'react-icons/fi';
 import MessageNotifications from '../messages/MessageNotifications';
 import NotificationCenter from '../activity/NotificationCenter';
+import FeedbackNotifications from '../admin/FeedbackNotifications';
 
 const Layout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -52,10 +54,15 @@ const Layout = () => {
   ];
   
   const adminNavItems = [
-    { name: 'Dashboard', icon: Home, path: '/dashboard' },
-    { name: 'User Management', icon: Users, path: '/user-management' },
-    { name: 'Orders', icon: FileText, path: '/orders' },
-    { name: 'All Jobs', icon: Calendar, path: '/admin/jobs' },
+  { name: 'Dashboard', icon: Home, path: '/dashboard' },
+  { name: 'User Management', icon: Users, path: '/user-management' },
+  { name: 'Lead Bubbler Shifts', icon: Calendar, path: '/lead-bubbler-shifts' },
+  { name: 'Takeover Verification', icon: CheckCircle, path: '/takeover-verification' },
+  { name: 'Lead Bubbler Oversight', icon: Eye, path: '/lead-bubbler-oversight' },
+  { name: 'Lead Bubbler Performance', icon: BarChart2, path: '/lead-bubbler-performance' },
+  { name: 'Lead Bubbler Retention', icon: Shield, path: '/lead-bubbler-retention' },
+  { name: 'Orders', icon: FileText, path: '/orders' },
+  { name: 'All Jobs', icon: Calendar, path: '/admin/jobs' },
     { name: 'Equipment', icon: Briefcase, path: '/admin/equipment' },
     { name: 'Applicants', icon: Users, path: '/applicants' },
     { name: 'Ratings', icon: Star, path: '/ratings' },
@@ -67,7 +74,7 @@ const Layout = () => {
     { name: 'Business Intelligence', icon: TrendingUp, path: '/business-intelligence' },
     { name: 'Automated Workflows', icon: Workflow, path: '/automated-workflows' },
     { name: 'Customer Analytics', icon: Users, path: '/customer-analytics' },
-    { name: 'Elite Bubbler Management', icon: Award, path: '/elite-bubbler-management' },
+            { name: 'EliteBubbler Management', icon: Award, path: '/elite-bubbler-management' },
     { name: 'Bubbler Morale', icon: Heart, path: '/bubbler-morale' },
     { name: 'Job Assignment Caps', icon: Target, path: '/job-assignment-caps' },
     { name: 'Admin Notes', icon: FileText, path: '/admin-notes' },
@@ -250,6 +257,7 @@ const Layout = () => {
             </div>
             
             <div className="flex items-center space-x-4">
+              {(isAdmin || isSupport) && <FeedbackNotifications />}
               <MessageNotifications />
               <NotificationCenter />
             </div>

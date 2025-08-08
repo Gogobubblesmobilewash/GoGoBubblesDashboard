@@ -4,8 +4,10 @@ import DeviceBindingService from '../../services/deviceBinding';
 import Modal from '../shared/Modal';
 import { BUBBLER_ROLES } from '../../constants/roles';
 import { FiPlus, FiEdit, FiTrash2, FiUserPlus, FiDollarSign, FiCheckCircle, FiClock, FiShield, FiMonitor, FiUnlock } from 'react-icons/fi';
+import { useAuth } from '../../store/AuthContext';
 
 const Bubblers = () => {
+  const { user, isAdmin, isSupport } = useAuth();
   const [bubblers, setBubblers] = useState([]);
   const [filteredBubblers, setFilteredBubblers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -40,7 +42,10 @@ const Bubblers = () => {
       setLoading(true);
       setError(null);
       try {
-      const { data, error } = await supabase.from('bubblers').select('*');
+        // Get user role for payment view selection
+        const userRole = user?.role || (isAdmin ? 'admin' : isSupport ? 'support' : 'bubbler');
+        
+        const { data, error } = await supabase.from('bubblers').select('*');
         if (error) throw error;
         
         // Check device binding status for each bubbler
@@ -68,8 +73,8 @@ const Bubblers = () => {
         
         setBubblers(bubblersWithDeviceInfo || []);
         
-        // Fetch weekly payouts for all bubblers
-        const payouts = await getAllBubblersWeeklyPayouts();
+        // Fetch weekly payouts for all bubblers using role-appropriate view
+        const payouts = await getAllBubblersWeeklyPayouts(userRole);
         const payoutsMap = {};
         payouts.forEach(payout => {
           payoutsMap[payout.id] = {
@@ -81,11 +86,11 @@ const Bubblers = () => {
       } catch (err) {
         setError(err.message);
       } finally {
-      setLoading(false);
+        setLoading(false);
       }
     };
     fetchBubblers();
-  }, []);
+  }, [user, isAdmin, isSupport]);
 
   // Filter bubblers based on search and filters
   useEffect(() => {
@@ -264,7 +269,9 @@ const Bubblers = () => {
   const handlePayoutClick = async (bubbler) => {
     setSelectedPayoutBubbler(bubbler);
     try {
-      const history = await getPayoutHistory(bubbler.id, 20);
+      // Get user role for payment view selection
+      const userRole = user?.role || (isAdmin ? 'admin' : isSupport ? 'support' : 'bubbler');
+      const history = await getPayoutHistory(bubbler.id, 20, userRole);
       setPayoutHistory(history);
       setShowPayoutModal(true);
     } catch (error) {
@@ -316,8 +323,9 @@ const Bubblers = () => {
 
       alert(`Payout record created for ${getFullName(bubbler)}: $${weeklyPayout.toFixed(2)}`);
       
-      // Refresh payout history
-      const history = await getPayoutHistory(bubbler.id, 20);
+      // Refresh payout history using role-appropriate view
+      const userRole = user?.role || (isAdmin ? 'admin' : isSupport ? 'support' : 'bubbler');
+      const history = await getPayoutHistory(bubbler.id, 20, userRole);
       setPayoutHistory(history);
       
     } catch (error) {
@@ -330,8 +338,9 @@ const Bubblers = () => {
     try {
       await updatePayoutStatus(payoutId, 'paid', new Date().toISOString());
       
-      // Refresh payout history
-      const history = await getPayoutHistory(selectedPayoutBubbler.id, 20);
+      // Refresh payout history using role-appropriate view
+      const userRole = user?.role || (isAdmin ? 'admin' : isSupport ? 'support' : 'bubbler');
+      const history = await getPayoutHistory(selectedPayoutBubbler.id, 20, userRole);
       setPayoutHistory(history);
       
       alert('Payout marked as paid successfully!');
@@ -479,10 +488,10 @@ const Bubblers = () => {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">All Roles</option>
-              <option value="shine">Shine Bubbler</option>
-              <option value="sparkle">Sparkle Bubbler</option>
-              <option value="fresh">Fresh Bubbler</option>
-              <option value="elite">Elite Bubbler</option>
+                              <option value="shine">ShineBubbler</option>
+                <option value="sparkle">SparkleBubbler</option>
+                <option value="fresh">FreshBubbler</option>
+                <option value="elite">EliteBubbler</option>
             </select>
           </div>
         </div>

@@ -30,18 +30,22 @@ import useStore from '../../store/useStore';
 import { supabase } from '../../services/api';
 import { 
   JOB_STATUSES, 
+  LAUNDRY_STATUSES,
+  LAUNDRY_SERVICE_TIERS,
   SERVICE_TYPES, 
   TIERS, 
   ADDONS, 
   BAG_TYPES,
   getPhotoRequirements, 
-  getPerks, 
-  getPayoutRules
+  getPayoutRules,
+  calculateJobDuration,
+  getDurationStatus,
+  formatDuration
 } from '../../constants';
 import QRScanner from './QRScanner';
 import Modal from '../shared/Modal';
 import MessageThread from '../messages/MessageThread';
-import { parseServicesForSplitting, fetchBubblersWithTravelPrefs } from '../../services/api';
+import { parseServicesForSplitting, fetchBubblersWithTravelPrefs, getJobPaymentStatus, getPerks } from '../../services/api';
 import dayjs from 'dayjs';
 import { useAuth } from '../../store/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -51,22 +55,7 @@ const ACCEPTANCE_WINDOWS = {
   standard: 30,
 };
 
-// Laundry-specific statuses
-const LAUNDRY_STATUSES = [
-  'pending',
-  'assigned',
-  'accepted',
-  'en_route_to_pickup',
-  'picked_up',
-  'in_wash',
-  'in_dry',
-  'folding_ironing',
-  'en_route_to_deliver',
-  'delivered',
-  'cancelled',
-  'reassigned',
-  'no_show',
-];
+// Use the imported LAUNDRY_STATUSES from constants
 
 const Jobs = () => {
   const { user, isAdmin, isSupport, isMarketManager, isLeadBubbler, isShineBubbler, isSparkleBubbler, isFreshBubbler, isEliteBubbler, canDoLaundry, canDoCarWash, canDoHomeCleaning } = useAuth();
@@ -94,10 +83,13 @@ const Jobs = () => {
     assignedBubbler: 'all',
     minAmount: '',
     maxAmount: '',
-    hasMessages: 'all'
+    hasMessages: 'all',
+    paymentStatus: 'all',
+    processingTime: 'all'
   });
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [selectedJobs, setSelectedJobs] = useState([]);
+  const [paymentStatuses, setPaymentStatuses] = useState({}); // orderId -> payment status
   const [currentPage, setCurrentPage] = useState(1);
   const [jobsPerPage] = useState(20);
   const [sortBy, setSortBy] = useState('created_at');
@@ -152,10 +144,329 @@ const Jobs = () => {
 
   // Helper to check if job is completed
   const isJobCompleted = (assignment) => assignment?.status === 'completed';
+  
+  // Check if payment is confirmed for a job
+  const isPaymentConfirmed = (orderId) => {
+    const paymentData = paymentStatuses[orderId];
+    if (!paymentData || paymentData.length === 0) return false;
+    return paymentData.some(payment => payment.payment_status === 'paid');
+  };
+
+  // Get next valid statuses based on current status and service type
+  const getNextValidStatuses = (currentStatus, serviceType) => {
+    if (serviceType === 'Laundry Service') {
+      return getNextLaundryStatuses(currentStatus);
+    } else {
+      return getNextGeneralStatuses(currentStatus);
+    }
+  };
+
+  // Get next valid statuses for general services (car wash, home cleaning)
+  const getNextGeneralStatuses = (currentStatus) => {
+    switch (currentStatus) {
+      case 'assigned':
+        return ['accepted', 'denied'];
+      case 'denied':
+        return ['reassign'];
+      case 'accepted':
+        return ['en_route'];
+      case 'en_route':
+        return ['arrived'];
+      case 'arrived':
+        return ['in_progress'];
+      case 'in_progress':
+        return ['completed'];
+      case 'reassign':
+        return ['assigned'];
+      default:
+        return [];
+    }
+  };
+
+  // Get next valid statuses for laundry services
+  const getNextLaundryStatuses = (currentStatus) => {
+    switch (currentStatus) {
+      case 'assigned':
+        return ['accepted', 'denied'];
+      case 'denied':
+        return ['reassign'];
+      case 'accepted':
+        return ['en_route_to_pickup'];
+      case 'en_route_to_pickup':
+        return ['arrived_at_pickup'];
+      case 'arrived_at_pickup':
+        return ['picked_up'];
+      case 'picked_up':
+        return ['in_wash'];
+      case 'in_wash':
+        return ['in_dry'];
+      case 'in_dry':
+        return ['folding_ironing'];
+      case 'folding_ironing':
+        return ['en_route_to_deliver'];
+      case 'en_route_to_deliver':
+        return ['arrived_at_delivery'];
+      case 'arrived_at_delivery':
+        return ['delivered'];
+      case 'delivered':
+        return ['completed'];
+      case 'reassign':
+        return ['assigned'];
+      default:
+        return [];
+    }
+  };
+
+  // Check if photos are required for completion
+  const arePhotosRequired = (service, assignment) => {
+    const { requirements } = getPhotoRequirementsForJob(service, assignment);
+    return requirements.length > 0;
+  };
+
+  // Check if job can be completed (photos uploaded if required)
+  const canCompleteJob = (service, assignment) => {
+    if (!arePhotosRequired(service, assignment)) {
+      return true;
+    }
+    
+    // Check if required photos have been uploaded
+    const { requirements } = getPhotoRequirementsForJob(service, assignment);
+    const uploadedPhotos = assignment.photos || [];
+    
+    return requirements.every(req => 
+      uploadedPhotos.some(photo => photo.type === req)
+    );
+  };
+
+  // Calculate laundry processing time remaining (flexible based on service tier)
+  const getLaundryTimeRemaining = (assignment, service) => {
+    if (service?.service_type !== 'Laundry Service') return null;
+    
+    const pickupTime = assignment.picked_up_at;
+    if (!pickupTime) return null;
+    
+    // Get processing hours based on service tier
+    const serviceTier = service.tier || 'Standard Service';
+    const tierConfig = LAUNDRY_SERVICE_TIERS[serviceTier];
+    
+    if (!tierConfig) return null;
+    
+    // Skip non-visible tiers for non-admin users
+    if (!tierConfig.visible && !isAdmin) return null;
+    
+    const processingHours = tierConfig.processingHours;
+    
+    const pickup = new Date(pickupTime);
+    const now = new Date();
+    const elapsedHours = (now - pickup) / (1000 * 60 * 60);
+    const remainingHours = Math.max(0, processingHours - elapsedHours);
+    
+    return {
+      elapsed: elapsedHours,
+      remaining: remainingHours,
+      isOverdue: elapsedHours > processingHours,
+      processingHours: processingHours,
+      serviceTier: serviceTier,
+      displayName: tierConfig.displayName || serviceTier
+    };
+  };
+
+  // Get laundry status description with time info
+  const getLaundryStatusDescription = (assignment, service) => {
+    const timeInfo = getLaundryTimeRemaining(assignment, service);
+    if (!timeInfo) return assignment.status.replace(/_/g, ' ');
+    
+    const statusText = assignment.status.replace(/_/g, ' ');
+    const tierInfo = `(${timeInfo.displayName})`;
+    
+    if (timeInfo.isOverdue) {
+      return `${statusText} ${tierInfo} - OVERDUE: ${Math.floor(timeInfo.elapsed)}h elapsed`;
+    } else {
+      return `${statusText} ${tierInfo} - ${Math.floor(timeInfo.remaining)}h remaining`;
+    }
+  };
+
+  // Get laundry processing time display
+  const getLaundryProcessingTimeDisplay = (service) => {
+    if (service?.service_type !== 'Laundry Service') return null;
+    
+    const serviceTier = service.tier || 'Standard Service';
+    const tierConfig = LAUNDRY_SERVICE_TIERS[serviceTier];
+    
+    if (!tierConfig) return null;
+    
+    const processingHours = tierConfig.processingHours;
+    const displayName = tierConfig.displayName || serviceTier;
+    
+    // Only show visible tiers by default (admin can override)
+    if (!tierConfig.visible && !isAdmin) {
+      return null; // Hide non-visible tiers for non-admin users
+    }
+    
+    if (processingHours <= 4) {
+      return `${processingHours}h Rush`;
+    } else if (processingHours <= 8) {
+      return `${processingHours}h ${displayName}`;
+    } else if (processingHours <= 24) {
+      return `${processingHours}h Express`;
+    } else {
+      return `${processingHours}h Standard`;
+    }
+  };
+
+  // Calculate expected job duration for a service
+  const getExpectedJobDuration = (service) => {
+    if (!service) return null;
+    
+    const serviceType = service.service_type;
+    const tier = service.tier;
+    const addons = service.addons || [];
+    
+    // Get additional options based on service type
+    let options = {};
+    
+    if (serviceType === 'Mobile Car Wash') {
+      // Get vehicles array from order_vehicles
+      const vehicles = service.order_vehicles || [];
+      options.vehicles = vehicles;
+    } else if (serviceType === 'Home Cleaning') {
+      // Get room counts from order_cleaning_details
+      const cleaningDetails = service.order_cleaning_details?.[0];
+      if (cleaningDetails) {
+        options.bedrooms = cleaningDetails.bedrooms_count || 1;
+        options.bathrooms = cleaningDetails.bathrooms_count || 1;
+      }
+    }
+    
+    return calculateJobDuration(serviceType, tier, addons, options);
+  };
+
+  // Get duration status with visual indicator
+  const getDurationStatusDisplay = (expectedDuration, actualDuration) => {
+    const status = getDurationStatus(expectedDuration, actualDuration);
+    
+    const statusConfig = {
+      green: {
+        color: 'text-green-600',
+        bgColor: 'bg-green-100',
+        icon: '🟢',
+        label: 'On Time'
+      },
+      yellow: {
+        color: 'text-yellow-600',
+        bgColor: 'bg-yellow-100',
+        icon: '🟡',
+        label: 'Nearing Overage'
+      },
+      red: {
+        color: 'text-red-600',
+        bgColor: 'bg-red-100',
+        icon: '🔴',
+        label: 'Overdue'
+      },
+      unknown: {
+        color: 'text-gray-600',
+        bgColor: 'bg-gray-100',
+        icon: '⚪',
+        label: 'Unknown'
+      }
+    };
+    
+    return statusConfig[status] || statusConfig.unknown;
+  };
+
+  // Get visible laundry service tiers
+  const getVisibleLaundryTiers = () => {
+    return Object.entries(LAUNDRY_SERVICE_TIERS)
+      .filter(([_, config]) => config.visible || isAdmin)
+      .map(([tier, config]) => ({
+        name: tier,
+        displayName: config.displayName || tier,
+        processingHours: config.processingHours,
+        visible: config.visible
+      }));
+  };
+
+  // Check if laundry is approaching deadline
+  const getLaundryUrgencyLevel = (assignment, service) => {
+    const timeInfo = getLaundryTimeRemaining(assignment, service);
+    if (!timeInfo) return null;
+    
+    const remainingPercentage = (timeInfo.remaining / timeInfo.processingHours) * 100;
+    
+    if (timeInfo.isOverdue) {
+      return { level: 'overdue', color: 'text-red-600', bgColor: 'bg-red-50' };
+    } else if (remainingPercentage <= 25) {
+      return { level: 'critical', color: 'text-red-600', bgColor: 'bg-red-50' };
+    } else if (remainingPercentage <= 50) {
+      return { level: 'warning', color: 'text-yellow-600', bgColor: 'bg-yellow-50' };
+    } else {
+      return { level: 'normal', color: 'text-green-600', bgColor: 'bg-green-50' };
+    }
+  };
+
+  // Render status action buttons based on current status and service type
+  const renderStatusActions = (job, service) => {
+    const validNextStatuses = getNextValidStatuses(job.status, service.service_type);
+    
+    if (validNextStatuses.length === 0) {
+      return <span className="text-gray-500 text-sm">No actions available</span>;
+    }
+
+    return (
+      <div className="flex flex-wrap gap-1">
+        {validNextStatuses.map(status => {
+          // Check if this is a completion action and if photos are required
+          const isCompletionAction = status === 'completed';
+          const canComplete = isCompletionAction ? canCompleteJob(service, job) : true;
+          
+          // Get photo requirements if this is a completion action
+          let missingPhotos = [];
+          if (isCompletionAction && !canComplete) {
+            const { requirements } = getPhotoRequirementsForJob(service, job);
+            const uploadedPhotos = job.photos || [];
+            missingPhotos = requirements.filter(req => 
+              !uploadedPhotos.some(photo => photo.type === req)
+            );
+          }
+
+          return (
+            <button
+              key={status}
+              onClick={() => updateJobStatus(job.id, status)}
+              disabled={!canComplete}
+              className={`px-2 py-1 text-xs rounded transition-colors ${
+                !canComplete ? 'bg-gray-100 text-gray-400 cursor-not-allowed' :
+                status === 'denied' ? 'bg-red-100 text-red-700 hover:bg-red-200' :
+                status === 'accepted' ? 'bg-green-100 text-green-700 hover:bg-green-200' :
+                status === 'completed' ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' :
+                'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+              title={
+                !canComplete && isCompletionAction 
+                  ? `Cannot complete: Missing required photos (${missingPhotos.join(', ')})`
+                  : `Mark as ${status.replace(/_/g, ' ')}`
+              }
+            >
+              {status.replace(/_/g, ' ')}
+              {!canComplete && isCompletionAction && (
+                <span className="ml-1 text-red-500">⚠️</span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+    );
+  };
 
   // Helper to determine photo requirements based on role and service
   const getPhotoRequirementsForJob = (service, assignment) => {
     const requirements = [];
+    const notes = [];
+    
+    // Get photo requirements based on service type, tier, and add-ons
+    const serviceRequirements = getPhotoRequirements(service.service_type, service.tier, service.addons || []);
+    requirements.push(...serviceRequirements);
     
     // Laundry services always require pickup and delivery photos
     if (canDoLaundry && service.service_type === 'Laundry Service') {
@@ -171,6 +482,7 @@ const Jobs = () => {
     if (isShineBubbler && service.service_type === 'Mobile Car Wash') {
       if (assignment.status === 'completed') {
         requirements.push('Perk Delivery Photo');
+        notes.push('Reminder: Take a clear photo showing the delivered perk. If you want to add any notes (e.g., customer declined perk), use the regular job notes section below.');
       }
     }
     
@@ -178,6 +490,7 @@ const Jobs = () => {
     if (isSparkleBubbler && service.service_type === 'Home Cleaning') {
       if (assignment.status === 'completed') {
         requirements.push('Perk Delivery Photo');
+        notes.push('Reminder: Take a clear photo showing the delivered perk. If you want to add any notes (e.g., customer declined perk), use the regular job notes section below.');
       }
     }
     
@@ -192,28 +505,124 @@ const Jobs = () => {
         }
       } else if (assignment.status === 'completed') {
         requirements.push('Perk Delivery Photo');
+        notes.push('Reminder: Take a clear photo showing the delivered perk. If you want to add any notes (e.g., customer declined perk), use the regular job notes section below.');
       }
     }
     
-    return requirements;
+    return { requirements, notes };
   };
 
   // Handle job status updates
   const updateJobStatus = async (assignmentId, newStatus) => {
     try {
+      // Find the job assignment to get the order ID and service info
+      const assignment = orders.flatMap(order => 
+        order.order_service?.flatMap(service => 
+          service.job_assignments?.filter(ja => ja.id === assignmentId) || []
+        ) || []
+      ).find(ja => ja);
+      
+      if (!assignment) {
+        toast.error('Job assignment not found');
+        return;
+      }
+
+      // Find the service to get service type
+      const service = orders.flatMap(order => 
+        order.order_service?.filter(s => 
+          s.job_assignments?.some(ja => ja.id === assignmentId)
+        ) || []
+      ).find(s => s);
+
+      if (!service) {
+        toast.error('Service not found for this assignment');
+        return;
+      }
+
+      // Validate status transition
+      const validNextStatuses = getNextValidStatuses(assignment.status, service.service_type);
+      if (!validNextStatuses.includes(newStatus)) {
+        toast.error(`Invalid status transition from ${assignment.status} to ${newStatus}`);
+        return;
+      }
+
+      // Check payment status before allowing job progression (except for denied/reassign)
+      if (!['denied', 'reassign', 'cancelled'].includes(newStatus)) {
+        const orderId = orders.find(order => 
+          order.order_service?.some(s => 
+            s.job_assignments?.some(ja => ja.id === assignmentId)
+          )
+        )?.id;
+        
+        if (orderId && !isPaymentConfirmed(orderId)) {
+          toast.error('Payment not confirmed. Cannot proceed with job until payment is received.');
+          return;
+        }
+      }
+
+      // Check if completion is allowed (photos required)
+      if (newStatus === 'completed' && !canCompleteJob(service, assignment)) {
+        toast.error('Cannot complete job. Required photos must be uploaded first.');
+        return;
+      }
+
+      // Handle automatic status transitions
+      let finalStatus = newStatus;
+      let additionalUpdates = {};
+
+      // Auto-transition logic
+      if (newStatus === 'denied') {
+        // When denied, automatically move to reassign
+        finalStatus = 'reassign';
+        additionalUpdates = {
+          denied_at: new Date().toISOString(),
+          reassigned_at: new Date().toISOString()
+        };
+      } else if (newStatus === 'arrived') {
+        // When arrived, automatically move to in_progress
+        finalStatus = 'in_progress';
+        additionalUpdates = {
+          arrived_at: new Date().toISOString(),
+          started_at: new Date().toISOString()
+        };
+      } else {
+        // Standard status updates
+        additionalUpdates = {
+          ...(newStatus === 'accepted' && { accepted_at: new Date().toISOString() }),
+          ...(newStatus === 'en_route' && { en_route_at: new Date().toISOString() }),
+          ...(newStatus === 'en_route_to_pickup' && { en_route_to_pickup_at: new Date().toISOString() }),
+          ...(newStatus === 'en_route_to_deliver' && { en_route_to_deliver_at: new Date().toISOString() }),
+          ...(newStatus === 'arrived_at_pickup' && { arrived_at_pickup_at: new Date().toISOString() }),
+          ...(newStatus === 'arrived_at_delivery' && { arrived_at_delivery_at: new Date().toISOString() }),
+          ...(newStatus === 'picked_up' && { picked_up_at: new Date().toISOString() }),
+          ...(newStatus === 'in_wash' && { in_wash_at: new Date().toISOString() }),
+          ...(newStatus === 'in_dry' && { in_dry_at: new Date().toISOString() }),
+          ...(newStatus === 'folding_ironing' && { folding_ironing_at: new Date().toISOString() }),
+          ...(newStatus === 'delivered' && { delivered_at: new Date().toISOString() }),
+          ...(newStatus === 'completed' && { completed_at: new Date().toISOString() }),
+          ...(newStatus === 'reassign' && { reassigned_at: new Date().toISOString() })
+        };
+      }
+
       const { error } = await supabase
         .from('job_assignments')
         .update({ 
-          status: newStatus,
-          ...(newStatus === 'accepted' && { accepted_at: new Date().toISOString() }),
-          ...(newStatus === 'in-progress' && { started_at: new Date().toISOString() }),
-          ...(newStatus === 'completed' && { completed_at: new Date().toISOString() })
+          status: finalStatus,
+          ...additionalUpdates
         })
         .eq('id', assignmentId);
       
       if (error) throw error;
       
-      toast.success(`Job ${newStatus.replace('-', ' ')}!`);
+      // Show appropriate success message
+      if (newStatus === 'denied') {
+        toast.success('Job denied and moved to reassignment');
+      } else if (newStatus === 'arrived') {
+        toast.success('Arrived and job started!');
+      } else {
+        toast.success(`Job status updated to ${finalStatus.replace('_', ' ')}!`);
+      }
+      
       loadOrders(); // Refresh the orders to show updated status
     } catch (error) {
       console.error('Error updating job status:', error);
@@ -284,7 +693,7 @@ const Jobs = () => {
         );
       });
     }
-
+    
     // Apply search filter
     if (searchTerm) {
       filteredOrders = filteredOrders.filter(order => {
@@ -312,20 +721,52 @@ const Jobs = () => {
         return { ...order, order_service: filteredServices };
       }).filter(Boolean);
     }
-
+    
     return filteredOrders;
   };
 
-  // Fetch all orders with their related services
+  // Load orders and job assignments
   const loadOrders = async () => {
-      setLoading(true);
     try {
-      const { data, error } = await supabase
+      setLoading(true);
+      
+      // Get user role for payment view selection
+      const userRole = user?.role || (isAdmin ? 'admin' : isSupport ? 'support' : 'bubbler');
+      
+      const { data: ordersData, error } = await supabase
         .from('orders')
-        .select(`*, order_service(*, order_cleaning_details(*), order_laundry_bags(*), order_vehicles(*), job_assignments(*))`)
+        .select(`
+          *,
+          order_service (
+            *,
+            job_assignments (
+              *,
+              bubblers (
+                id,
+                name,
+                email,
+                role
+              )
+            )
+          )
+        `)
         .order('created_at', { ascending: false });
+
       if (error) throw error;
-      setOrders(Array.isArray(data) ? data : []);
+      setOrders(ordersData);
+      
+      // Fetch payment status for all orders using role-appropriate view
+      const paymentStatusesData = {};
+      for (const order of ordersData) {
+        try {
+          const paymentData = await getJobPaymentStatus(order.id, userRole);
+          paymentStatusesData[order.id] = paymentData;
+        } catch (error) {
+          console.error(`Error fetching payment status for order ${order.id}:`, error);
+          paymentStatusesData[order.id] = [];
+        }
+      }
+      setPaymentStatuses(paymentStatusesData);
       } catch (error) {
       console.error('Error loading orders:', error);
       toast.error('Failed to load orders');
@@ -454,6 +895,55 @@ const Jobs = () => {
       jobs = jobs.filter(job => job.messageCount > 0);
     } else if (advancedFilters.hasMessages === 'no') {
       jobs = jobs.filter(job => job.messageCount === 0);
+    }
+
+    // Payment status filtering
+    if (advancedFilters.paymentStatus !== 'all') {
+      jobs = jobs.filter(job => {
+        const orderId = orders.find(order => 
+          order.order_service?.some(service => 
+            service.job_assignments?.some(ja => ja.id === job.id)
+          )
+        )?.id;
+        const isPaid = orderId ? isPaymentConfirmed(orderId) : false;
+        return advancedFilters.paymentStatus === 'paid' ? isPaid : !isPaid;
+      });
+    }
+
+    // Processing time filtering (for laundry services)
+    if (advancedFilters.processingTime !== 'all') {
+      jobs = jobs.filter(job => {
+        const service = orders.flatMap(order => 
+          order.order_service?.filter(s => 
+            s.job_assignments?.some(ja => ja.id === job.id)
+          ) || []
+        ).find(s => s);
+        
+        if (service?.service_type !== 'Laundry Service') return true;
+        
+        const serviceTier = service.tier || 'Standard Service';
+        const tierConfig = LAUNDRY_SERVICE_TIERS[serviceTier];
+        
+        if (!tierConfig) return true;
+        
+        // Skip non-visible tiers for non-admin users
+        if (!tierConfig.visible && !isAdmin) return false;
+        
+        const processingHours = tierConfig.processingHours;
+        
+        switch (advancedFilters.processingTime) {
+          case 'rush':
+            return processingHours <= 4 && (tierConfig.visible || isAdmin);
+          case 'same_day':
+            return processingHours <= 8 && processingHours > 4 && (tierConfig.visible || isAdmin);
+          case 'express':
+            return processingHours <= 24 && processingHours > 8;
+          case 'standard':
+            return processingHours > 24;
+          default:
+            return true;
+        }
+      });
     }
 
     // Date range filtering
@@ -777,6 +1267,67 @@ const Jobs = () => {
               Bags: {service.order_laundry_bags.map(bag => `${bag.bag_type} x${bag.quantity}`).join(', ')}
               </div>
             )}
+          
+          {/* Expected Job Duration - for Mobile Car Wash and Home Cleaning */}
+          {(service.service_type === 'Mobile Car Wash' || service.service_type === 'Home Cleaning') && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
+              <h4 className="text-sm font-semibold text-blue-800 mb-2 flex items-center">
+                ⏱️ Expected Duration
+              </h4>
+              {(() => {
+                const durationInfo = getExpectedJobDuration(service);
+                if (!durationInfo || durationInfo.totalDuration === 0) {
+                  return (
+                    <div className="text-xs text-gray-600">
+                      Duration calculation not available
+                    </div>
+                  );
+                }
+                
+                const formattedDuration = formatDuration(durationInfo.totalDuration);
+                let breakdown = [];
+                
+                if (service.service_type === 'Mobile Car Wash') {
+                  breakdown.push(`Base (${service.tier}): ${formatDuration(durationInfo.baseDuration)}`);
+                  if (durationInfo.addonTime > 0) {
+                    breakdown.push(`Add-ons: ${formatDuration(durationInfo.addonTime)}`);
+                  }
+                  if (durationInfo.vehicleCount > 1) {
+                    breakdown.push(`${durationInfo.vehicleCount} vehicles: ${formatDuration(durationInfo.timePerVehicle)} each`);
+                  }
+                  
+                  // Show vehicle breakdown if available
+                  if (durationInfo.vehicleBreakdown && durationInfo.vehicleBreakdown.length > 0) {
+                    const vehicleDetails = durationInfo.vehicleBreakdown.map(v => 
+                      `${v.vehicleType} (${v.multiplier}×): ${formatDuration(v.duration)}`
+                    );
+                    breakdown.push(`Vehicles: ${vehicleDetails.join(', ')}`);
+                  }
+                } else if (service.service_type === 'Home Cleaning') {
+                  breakdown.push(`Base (${service.tier}): ${formatDuration(durationInfo.baseDuration)}`);
+                  if (durationInfo.roomTime > 0) {
+                    breakdown.push(`Additional rooms: ${formatDuration(durationInfo.roomTime)}`);
+                  }
+                  if (durationInfo.addonTime > 0) {
+                    breakdown.push(`Add-ons: ${formatDuration(durationInfo.addonTime)}`);
+                  }
+                }
+                
+                return (
+                  <div className="space-y-1">
+                    <div className="text-sm font-medium text-blue-900">
+                      Total: {formattedDuration}
+                    </div>
+                    {breakdown.length > 0 && (
+                      <div className="text-xs text-blue-700">
+                        {breakdown.join(' • ')}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+              </div>
+            )}
             
           {/* QR Code Monitoring Section - Admin Only for Laundry Jobs */}
           {isAdmin && service.service_type === 'Laundry' && assignment && (
@@ -916,6 +1467,69 @@ const Jobs = () => {
               Vehicles: {service.order_vehicles.map(v => `${v.vehicle_type} (${v.tier})`).join(', ')}
         </div>
             )}
+          
+          {/* Photo Requirements Section */}
+          {assignment && arePhotosRequired(service, assignment) && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
+              <h4 className="text-sm font-semibold text-blue-800 mb-2 flex items-center">
+                📸 Photo Requirements
+              </h4>
+              {(() => {
+                const { requirements, notes } = getPhotoRequirementsForJob(service, assignment);
+                const uploadedPhotos = assignment.photos || [];
+                const missingPhotos = requirements.filter(req => 
+                  !uploadedPhotos.some(photo => photo.type === req)
+                );
+                const completedPhotos = requirements.filter(req => 
+                  uploadedPhotos.some(photo => photo.type === req)
+                );
+                
+                return (
+                  <div className="space-y-2">
+                    {/* Required Photos */}
+                    <div className="text-xs">
+                      <span className="font-medium text-blue-700">Required:</span>
+                      <div className="mt-1 space-y-1">
+                        {requirements.map(req => {
+                          const isCompleted = completedPhotos.includes(req);
+                          return (
+                            <div key={req} className="flex items-center gap-2">
+                              <span className={`w-2 h-2 rounded-full ${isCompleted ? 'bg-green-500' : 'bg-red-500'}`}></span>
+                              <span className={isCompleted ? 'text-green-700 line-through' : 'text-red-700'}>
+                                {req}
+                              </span>
+                              {isCompleted && <span className="text-green-600 text-xs">✓</span>}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    
+                    {/* Perk Delivery Photo Note */}
+                    {notes.length > 0 && (
+                      <div className="bg-yellow-50 border border-yellow-200 rounded p-2">
+                        <p className="text-xs text-yellow-800">
+                          {notes[0]}
+                        </p>
+                      </div>
+                    )}
+                    
+                    {/* Completion Status */}
+                    {missingPhotos.length > 0 ? (
+                      <div className="text-xs text-red-600 font-medium">
+                        ⚠️ Cannot complete job: {missingPhotos.length} photo(s) still required
+                      </div>
+                    ) : (
+                      <div className="text-xs text-green-600 font-medium">
+                        ✅ All required photos uploaded - job can be completed
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
+          )}
+          
           {/* Action buttons */}
           <div className="flex gap-2 mt-2 flex-wrap">
             {/* Messages button - only show if job is assigned */}
@@ -1057,7 +1671,7 @@ const Jobs = () => {
               </p>
             </div>
           )}
-        </div>
+      </div>
         <div className="mb-4">
           <div className="font-semibold mb-2">Eligible Bubblers:</div>
           {eligibleBubblers.length === 0 && <div className="text-red-500">No eligible bubblers within travel range.</div>}
@@ -1242,13 +1856,25 @@ const Jobs = () => {
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="all">All Statuses</option>
+            <option value="pending">Pending</option>
             <option value="assigned">Assigned</option>
+            <option value="denied">Denied</option>
+            <option value="reassign">Reassign</option>
             <option value="accepted">Accepted</option>
             <option value="en_route">En Route</option>
-            <option value="in-progress">In Progress</option>
+            <option value="arrived">Arrived</option>
+            <option value="in_progress">In Progress</option>
             <option value="completed">Completed</option>
-            <option value="expired">Expired</option>
-            <option value="declined">Declined</option>
+            <option value="cancelled">Cancelled</option>
+            <option value="en_route_to_pickup">En Route to Pickup</option>
+            <option value="arrived_at_pickup">Arrived at Pickup</option>
+            <option value="picked_up">Picked Up</option>
+            <option value="in_wash">In Wash</option>
+            <option value="in_dry">In Dry</option>
+            <option value="folding_ironing">Folding/Ironing</option>
+            <option value="en_route_to_deliver">En Route to Deliver</option>
+            <option value="arrived_at_delivery">Arrived at Delivery</option>
+            <option value="delivered">Delivered</option>
             </select>
         </div>
 
@@ -1330,6 +1956,40 @@ const Jobs = () => {
                   <option value="all">All Jobs</option>
                   <option value="yes">With Messages</option>
                   <option value="no">Without Messages</option>
+                </select>
+              </div>
+
+              {/* Payment Status Filter */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Payment Status</label>
+                <select
+                  value={advancedFilters.paymentStatus}
+                  onChange={(e) => setAdvancedFilters(prev => ({ ...prev, paymentStatus: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
+                >
+                  <option value="all">All Payment Statuses</option>
+                  <option value="paid">Paid</option>
+                  <option value="pending">Pending Payment</option>
+                </select>
+              </div>
+
+              {/* Processing Time Filter */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Processing Time</label>
+                <select
+                  value={advancedFilters.processingTime}
+                  onChange={(e) => setAdvancedFilters(prev => ({ ...prev, processingTime: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
+                >
+                  <option value="all">All Processing Times</option>
+                  {isAdmin && (
+                    <>
+                      <option value="rush">Rush (≤4h) - Admin Only</option>
+                      <option value="same_day">Same Day (≤8h) - Admin Only</option>
+                    </>
+                  )}
+                  <option value="express">Express (≤24h)</option>
+                  <option value="standard">Standard (&gt;24h)</option>
                 </select>
               </div>
             </div>
@@ -1480,6 +2140,24 @@ const Jobs = () => {
                         )}
                       </div>
                     </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <div className="flex items-center gap-1">
+                        <FiCheckCircle className="h-4 w-4" />
+                        Payment
+                      </div>
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <div className="flex items-center gap-1">
+                        <FiClock className="h-4 w-4" />
+                        Processing Time
+                      </div>
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <div className="flex items-center gap-1">
+                        <FiClock className="h-4 w-4" />
+                        Expected Duration
+                      </div>
+                    </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => setSortBy('created_at')}>
                       <div className="flex items-center gap-1">
                         <FiCalendar className="h-4 w-4" />
@@ -1488,6 +2166,9 @@ const Jobs = () => {
                           <span className="text-blue-600">{sortOrder === 'asc' ? '↑' : '↓'}</span>
                         )}
                       </div>
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status Actions
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Actions
@@ -1525,12 +2206,46 @@ const Jobs = () => {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                           job.status === 'completed' ? 'bg-green-100 text-green-800' :
-                          job.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
+                          job.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
                           job.status === 'assigned' ? 'bg-yellow-100 text-yellow-800' :
-                          job.status === 'expired' ? 'bg-red-100 text-red-800' :
+                          job.status === 'accepted' ? 'bg-green-100 text-green-800' :
+                          job.status === 'en_route' || job.status === 'en_route_to_pickup' || job.status === 'en_route_to_deliver' ? 'bg-blue-100 text-blue-800' :
+                          job.status === 'arrived' || job.status === 'arrived_at_pickup' || job.status === 'arrived_at_delivery' ? 'bg-purple-100 text-purple-800' :
+                          job.status === 'denied' ? 'bg-red-100 text-red-800' :
+                          job.status === 'reassign' ? 'bg-orange-100 text-orange-800' :
+                          job.status === 'picked_up' || job.status === 'delivered' ? 'bg-indigo-100 text-indigo-800' :
+                          job.status === 'in_wash' || job.status === 'in_dry' || job.status === 'folding_ironing' ? 'bg-cyan-100 text-cyan-800' :
+                          job.status === 'cancelled' ? 'bg-red-100 text-red-800' :
                           'bg-gray-100 text-gray-800'
                         }`}>
-                          {job.status.replace('_', ' ')}
+                          {job.serviceType === 'Laundry Service' ? 
+                            (() => {
+                              const service = orders.flatMap(order => 
+                                order.order_service?.filter(s => 
+                                  s.job_assignments?.some(ja => ja.id === job.id)
+                                ) || []
+                              ).find(s => s);
+                              const urgency = getLaundryUrgencyLevel(job, service);
+                              const statusText = getLaundryStatusDescription(job, service);
+                              
+                              if (urgency && (urgency.level === 'critical' || urgency.level === 'overdue')) {
+                                return (
+                                  <span className={`${urgency.bgColor} ${urgency.color} px-2 py-1 rounded-full font-bold`}>
+                                    ⚠️ {statusText}
+                                  </span>
+                                );
+                              } else if (urgency && urgency.level === 'warning') {
+                                return (
+                                  <span className={`${urgency.bgColor} ${urgency.color} px-2 py-1 rounded-full`}>
+                                    ⏰ {statusText}
+                                  </span>
+                                );
+                              } else {
+                                return statusText;
+                              }
+                            })() : 
+                            job.status.replace(/_/g, ' ')
+                          }
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -1539,8 +2254,78 @@ const Jobs = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         ${Number(job.earningsEstimate || 0).toFixed(2)}
                       </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {(() => {
+                          const orderId = orders.find(order => 
+                            order.order_service?.some(service => 
+                              service.job_assignments?.some(ja => ja.id === job.id)
+                            )
+                          )?.id;
+                          const isPaid = orderId ? isPaymentConfirmed(orderId) : false;
+                          return (
+                            <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full ${
+                              isPaid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                            }`}>
+                              {isPaid ? (
+                                <>
+                                  <FiCheckCircle className="h-3 w-3" />
+                                  Paid
+                                </>
+                              ) : (
+                                <>
+                                  <FiAlertCircle className="h-3 w-3" />
+                                  Pending
+                                </>
+                              )}
+                            </span>
+                          );
+                        })()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                        {(() => {
+                          const service = orders.flatMap(order => 
+                            order.order_service?.filter(s => 
+                              s.job_assignments?.some(ja => ja.id === job.id)
+                            ) || []
+                          ).find(s => s);
+                          const processingTime = getLaundryProcessingTimeDisplay(service);
+                          return processingTime || '-';
+                        })()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                        {(() => {
+                          const service = orders.flatMap(order => 
+                            order.order_service?.filter(s => 
+                              s.job_assignments?.some(ja => ja.id === job.id)
+                            ) || []
+                          ).find(s => s);
+                          
+                          // Only show expected duration for Mobile Car Wash and Home Cleaning
+                          if (service && (service.service_type === 'Mobile Car Wash' || service.service_type === 'Home Cleaning')) {
+                            const durationInfo = getExpectedJobDuration(service);
+                            if (durationInfo && durationInfo.totalDuration > 0) {
+                              return (
+                                <span className="font-medium text-blue-700">
+                                  {formatDuration(durationInfo.totalDuration)}
+                                </span>
+                              );
+                            }
+                          }
+                          return '-';
+                        })()}
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {new Date(job.created_at).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        {(() => {
+                          const service = orders.flatMap(order => 
+                            order.order_service?.filter(s => 
+                              s.job_assignments?.some(ja => ja.id === job.id)
+                            ) || []
+                          ).find(s => s);
+                          return service ? renderStatusActions(job, service) : <span className="text-gray-500 text-sm">No service found</span>;
+                        })()}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex items-center gap-2">

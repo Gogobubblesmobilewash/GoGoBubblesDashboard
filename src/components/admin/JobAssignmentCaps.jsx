@@ -43,26 +43,26 @@ const JobAssignmentCaps = () => {
   // Service type definitions with realistic caps
   const serviceTypes = {
     shine: {
-      name: 'Shine Bubbler (Mobile Car Wash)',
+              name: 'ShineBubbler (Mobile Car Wash)',
       icon: Truck,
       color: 'blue',
       tiers: {
         express_shine: {
-          name: 'Express Shine',
+          name: 'ExpressShine',
           timeRange: '30-45 mins',
           maxPerDay: 8,
           recommended: 6,
           description: 'Quick exterior wash and basic interior cleaning'
         },
         signature_shine: {
-          name: 'Signature Shine',
+          name: 'SignatureShine',
           timeRange: '60 mins',
           maxPerDay: 6,
           recommended: 4,
           description: 'Comprehensive exterior and interior cleaning'
         },
         supreme_shine: {
-          name: 'Supreme Shine',
+          name: 'SupremeShine',
           timeRange: '90 mins',
           maxPerDay: 4,
           recommended: 3,
@@ -73,7 +73,7 @@ const JobAssignmentCaps = () => {
       maxCap: 8
     },
     sparkle: {
-      name: 'Sparkle Bubbler (Home Cleaning)',
+              name: 'SparkleBubbler (Home Cleaning)',
       icon: Home,
       color: 'green',
       tiers: {
@@ -85,7 +85,7 @@ const JobAssignmentCaps = () => {
           description: 'Basic cleaning and tidying'
         },
         signature_deep_clean: {
-          name: 'Signature Deep Clean',
+          name: 'SignatureDeepClean',
           timeRange: '3-4.5+ hours',
           maxPerDay: 2,
           recommended: 1,
@@ -96,7 +96,7 @@ const JobAssignmentCaps = () => {
       maxCap: 3
     },
     fresh: {
-      name: 'Fresh Bubbler (Laundry)',
+              name: 'FreshBubbler (Laundry)',
       icon: Package,
       color: 'purple',
       tiers: {
@@ -518,9 +518,9 @@ const JobAssignmentCaps = () => {
                   className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="all">All Services</option>
-                  <option value="shine">Shine Bubbler</option>
-                  <option value="sparkle">Sparkle Bubbler</option>
-                  <option value="fresh">Fresh Bubbler</option>
+                                  <option value="shine">ShineBubbler</option>
+                <option value="sparkle">SparkleBubbler</option>
+                <option value="fresh">FreshBubbler</option>
                 </select>
                 <select
                   value={filterStatus}
@@ -714,15 +714,15 @@ const JobAssignmentCaps = () => {
                 </div>
 
                 <div className="border border-gray-200 rounded-lg p-4">
-                  <h4 className="font-medium text-gray-900 mb-3">Elite Bubbler Settings</h4>
+                  <h4 className="font-medium text-gray-900 mb-3">EliteBubbler Settings</h4>
                   <div className="space-y-3">
                     <label className="flex items-center">
                       <input type="checkbox" className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" defaultChecked />
-                      <span className="ml-2 text-sm text-gray-700">Allow elite bubblers to exceed caps by 1-2 jobs</span>
+                      <span className="ml-2 text-sm text-gray-700">Allow eliteBubblers to exceed caps by 1-2 jobs</span>
                     </label>
                     <label className="flex items-center">
                       <input type="checkbox" className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" defaultChecked />
-                      <span className="ml-2 text-sm text-gray-700">Prioritize elite bubblers for split orders</span>
+                      <span className="ml-2 text-sm text-gray-700">Prioritize eliteBubblers for split orders</span>
                     </label>
                   </div>
                 </div>

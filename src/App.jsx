@@ -35,6 +35,18 @@ import FinanceDashboard from './components/dashboard/FinanceDashboard';
 import RecruiterDashboard from './components/dashboard/RecruiterDashboard';
 import MarketManagerDashboard from './components/dashboard/MarketManagerDashboard';
 import LeadBubblerDashboard from './components/dashboard/LeadBubblerDashboard';
+import LeadBubblerOversight from './components/admin/LeadBubblerOversight';
+import LeadBubblerPerformance from './components/admin/LeadBubblerPerformance';
+import LeadBubblerRetention from './components/admin/LeadBubblerRetention';
+import LeadBubblerShifts from './components/admin/LeadBubblerShifts';
+import TakeoverVerification from './components/admin/TakeoverVerification';
+import ManualLinkGenerator from './components/admin/ManualLinkGenerator';
+
+// Import main site components
+import HomePage from './components/main/HomePage';
+import BookingPage from './components/main/BookingPage';
+import FeedbackPage from './components/main/FeedbackPage';
+import JobsPage from './components/main/JobsPage';
 
 import { useAuth } from './store/AuthContext';
 import { SpeedInsights } from "@vercel/speed-insights/react";
@@ -93,24 +105,30 @@ function App() {
     <Router>
       <SpeedInsights />
       <Routes>
+        {/* Public routes */}
+        <Route path="/" element={<HomePage />} />
+        <Route path="/booking" element={<BookingPage />} />
+        <Route path="/feedback" element={<FeedbackPage />} />
+        <Route path="/jobs" element={<JobsPage />} />
+        
+        {/* Auth routes */}
         <Route path="/login" element={<Login />} />
         <Route 
           path="/onboarding/:bubblerId" 
           element={<Onboarding />}
         />
 
-        {/* All authenticated routes share the same layout */}
+        {/* Protected dashboard routes */}
         <Route 
-          path="*" 
+          path="/dashboard" 
           element={
             <ProtectedRoute>
               <Layout />
             </ProtectedRoute>
           }
         >
-          {/* Routes inside the layout */}
-          <Route index element={<Navigate to="/dashboard" replace />} />
-          <Route path="dashboard" element={<Dashboard />} />
+          {/* Dashboard index */}
+          <Route index element={<Dashboard />} />
           
           {/* Bubbler-specific routes */}
           <Route 
@@ -320,6 +338,54 @@ function App() {
             element={
               <ProtectedRoute requireAdmin>
                 <UserManagement />
+              </ProtectedRoute>
+            }
+          />
+          <Route 
+            path="lead-bubbler-oversight"
+            element={
+              <ProtectedRoute requireAdmin>
+                <LeadBubblerOversight />
+              </ProtectedRoute>
+            }
+          />
+          <Route 
+            path="lead-bubbler-performance"
+            element={
+              <ProtectedRoute requireAdmin>
+                <LeadBubblerPerformance />
+              </ProtectedRoute>
+            }
+          />
+          <Route 
+            path="lead-bubbler-retention"
+            element={
+              <ProtectedRoute requireAdmin>
+                <LeadBubblerRetention />
+              </ProtectedRoute>
+            }
+          />
+          <Route 
+            path="lead-bubbler-shifts"
+            element={
+              <ProtectedRoute requireAdmin>
+                <LeadBubblerShifts />
+              </ProtectedRoute>
+            }
+          />
+          <Route 
+            path="takeover-verification"
+            element={
+              <ProtectedRoute requireAdmin>
+                <TakeoverVerification />
+              </ProtectedRoute>
+            }
+          />
+          <Route 
+            path="manual-link-generator"
+            element={
+              <ProtectedRoute requireAdmin>
+                <ManualLinkGenerator />
               </ProtectedRoute>
             }
           />
