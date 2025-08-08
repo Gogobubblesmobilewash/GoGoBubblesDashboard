@@ -51,10 +51,30 @@ import { SpeedInsights } from "@vercel/speed-insights/react";
 const ProtectedRoute = ({ children, requireAdmin = false, requireBubbler = false, requireSupport = false, requireMarketManager = false, requireLeadBubbler = false }) => {
   const { user, loading, isAuthenticated, isAdmin, isBubbler, isSupport, isMarketManager, isLeadBubbler } = useAuth();
 
+  // Debug logging
+  console.log('ProtectedRoute render:', {
+    user: user?.email,
+    loading,
+    isAuthenticated,
+    isAdmin,
+    isBubbler,
+    isSupport,
+    isMarketManager,
+    isLeadBubbler,
+    requireAdmin,
+    requireBubbler,
+    requireSupport,
+    requireMarketManager,
+    requireLeadBubbler
+  });
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-aqua" />
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-aqua mx-auto mb-4" />
+          <p className="text-gray-600">Loading dashboard...</p>
+        </div>
       </div>
     );
   }
@@ -84,7 +104,22 @@ const ProtectedRoute = ({ children, requireAdmin = false, requireBubbler = false
     return <Navigate to="/dashboard" replace />;
   }
 
-  return children;
+  // Debug: Add a simple wrapper to catch any rendering issues
+  try {
+    return children;
+  } catch (error) {
+    console.error('ProtectedRoute: Error rendering children:', error);
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Dashboard Error</h1>
+          <p className="text-gray-600 mb-4">There was an error loading the dashboard.</p>
+          <p className="text-sm text-gray-500">User: {user?.email || 'Unknown'}</p>
+          <p className="text-sm text-gray-500">Role: {isAdmin ? 'Admin' : isSupport ? 'Support' : 'Bubbler'}</p>
+        </div>
+      </div>
+    );
+  }
 };
 
 ProtectedRoute.propTypes = {
@@ -97,6 +132,9 @@ ProtectedRoute.propTypes = {
 };
 
 function App() {
+  // Debug logging
+  console.log('App component rendering');
+  
   return (
     <Router>
       <SpeedInsights />
