@@ -159,14 +159,27 @@ function App() {
             <p>Time: {new Date().toLocaleString()}</p>
           </div>
         } />
+        
+        {/* Minimal test route that bypasses all auth logic */}
+        <Route path="/dashboard/minimal" element={
+          <div style={{ padding: 24, backgroundColor: '#e8f5e8', minHeight: '100vh' }}>
+            <h1>Minimal Test Route</h1>
+            <p>This bypasses all auth and store logic</p>
+            <p>Time: {new Date().toLocaleString()}</p>
+            <p>If you see this, the issue is in AuthContext or useStore</p>
+          </div>
+        } />
 
         {/* Protected dashboard routes */}
         <Route 
           path="/dashboard" 
           element={
-            <ProtectedRoute>
-              <Layout />
-            </ProtectedRoute>
+            <div style={{ padding: 24, backgroundColor: '#fff3cd', minHeight: '100vh' }}>
+              <h1>Dashboard Route Test</h1>
+              <p>This bypasses ProtectedRoute and Layout</p>
+              <p>Time: {new Date().toLocaleString()}</p>
+              <p>If you see this, the issue is in ProtectedRoute or Layout</p>
+            </div>
           }
         >
           {/* Dashboard index */}
