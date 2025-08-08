@@ -733,7 +733,7 @@ const Jobs = () => {
       // Get user role for payment view selection
       const userRole = user?.role || (isAdmin ? 'admin' : isSupport ? 'support' : 'bubbler');
       
-      const { data: ordersData, error } = await supabase
+      let query = supabase
         .from('orders')
         .select(`
           *,
@@ -752,8 +752,15 @@ const Jobs = () => {
         `)
         .order('created_at', { ascending: false });
 
+      // For regular bubblers, only fetch their assigned jobs
+      if (!isAdmin && !isSupport && !isMarketManager && !isLeadBubbler) {
+        query = query.eq('order_service.job_assignments.bubbler_id', user?.id);
+      }
+
+      const { data: ordersData, error } = await query;
+
       if (error) throw error;
-      setOrders(ordersData);
+      setOrders(ordersData || []);
       
       // Fetch payment status for all orders using role-appropriate view
       const paymentStatusesData = {};

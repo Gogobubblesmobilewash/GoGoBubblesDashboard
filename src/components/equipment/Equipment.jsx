@@ -48,7 +48,14 @@ const Equipment = () => {
   const loadEquipment = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.from('equipment').select();
+      let query = supabase.from('equipment').select();
+      
+      // For regular bubblers, only show equipment assigned to them
+      if (!isAdmin) {
+        query = query.eq('assigned_to', user?.email);
+      }
+      
+      const { data, error } = await query;
       if (error) throw error;
       
       // Ensure data is an array, default to empty array if null/undefined

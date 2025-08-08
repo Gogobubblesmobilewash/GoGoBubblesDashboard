@@ -190,21 +190,21 @@ const Dashboard = () => {
             description="View and manage customer orders"
             icon={FiFileText}
             color="brand-aqua"
-            onClick={() => navigate('/orders')}
+            onClick={() => navigate('orders')}
           />
           <QuickActionCard 
             title="Review Applications"
             description="Review new bubbler applications"
             icon={FiUsers}
             color="brand-blue"
-            onClick={() => navigate('/applicants')}
+            onClick={() => navigate('applicants')}
           />
           <QuickActionCard 
             title="View Analytics"
             description="Access detailed business analytics"
             icon={FiBarChart2}
             color="brand-yellow"
-            onClick={() => navigate('/analytics')}
+            onClick={() => navigate('analytics')}
           />
         </div>
 
@@ -406,21 +406,21 @@ const Dashboard = () => {
             description="Check your assigned jobs for today"
             icon={FiCalendar}
             color="brand-aqua"
-            onClick={() => navigate('/jobs')}
+            onClick={() => navigate('jobs')}
           />
           <QuickActionCard 
             title="Equipment Status"
             description="Check your equipment availability"
             icon={FiBriefcase}
             color="brand-blue"
-            onClick={() => navigate('/equipment')}
+            onClick={() => navigate('equipment')}
           />
           <QuickActionCard 
             title="View Earnings"
             description="Check your earnings and payouts"
             icon={FiDollarSign}
             color="brand-yellow"
-            onClick={() => navigate('/earnings')}
+            onClick={() => navigate('earnings')}
           />
         </div>
 

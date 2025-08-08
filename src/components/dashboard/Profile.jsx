@@ -59,14 +59,14 @@ const Profile = () => {
   };
 
   const fetchBubblerProfile = async () => {
-    if (!user?.id) return;
+    if (!user?.email) return;
 
     try {
       setLoading(true);
       const { data, error } = await supabase
         .from('bubblers')
         .select('*')
-        .eq('id', user.id)
+        .eq('email', user.email)
         .single();
 
       if (error) throw error;
