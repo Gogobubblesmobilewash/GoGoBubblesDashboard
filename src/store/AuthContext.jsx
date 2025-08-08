@@ -22,8 +22,8 @@ export const AuthProvider = ({ children }) => {
   }, [loading]);
 
   // Function to fetch user role from database
-  const fetchUserRole = async (userEmail) => {
-    if (!userEmail) {
+  const fetchUserRole = async (userEmail, userId) => {
+    if (!userEmail || !userId) {
       setUserRole(null);
       return;
     }
@@ -158,13 +158,13 @@ export const AuthProvider = ({ children }) => {
         return;
       }
 
-      // Check bubblers table for role
+      // Check bubblers table for role using user_id from auth
       console.log('AuthContext: Checking bubblers table for role...');
       try {
         const { data, error } = await supabase
           .from('bubblers')
-          .select('email, id, role, permissions, services, is_active, restrictions')
-          .eq('email', userEmail)
+          .select('email, id, role, permissions, services, is_active, restrictions, user_id')
+          .eq('user_id', userId)
           .single();
 
         if (error) {
@@ -231,7 +231,7 @@ export const AuthProvider = ({ children }) => {
         
         // Fetch user role if user exists
         if (session?.user) {
-          await fetchUserRole(session.user.email);
+          await fetchUserRole(session.user.email, session.user.id);
         } else {
           setUserRole(null);
         }
@@ -255,7 +255,7 @@ export const AuthProvider = ({ children }) => {
         
         // Fetch user role if user exists
         if (session?.user) {
-          await fetchUserRole(session.user.email);
+          await fetchUserRole(session.user.email, session.user.id);
         } else {
           setUserRole(null);
         }

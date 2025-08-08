@@ -54,9 +54,26 @@ const Equipment = () => {
       
       // For regular bubblers, only show equipment assigned to them and exclude damaged/maintenance
       if (!isAdmin) {
-        query = query
-          .eq('assigned_to', user?.email)
-          .not('status', 'in', '(damaged,maintenance)');
+        // First get the bubbler's ID from the bubblers table
+        const { data: bubblerData, error: bubblerError } = await supabase
+          .from('bubblers')
+          .select('id')
+          .eq('user_id', user?.id)
+          .single();
+        
+        if (bubblerError) {
+          console.error('Equipment: Error fetching bubbler ID:', bubblerError);
+          throw bubblerError;
+        }
+        
+        if (bubblerData) {
+          query = query
+            .eq('assigned_to_bubbler_id', bubblerData.id)
+            .not('status', 'in', '(damaged,maintenance)');
+        } else {
+          // If no bubbler record found, show no equipment
+          query = query.eq('assigned_to_bubbler_id', null);
+        }
       }
       
       const { data, error } = await query;
@@ -88,7 +105,7 @@ const Equipment = () => {
       filtered = filtered.filter(item =>
         (item.item && item.item.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (item.serialNumber && item.serialNumber.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (item.assigned_to && item.assigned_to.toLowerCase().includes(searchTerm.toLowerCase()))
+        (item.assigned_to_bubbler_id && item.assigned_to_bubbler_id.toString().includes(searchTerm.toLowerCase()))
       );
     }
 
