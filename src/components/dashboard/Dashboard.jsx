@@ -71,6 +71,8 @@ const Dashboard = () => {
 
   // Debug logging
   console.log('Dashboard render - user:', user, 'isAdmin:', isAdmin, 'isBubbler:', isBubbler, 'isSupport:', isSupport);
+  console.log('Dashboard render - userRole:', userRole);
+  console.log('Dashboard render - loading:', loading, 'error:', error);
 
   // Role-based dashboard rendering using switch statement
   const renderDashboard = () => {
@@ -83,6 +85,8 @@ const Dashboard = () => {
     else if (isFinance) role = 'finance_bubbler';
     else if (isRecruiter) role = 'recruiter_bubbler';
     else if (isMarketManager) role = 'market_manager_bubbler';
+    
+    console.log('Dashboard render - determined role:', role);
 
     switch (role) {
       case 'admin_bubbler': 
@@ -98,6 +102,7 @@ const Dashboard = () => {
       case 'market_manager_bubbler': 
         return <MarketManagerDashboard />;
       default:
+        console.log('Dashboard render - falling back to bubbler view');
         return renderBubblerView();
     }
   };
@@ -113,19 +118,22 @@ const Dashboard = () => {
 
   // Error state
   if (error) {
-  return (
+    return (
       <div className="text-center py-8">
         <p className="text-red-600 mb-4 font-inter">Error loading dashboard data: {error}</p>
-            <button
+        <button
           onClick={() => fetchDashboardData()} 
           className="btn-primary"
         >
           Retry
-                </button>
-              </div>
+        </button>
+      </div>
     );
   }
 
+  // Debug: Show user info even if dashboard data fails
+  console.log('Dashboard render - about to render dashboard, user:', user?.email);
+  
   return renderDashboard();
 
   // Admin Dashboard View
