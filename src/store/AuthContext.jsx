@@ -347,19 +347,7 @@ export const AuthProvider = ({ children }) => {
     isUserActive: userRole?.isActive !== false,
   }), [user, userRole, loading]);
 
-  console.log('AuthContext: Current state:', { 
-    user: user?.email, 
-    userRole: userRole?.type, 
-    loading, 
-    isAuthenticated: !!user, 
-    isAdmin: userRole?.type === 'ADMIN',
-    isSupport: userRole?.type === 'SUPPORT',
-    isLeadBubbler: userRole?.type === 'LEAD_BUBBLER',
-    isFinance: userRole?.type === 'FINANCE',
-    isRecruiter: userRole?.type === 'RECRUITER',
-    isMarketManager: userRole?.type === 'MARKET_MANAGER',
-    isBubbler: userRole?.type && userRole.type !== 'ADMIN' && userRole.type !== 'SUPPORT' && userRole.type !== 'FINANCE' && userRole.type !== 'RECRUITER' && userRole.type !== 'MARKET_MANAGER' && userRole.type !== 'LEAD_BUBBLER' && ['SHINE', 'SPARKLE', 'FRESH', 'ELITE'].includes(userRole.type)
-  });
+
 
   return (
     <AuthContext.Provider value={value}>

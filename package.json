@@ -15,6 +15,7 @@
     "autoprefixer": "^10.4.21",
     "axios": "^1.10.0",
     "dayjs": "^1.11.13",
+    "dotenv": "^16.4.5",
     "html5-qrcode": "^2.3.8",
     "js-sha256": "^0.11.1",
     "postcss": "^8.5.6",
@@ -26,7 +27,6 @@
     "react-icons": "^5.5.0",
     "react-router-dom": "^7.6.2",
     "stripe": "^14.21.0",
-    "dotenv": "^16.4.5",
     "tailwindcss": "^3.4.17",
     "zustand": "^5.0.6"
   },
@@ -41,6 +41,7 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.2.0",
+    "madge": "^8.0.0",
     "vite": "^7.0.0"
   }
 }
