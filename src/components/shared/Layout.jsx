@@ -29,7 +29,10 @@ import {
   FiDownload as Download,
   FiUserPlus as UserPlus,
   FiAlertCircle as AlertCircle,
-  FiEye as Eye
+  FiEye as Eye,
+  FiCheckCircle as CheckCircle,
+  FiBarChart2 as BarChart2,
+  FiShield as Shield
 } from 'react-icons/fi';
 import MessageNotifications from '../messages/MessageNotifications';
 import NotificationCenter from '../activity/NotificationCenter';
@@ -43,6 +46,8 @@ const Layout = () => {
 
   // Debug logging
   console.log('Layout render - user:', user, 'isAdmin:', isAdmin, 'activeTab:', activeTab);
+  console.log('Layout render - navItems:', navItems);
+  console.log('Layout render - location.pathname:', location.pathname);
 
   const bubblerNavItems = [
     { name: 'Dashboard', icon: Home, path: '/dashboard' },
@@ -266,6 +271,11 @@ const Layout = () => {
 
         {/* Page content */}
         <main className="flex-1 overflow-auto p-6">
+          <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-sm text-blue-800">
+              Debug: Layout is rendering. User: {user?.email || 'No user'}, Role: {isAdmin ? 'Admin' : isSupport ? 'Support' : 'Bubbler'}
+            </p>
+          </div>
           <Outlet />
         </main>
       </div>
