@@ -25,12 +25,13 @@ import {
   getPropertyTypeSpecificDuration,
   PROPERTY_TYPE_DURATION_ADJUSTMENTS 
 } from '../../constants';
-import SupportDashboard from './SupportDashboard';
-import FinanceDashboard from './FinanceDashboard';
-import RecruiterDashboard from './RecruiterDashboard';
-import MarketManagerDashboard from './MarketManagerDashboard';
-import LeadBubblerDashboard from './LeadBubblerDashboard';
-import AdminCommandCenter from './AdminCommandCenter';
+// Temporarily commenting out imports to isolate the issue
+// import SupportDashboard from './SupportDashboard';
+// import FinanceDashboard from './FinanceDashboard';
+// import RecruiterDashboard from './RecruiterDashboard';
+// import MarketManagerDashboard from './MarketManagerDashboard';
+// import LeadBubblerDashboard from './LeadBubblerDashboard';
+// import AdminCommandCenter from './AdminCommandCenter';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -78,7 +79,7 @@ const Dashboard = () => {
 
   // Debug logging
   console.log('Dashboard render - user:', user, 'isAdmin:', isAdmin, 'isBubbler:', isBubbler, 'isSupport:', isSupport);
-  console.log('Dashboard render - userRole:', userRole);
+
   console.log('Dashboard render - loading:', loading, 'error:', error);
 
   // Role-based dashboard rendering using switch statement
@@ -95,23 +96,9 @@ const Dashboard = () => {
     
     console.log('Dashboard render - determined role:', role);
 
-    switch (role) {
-      case 'admin_bubbler': 
-        return <AdminCommandCenter />;
-      case 'support_bubbler': 
-        return <SupportDashboard />;
-      case 'lead_bubbler': 
-        return <LeadBubblerDashboard />;
-      case 'finance_bubbler': 
-        return <FinanceDashboard />;
-      case 'recruiter_bubbler': 
-        return <RecruiterDashboard />;
-      case 'market_manager_bubbler': 
-        return <MarketManagerDashboard />;
-      default:
-        console.log('Dashboard render - falling back to bubbler view');
-        return renderBubblerView();
-    }
+    // For now, just render the basic bubbler view to isolate the issue
+    console.log('Dashboard render - rendering basic bubbler view');
+    return renderBubblerView();
   };
 
   // Loading state
