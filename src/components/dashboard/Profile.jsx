@@ -37,10 +37,10 @@ const Profile = () => {
       
       console.log('Profile: Fetching data for user:', user.email);
       
-      // Try a simple query first
+      // Try a simple query first - check what columns actually exist
       const { data, error } = await supabase
         .from('bubblers')
-        .select('email, name, role')
+        .select('*')
         .eq('email', user.email)
         .single();
 

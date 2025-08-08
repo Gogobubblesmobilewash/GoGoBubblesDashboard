@@ -270,7 +270,7 @@ const Layout = () => {
 
         {/* Page content */}
         <main className="flex-1 overflow-auto p-6">
-          <Outlet />
+          <Outlet key={location.pathname} />
         </main>
       </div>
     </div>

@@ -50,9 +50,11 @@ const Equipment = () => {
     try {
       let query = supabase.from('equipment').select();
       
-      // For regular bubblers, only show equipment assigned to them
+      // For regular bubblers, only show equipment assigned to them and exclude damaged/maintenance
       if (!isAdmin) {
-        query = query.eq('assigned_to', user?.email);
+        query = query
+          .eq('assigned_to', user?.email)
+          .not('status', 'in', '(damaged,maintenance)');
       }
       
       const { data, error } = await query;

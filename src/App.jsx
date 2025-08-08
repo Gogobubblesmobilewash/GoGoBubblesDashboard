@@ -180,196 +180,35 @@ function App() {
           <Route path="bubblers" element={<Bubblers />} />
           <Route path="admin-notes" element={<AdminNotes />} />
           <Route path="ratings" element={<Ratings />} />
-          <Route 
-            path="analytics"
-            element={
-              <ProtectedRoute requireAdmin>
-                <Analytics />
-              </ProtectedRoute>
-            }
-          />
-          <Route 
-            path="applicants"
-            element={
-              <ProtectedRoute requireAdmin>
-                <Applicants />
-              </ProtectedRoute>
-            }
-          />
-          <Route 
-            path="messages"
-            element={
-              <ProtectedRoute requireAdmin>
-                <Messages />
-              </ProtectedRoute>
-            }
-          />
-          <Route 
-            path="activity"
-            element={
-              <ProtectedRoute requireAdmin>
-                <ActivityFeed />
-              </ProtectedRoute>
-            }
-          />
-          <Route 
-            path="advanced-analytics"
-            element={
-              <ProtectedRoute requireAdmin>
-                <AdvancedAnalytics />
-              </ProtectedRoute>
-            }
-          />
-          <Route 
-            path="performance"
-            element={
-              <ProtectedRoute requireAdmin>
-                <PerformanceMonitor />
-              </ProtectedRoute>
-            }
-          />
-          <Route 
-            path="automated-reporting"
-            element={
-              <ProtectedRoute requireAdmin>
-                <AutomatedReporting />
-              </ProtectedRoute>
-            }
-          />
-          <Route 
-            path="business-intelligence"
-            element={
-              <ProtectedRoute requireAdmin>
-                <BusinessIntelligence />
-              </ProtectedRoute>
-            }
-          />
-          <Route 
-            path="automated-workflows"
-            element={
-              <ProtectedRoute requireAdmin>
-                <AutomatedWorkflows />
-              </ProtectedRoute>
-            }
-          />
-          <Route 
-            path="customer-analytics"
-            element={
-              <ProtectedRoute requireAdmin>
-                <CustomerAnalytics />
-              </ProtectedRoute>
-            }
-          />
-          <Route 
-            path="elite-bubbler-management"
-            element={
-              <ProtectedRoute requireAdmin>
-                <EliteBubblerManagement />
-              </ProtectedRoute>
-            }
-          />
-          <Route 
-            path="bubbler-morale"
-            element={
-              <ProtectedRoute requireAdmin>
-                <BubblerMorale />
-              </ProtectedRoute>
-            }
-          />
-          <Route 
-            path="job-assignment-caps"
-            element={
-              <ProtectedRoute requireAdmin>
-                <JobAssignmentCaps />
-              </ProtectedRoute>
-            }
-          />
-          <Route 
-            path="user-management"
-            element={
-              <ProtectedRoute requireAdmin>
-                <UserManagement />
-              </ProtectedRoute>
-            }
-          />
-          <Route 
-            path="lead-bubbler-oversight"
-            element={
-              <ProtectedRoute requireAdmin>
-                <LeadBubblerOversight />
-              </ProtectedRoute>
-            }
-          />
-          <Route 
-            path="lead-bubbler-performance"
-            element={
-              <ProtectedRoute requireAdmin>
-                <LeadBubblerPerformance />
-              </ProtectedRoute>
-            }
-          />
-          <Route 
-            path="lead-bubbler-retention"
-            element={
-              <ProtectedRoute requireAdmin>
-                <LeadBubblerRetention />
-              </ProtectedRoute>
-            }
-          />
-          <Route 
-            path="lead-bubbler-shifts"
-            element={
-              <ProtectedRoute requireAdmin>
-                <LeadBubblerShifts />
-              </ProtectedRoute>
-            }
-          />
-          <Route 
-            path="takeover-verification"
-            element={
-              <ProtectedRoute requireAdmin>
-                <TakeoverVerification />
-              </ProtectedRoute>
-            }
-          />
-          <Route 
-            path="manual-link-generator"
-            element={
-              <ProtectedRoute requireAdmin>
-                <ManualLinkGenerator />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="analytics" element={<Analytics />} />
+          <Route path="applicants" element={<Applicants />} />
+          <Route path="messages" element={<Messages />} />
+          <Route path="activity" element={<ActivityFeed />} />
+          <Route path="advanced-analytics" element={<AdvancedAnalytics />} />
+          <Route path="performance" element={<PerformanceMonitor />} />
+          <Route path="automated-reporting" element={<AutomatedReporting />} />
+          <Route path="business-intelligence" element={<BusinessIntelligence />} />
+          <Route path="automated-workflows" element={<AutomatedWorkflows />} />
+          <Route path="customer-analytics" element={<CustomerAnalytics />} />
+          <Route path="elite-bubbler-management" element={<EliteBubblerManagement />} />
+          <Route path="bubbler-morale" element={<BubblerMorale />} />
+          <Route path="job-assignment-caps" element={<JobAssignmentCaps />} />
+          <Route path="user-management" element={<UserManagement />} />
+          <Route path="lead-bubbler-oversight" element={<LeadBubblerOversight />} />
+          <Route path="lead-bubbler-performance" element={<LeadBubblerPerformance />} />
+          <Route path="lead-bubbler-retention" element={<LeadBubblerRetention />} />
+          <Route path="lead-bubbler-shifts" element={<LeadBubblerShifts />} />
+          <Route path="takeover-verification" element={<TakeoverVerification />} />
+          <Route path="manual-link-generator" element={<ManualLinkGenerator />} />
 
           {/* Support-specific routes */}
-          <Route 
-            path="support/jobs"
-            element={
-              <ProtectedRoute requireSupport>
-                <Jobs />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="support/jobs" element={<Jobs />} />
 
           {/* Market Manager-specific routes */}
-          <Route 
-            path="market/jobs"
-            element={
-              <ProtectedRoute requireMarketManager>
-                <Jobs />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="market/jobs" element={<Jobs />} />
 
           {/* Lead Bubbler-specific routes */}
-          <Route 
-            path="lead/jobs"
-            element={
-              <ProtectedRoute requireLeadBubbler>
-                <Jobs />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="lead/jobs" element={<Jobs />} />
         </Route>
       </Routes>
     </Router>
