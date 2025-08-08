@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { supabase } from '../services/api';
 
 const AuthContext = createContext();
@@ -22,7 +22,7 @@ export const AuthProvider = ({ children }) => {
   }, [loading]);
 
   // Function to fetch user role from database
-  const fetchUserRole = async (userEmail) => {
+  const fetchUserRole = useCallback(async (userEmail) => {
     if (!userEmail) {
       setUserRole(null);
       return;
@@ -160,41 +160,52 @@ export const AuthProvider = ({ children }) => {
 
       // Check bubblers table for role
       console.log('AuthContext: Checking bubblers table for role...');
-      const { data, error } = await supabase
-        .from('bubblers')
-        .select('*')
-        .eq('email', userEmail)
-        .single();
+      try {
+        const { data, error } = await supabase
+          .from('bubblers')
+          .select('*')
+          .eq('email', userEmail)
+          .single();
 
-      if (error) {
-        console.warn('AuthContext: Error fetching from bubblers table:', error);
-        // If bubblers table doesn't exist or user not found, set as basic bubbler
-        console.log('AuthContext: Setting user as basic bubbler (fallback)');
+        if (error) {
+          console.warn('AuthContext: Error fetching from bubblers table:', error);
+          // If bubblers table doesn't exist or user not found, set as basic bubbler
+          console.log('AuthContext: Setting user as basic bubbler (fallback)');
+          setUserRole({ 
+            type: 'BUBBLER', 
+            permissions: ['view_own_jobs', 'view_own_earnings'],
+            restrictions: ['no_admin_access']
+          });
+          return;
+        }
+
+        if (data) {
+          console.log('AuthContext: Found user in bubblers table:', data);
+          setUserRole({
+            type: data.role || 'BUBBLER',
+            permissions: data.permissions || ['view_own_jobs', 'view_own_earnings'],
+            services: data.services || [],
+            isActive: data.is_active !== false,
+            restrictions: data.restrictions || ['no_admin_access']
+          });
+        } else {
+          console.log('AuthContext: User not found in bubblers table, setting as basic bubbler');
+          setUserRole({ 
+            type: 'BUBBLER', 
+            permissions: ['view_own_jobs', 'view_own_earnings'],
+            restrictions: ['no_admin_access']
+          });
+        }
+      } catch (dbError) {
+        console.error('AuthContext: Database error, setting as basic bubbler:', dbError);
         setUserRole({ 
           type: 'BUBBLER', 
           permissions: ['view_own_jobs', 'view_own_earnings'],
           restrictions: ['no_admin_access']
         });
-        return;
       }
 
-      if (data) {
-        console.log('AuthContext: Found user in bubblers table:', data);
-        setUserRole({
-          type: data.role || 'BUBBLER',
-          permissions: data.permissions || ['view_own_jobs', 'view_own_earnings'],
-          services: data.services || [],
-          isActive: data.is_active !== false,
-          restrictions: data.restrictions || ['no_admin_access']
-        });
-      } else {
-        console.log('AuthContext: User not found in bubblers table, setting as basic bubbler');
-        setUserRole({ 
-          type: 'BUBBLER', 
-          permissions: ['view_own_jobs', 'view_own_earnings'],
-          restrictions: ['no_admin_access']
-        });
-      }
+
     } catch (error) {
       console.error('AuthContext: Exception in fetchUserRole:', error);
       // Set a default role to prevent complete failure
@@ -204,7 +215,7 @@ export const AuthProvider = ({ children }) => {
         restrictions: ['no_admin_access']
       });
     }
-  };
+  }, []);
 
   useEffect(() => {
     // Check for existing session
@@ -254,7 +265,7 @@ export const AuthProvider = ({ children }) => {
     );
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [fetchUserRole]);
 
   const login = async (email, password) => {
     try {
