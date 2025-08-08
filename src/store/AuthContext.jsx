@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { supabase } from '../services/api';
 
 const AuthContext = createContext();
@@ -22,7 +22,7 @@ export const AuthProvider = ({ children }) => {
   }, [loading]);
 
   // Function to fetch user role from database
-  const fetchUserRole = useCallback(async (userEmail) => {
+  const fetchUserRole = async (userEmail) => {
     if (!userEmail) {
       setUserRole(null);
       return;
@@ -215,7 +215,7 @@ export const AuthProvider = ({ children }) => {
         restrictions: ['no_admin_access']
       });
     }
-  }, []);
+  };
 
   useEffect(() => {
     // Check for existing session
@@ -265,7 +265,7 @@ export const AuthProvider = ({ children }) => {
     );
 
     return () => subscription.unsubscribe();
-  }, [fetchUserRole]);
+  }, []);
 
   const login = async (email, password) => {
     try {
@@ -295,7 +295,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const value = {
+  const value = useMemo(() => ({
     user,
     userRole,
     loading,
@@ -345,7 +345,7 @@ export const AuthProvider = ({ children }) => {
     userServices: userRole?.services || [],
     userRestrictions: userRole?.restrictions || [],
     isUserActive: userRole?.isActive !== false,
-  };
+  }), [user, userRole, loading]);
 
   console.log('AuthContext: Current state:', { 
     user: user?.email, 
