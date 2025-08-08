@@ -38,6 +38,13 @@ const Dashboard = () => {
   const location = useLocation();
   const { fetchDashboardData, dashboardData, loading, error } = useStore();
 
+  // Comprehensive debugging
+  console.log('Dashboard component mounted');
+  console.log('Dashboard - user:', user?.email);
+  console.log('Dashboard - roles:', { isAdmin, isBubbler, isSupport, isFinance, isRecruiter, isMarketManager, isLeadBubbler });
+  console.log('Dashboard - loading:', loading, 'error:', error);
+  console.log('Dashboard - dashboardData:', dashboardData);
+
   // Utility function to calculate job duration with property type adjustments
   const calculateJobDurationWithPropertyType = (serviceData) => {
     if (!serviceData) return { totalDuration: 0 };
@@ -134,7 +141,29 @@ const Dashboard = () => {
   // Debug: Show user info even if dashboard data fails
   console.log('Dashboard render - about to render dashboard, user:', user?.email);
   
-  return renderDashboard();
+  // Always render something, even if data fails
+  try {
+    console.log('Dashboard - about to render dashboard');
+    return renderDashboard();
+  } catch (error) {
+    console.error('Dashboard - error rendering dashboard:', error);
+    return (
+      <div className="max-w-7xl mx-auto p-6">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+          <h1 className="text-2xl font-bold text-red-800 mb-4">Dashboard Error</h1>
+          <p className="text-red-700 mb-4">There was an error rendering the dashboard.</p>
+          <p className="text-sm text-red-600">User: {user?.email || 'Unknown'}</p>
+          <p className="text-sm text-red-600">Error: {error?.message || error?.toString()}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+          >
+            Reload Page
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // Admin Dashboard View
   function renderAdminView() {

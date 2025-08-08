@@ -35,6 +35,9 @@ const useStore = create(
       loading: false,
       error: null,
       activeTab: 'dashboard',
+      
+      // Dashboard Data
+      dashboardData: null,
 
       // Actions
       login: (userData) => {
@@ -126,6 +129,37 @@ const useStore = create(
 
       // Remember Me
       setRememberMe: (remember) => set({ rememberMe: remember }),
+      
+      // Dashboard Actions
+      fetchDashboardData: async () => {
+        console.log('useStore: fetchDashboardData called');
+        set({ loading: true, error: null });
+        
+        try {
+          // For now, just set some mock data to test rendering
+          const mockData = {
+            stats: {
+              totalRevenue: 0,
+              activeBubblers: 0,
+              pendingApplications: 0,
+              todayJobs: 0
+            },
+            bubblerStats: {
+              todayJobs: 0,
+              completedToday: 0,
+              availableEquipment: 0,
+              weeklyEarnings: 0,
+              recentActivity: []
+            }
+          };
+          
+          console.log('useStore: Setting mock dashboard data');
+          set({ dashboardData: mockData, loading: false });
+        } catch (error) {
+          console.error('useStore: Error fetching dashboard data:', error);
+          set({ error: error.message, loading: false });
+        }
+      },
     }),
     {
       name: 'bubbler-storage',

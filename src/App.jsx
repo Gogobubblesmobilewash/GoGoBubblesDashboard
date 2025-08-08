@@ -46,6 +46,7 @@ import ManualLinkGenerator from './components/admin/ManualLinkGenerator';
 
 import { useAuth } from './store/AuthContext';
 import { SpeedInsights } from "@vercel/speed-insights/react";
+import { ErrorBoundary } from './components/shared/ErrorBoundary';
 
 // Protected Route wrapper
 const ProtectedRoute = ({ children, requireAdmin = false, requireBubbler = false, requireSupport = false, requireMarketManager = false, requireLeadBubbler = false }) => {
@@ -136,9 +137,10 @@ function App() {
   console.log('App component rendering');
   
   return (
-    <Router>
-      <SpeedInsights />
-      <Routes>
+    <ErrorBoundary>
+      <Router>
+        <SpeedInsights />
+        <Routes>
         {/* Redirect root to login for internal-only dashboard */}
         <Route path="/" element={<Navigate to="/login" replace />} />
         
@@ -148,6 +150,15 @@ function App() {
           path="/onboarding/:bubblerId" 
           element={<Onboarding />}
         />
+        
+        {/* Test route to check if routing works */}
+        <Route path="/dashboard/test" element={
+          <div style={{ padding: 24, backgroundColor: '#f0f0f0', minHeight: '100vh' }}>
+            <h1>Dashboard Test Route</h1>
+            <p>If you can see this, routing is working!</p>
+            <p>Time: {new Date().toLocaleString()}</p>
+          </div>
+        } />
 
         {/* Protected dashboard routes */}
         <Route 
@@ -453,6 +464,7 @@ function App() {
         </Route>
       </Routes>
     </Router>
+    </ErrorBoundary>
   );
 }
 
