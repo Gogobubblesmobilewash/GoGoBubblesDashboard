@@ -1,28 +1,98 @@
-import React from 'react';
-// Temporarily commenting out imports to isolate the issue
-// import SupportDashboard from './SupportDashboard';
-// import FinanceDashboard from './FinanceDashboard';
-// import RecruiterDashboard from './RecruiterDashboard';
-// import MarketManagerDashboard from './MarketManagerDashboard';
-// import LeadBubblerDashboard from './LeadBubblerDashboard';
-// import AdminCommandCenter from './AdminCommandCenter';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import {
+  FiHome, 
+  FiDollarSign,
+  FiUsers,
+  FiCalendar, 
+  FiTrendingUp, 
+  FiDownload, 
+  FiRefreshCw,
+  FiBarChart2,
+  FiFileText,
+  FiMessageCircle,
+  FiStar,
+  FiBriefcase,
+  FiAlertCircle,
+  FiCheckCircle,
+  FiClock
+} from 'react-icons/fi';
+import useStore from '../../store/useStore';
+import { useAuth } from '../../store/AuthContext';
+import { 
+  calculateJobDuration, 
+  calculatePropertyTypeAdjustedDuration,
+  getPropertyTypeSpecificDuration,
+  PROPERTY_TYPE_DURATION_ADJUSTMENTS 
+} from '../../constants';
 
 const Dashboard = () => {
-  // Minimal test - remove all dependencies to isolate the issue
-  console.log('Dashboard component mounted - minimal test');
-  
-  return (
-    <div className="max-w-7xl mx-auto p-6">
-      <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-        <h1 className="text-2xl font-bold text-green-800 mb-4">Dashboard Test</h1>
-        <p className="text-green-700 mb-4">If you can see this, the Dashboard component is working!</p>
-        <p className="text-sm text-green-600">Time: {new Date().toLocaleString()}</p>
-        <p className="text-sm text-green-600">Component: Dashboard.jsx</p>
-      </div>
-    </div>
-  );
+  const navigate = useNavigate();
+  const { user, isAdmin, isBubbler, isSupport, isFinance, isRecruiter, isMarketManager, isLeadBubbler } = useAuth();
+  const location = useLocation();
+  const { fetchDashboardData, dashboardData, loading, error } = useStore();
 
+  // Comprehensive debugging
+  console.log('Dashboard component mounted');
+  console.log('Dashboard - user:', user?.email);
+  console.log('Dashboard - roles:', { isAdmin, isBubbler, isSupport, isFinance, isRecruiter, isMarketManager, isLeadBubbler });
+  console.log('Dashboard - loading:', loading, 'error:', error);
+  console.log('Dashboard - dashboardData:', dashboardData);
 
+  // Utility function to calculate job duration with property type adjustments
+  const calculateJobDurationWithPropertyType = (serviceData) => {
+    if (!serviceData) return { totalDuration: 0 };
+    
+    const { service, tier, bedrooms, bathrooms, propertyType, addons = [] } = serviceData;
+    
+    if (service === 'Home Cleaning') {
+      // Use property type specific duration if available
+      const specificDuration = getPropertyTypeSpecificDuration(bedrooms, bathrooms, tier, propertyType);
+      if (specificDuration) {
+        return { totalDuration: specificDuration };
+      }
+      
+      // Fallback to calculated duration with property type adjustment
+      return calculateJobDuration(service, tier, addons, {
+        bedrooms,
+        bathrooms,
+        propertyType: propertyType || 'Apartment/Loft'
+      });
+    }
+    
+    // For other services, use standard calculation
+    return calculateJobDuration(service, tier, addons);
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchDashboardData();
+    }
+  }, [user, fetchDashboardData]);
+
+  // Debug logging
+  console.log('Dashboard render - user:', user, 'isAdmin:', isAdmin, 'isBubbler:', isBubbler, 'isSupport:', isSupport);
+
+  console.log('Dashboard render - loading:', loading, 'error:', error);
+
+  // Role-based dashboard rendering using switch statement
+  const renderDashboard = () => {
+    // Determine the user's role
+    let role = 'bubbler'; // default
+    
+    if (isAdmin) role = 'admin_bubbler';
+    else if (isSupport) role = 'support_bubbler';
+    else if (isLeadBubbler) role = 'lead_bubbler';
+    else if (isFinance) role = 'finance_bubbler';
+    else if (isRecruiter) role = 'recruiter_bubbler';
+    else if (isMarketManager) role = 'market_manager_bubbler';
+    
+    console.log('Dashboard render - determined role:', role);
+
+    // For now, just render the basic bubbler view to isolate the issue
+    console.log('Dashboard render - rendering basic bubbler view');
+    return renderBubblerView();
+  };
 
   // Loading state
   if (loading) {
@@ -82,7 +152,7 @@ const Dashboard = () => {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 font-poppins">Admin Dashboard</h1>
           <p className="text-gray-600 font-inter">Complete overview of GoGoBubbles operations</p>
-                    </div>
+        </div>
 
         {/* Main stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -111,7 +181,7 @@ const Dashboard = () => {
             icon={FiCalendar} 
             color="brand-aqua" 
           />
-      </div>
+        </div>
 
         {/* Quick actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
@@ -143,22 +213,22 @@ const Dashboard = () => {
           <div className="p-6 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900 font-poppins">Recent Activity</h3>
             <p className="text-sm text-gray-600 font-inter">Latest actions from your team</p>
-                  </div>
+          </div>
           <div className="p-6 space-y-4">
             {dashboardData?.recentActivity?.map(item => (
               <RecentActivityItem key={item.id} item={item} />
             )) || (
               <p className="text-gray-500 text-center py-4 font-inter">No recent activity</p>
             )}
+          </div>
         </div>
-      </div>
 
         {/* Recent jobs */}
         <div className="card mb-6">
           <div className="p-6 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900 font-poppins">Recent Jobs</h3>
             <p className="text-sm text-gray-600 font-inter">Latest job assignments and completions</p>
-            </div>
+          </div>
           <div className="p-6 space-y-4">
             {dashboardData?.recentJobs?.map(item => (
               <RecentListItem key={item.id} item={item} type="jobs" />
@@ -173,7 +243,7 @@ const Dashboard = () => {
           <div className="p-6 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900 font-poppins">Recent Applicants</h3>
             <p className="text-sm text-gray-600 font-inter">New applications and their status</p>
-            </div>
+          </div>
           <div className="p-6 space-y-4">
             {dashboardData?.recentApplicants?.map(item => (
               <RecentListItem key={item.id} item={item} type="applicants" />
@@ -188,7 +258,7 @@ const Dashboard = () => {
           <div className="p-6 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900 font-poppins">Equipment Status</h3>
             <p className="text-sm text-gray-600 font-inter">Overview of equipment availability</p>
-            </div>
+          </div>
           <div className="p-6 space-y-4">
             {dashboardData?.equipmentStatus?.map(item => (
               <RecentListItem key={item.id} item={item} type="equipment" />
@@ -203,7 +273,7 @@ const Dashboard = () => {
           <div className="p-6 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900 font-poppins">Recent Messages</h3>
             <p className="text-sm text-gray-600 font-inter">Latest communications</p>
-            </div>
+          </div>
           <div className="p-6 space-y-4">
             {dashboardData?.recentMessages?.map(item => (
               <RecentListItem key={item.id} item={item} type="messages" />
@@ -218,7 +288,7 @@ const Dashboard = () => {
           <div className="p-6 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900 font-poppins">Recent Ratings</h3>
             <p className="text-sm text-gray-600 font-inter">Latest customer feedback</p>
-            </div>
+          </div>
           <div className="p-6 space-y-4">
             {dashboardData?.recentRatings?.map(item => (
               <RecentListItem key={item.id} item={item} type="ratings" />
@@ -233,7 +303,7 @@ const Dashboard = () => {
           <div className="p-6 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900 font-poppins">Revenue Trends</h3>
             <p className="text-sm text-gray-600 font-inter">Monthly revenue and payout trends</p>
-            </div>
+          </div>
           <div className="p-6 space-y-4">
             {dashboardData?.revenueTrends?.map(item => (
               <RecentListItem key={item.id} item={item} type="revenue" />
@@ -248,7 +318,7 @@ const Dashboard = () => {
           <div className="p-6 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900 font-poppins">Payout History</h3>
             <p className="text-sm text-gray-600 font-inter">Recent bubbler payouts</p>
-            </div>
+          </div>
           <div className="p-6 space-y-4">
             {dashboardData?.recentPayouts?.map(item => (
               <RecentListItem key={item.id} item={item} type="payouts" />
@@ -263,7 +333,7 @@ const Dashboard = () => {
           <div className="p-6 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900 font-poppins">Customer Segments</h3>
             <p className="text-sm text-gray-600 font-inter">Breakdown of customer types</p>
-            </div>
+          </div>
           <div className="p-6 space-y-4">
             {dashboardData?.customerSegments?.map(item => (
               <RecentListItem key={item.id} item={item} type="customers" />
@@ -278,16 +348,16 @@ const Dashboard = () => {
           <div className="p-6 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900 font-poppins">Business Insights</h3>
             <p className="text-sm text-gray-600 font-inter">Key business metrics and recommendations</p>
-            </div>
+          </div>
           <div className="p-6 space-y-4">
             {dashboardData?.businessInsights?.map(item => (
               <RecentListItem key={item.id} item={item} type="insights" />
             )) || (
               <p className="text-gray-500 text-center py-4 font-inter">No insights data</p>
             )}
-            </div>
           </div>
-          </div>
+        </div>
+      </div>
     );
   }
 
@@ -352,23 +422,23 @@ const Dashboard = () => {
             color="brand-yellow"
             onClick={() => navigate('/earnings')}
           />
-              </div>
+        </div>
 
         {/* Recent activity */}
         <div className="card">
           <div className="p-6 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900 font-poppins">Recent Activity</h3>
             <p className="text-sm text-gray-600 font-inter">Your latest job activities</p>
-            </div>
+          </div>
           <div className="p-6 space-y-4">
             {dashboardData?.bubblerStats?.recentActivity?.map(item => (
               <RecentActivityItem key={item.id} item={item} />
             )) || (
               <p className="text-gray-500 text-center py-4 font-inter">No recent activity</p>
             )}
-            </div>
           </div>
-            </div>
+        </div>
+      </div>
     );
   }
 };
@@ -418,16 +488,16 @@ const StatCard = ({ title, value, icon: Icon, color = 'brand-aqua', format = 'nu
 
   return (
     <div className={`card-hover border-l-4 ${colors.bg} border-l-${color}`}>
-          <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between">
         <div>
           <h3 className="text-sm font-medium text-gray-500 font-inter">{title}</h3>
           <p className={`mt-1 text-3xl font-bold ${colors.textDark} font-poppins`}>{formatValue(value)}</p>
-            </div>
+        </div>
         <div className={`p-3 rounded-full ${colors.bgLight} ${colors.text}`}>
           <Icon className="h-6 w-6" />
-            </div>
-          </div>
-              </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
@@ -477,20 +547,20 @@ const QuickActionCard = ({ title, description, icon: Icon, color = 'brand-aqua',
         <p className="text-sm text-gray-600 mb-4 font-inter">{description}</p>
         <button className={`${colors.bg} text-white px-4 py-2 rounded-lg hover:${colors.hover} transition-colors font-poppins font-semibold`}>
           View
-          </button>
-              </div>
-                </div>
+        </button>
+      </div>
+    </div>
   );
 };
 
 const RecentActivityItem = ({ item }) => (
   <div className="flex items-start space-x-3">
     <div className="w-2 h-2 bg-brand-aqua rounded-full mt-2 flex-shrink-0" />
-                <div className="flex-1 min-w-0">
+    <div className="flex-1 min-w-0">
       <p className="text-sm font-medium text-gray-800 font-inter">{item.action}</p>
       <p className="text-sm text-gray-500 font-inter">{item.timestamp}</p>
-                </div>
-              </div>
+    </div>
+  </div>
 );
 
 const RecentListItem = ({ item, type }) => (
@@ -502,15 +572,15 @@ const RecentListItem = ({ item, type }) => (
       <p className="text-sm text-gray-500 font-inter">
         {type === 'jobs' ? item.service : type === 'applicants' ? item.email : item.description}
       </p>
-            </div>
+    </div>
     <div className="flex items-center space-x-2">
       <span className="text-sm text-gray-500 font-inter">{item.timestamp}</span>
       {type === 'jobs' && <span className={`px-2 py-1 text-xs rounded-full ${item.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'} font-inter`}>{item.status}</span>}
       {type === 'applicants' && <span className={`px-2 py-1 text-xs rounded-full ${item.status === 'approved' ? 'bg-green-100 text-green-800' : item.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'} font-inter`}>{item.status}</span>}
       {type === 'equipment' && <span className={`px-2 py-1 text-xs rounded-full ${item.status === 'available' ? 'bg-green-100 text-green-800' : item.status === 'in_use' ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'} font-inter`}>{item.status}</span>}
       {type === 'messages' && item.unread && <span className="px-2 py-1 text-xs rounded-full bg-brand-aqua text-white font-inter">New</span>}
-        </div>
     </div>
-  );
+  </div>
+);
 
 export default Dashboard;
