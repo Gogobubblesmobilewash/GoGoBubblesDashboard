@@ -107,7 +107,7 @@ const ProtectedRoute = ({ children, requireAdmin = false, requireBubbler = false
 
   // Debug: Add a simple wrapper to catch any rendering issues
   try {
-    return children;
+  return children;
   } catch (error) {
     console.error('ProtectedRoute: Error rendering children:', error);
     return (
@@ -138,9 +138,9 @@ function App() {
   
   return (
     <ErrorBoundary>
-      <Router>
-        <SpeedInsights />
-        <Routes>
+    <Router>
+      <SpeedInsights />
+      <Routes>
         {/* Redirect root to login for internal-only dashboard */}
         <Route path="/" element={<Navigate to="/login" replace />} />
         
@@ -153,7 +153,7 @@ function App() {
         
 
 
-                {/* Protected dashboard routes */}
+        {/* Protected dashboard routes */}
         <Route 
           path="/dashboard" 
           element={

@@ -26,6 +26,10 @@ const Messages = () => {
   const [statusFilter, setStatusFilter] = useState('all'); // all, unread, read
   const [sortBy, setSortBy] = useState('latest'); // latest, oldest, unread
   const [refreshing, setRefreshing] = useState(false);
+  const [showComposeModal, setShowComposeModal] = useState(false);
+  const [composeMessage, setComposeMessage] = useState('');
+  const [recipientGroup, setRecipientGroup] = useState('admin');
+  const [sending, setSending] = useState(false);
 
   // Load all message threads
   const loadMessageThreads = async () => {
@@ -42,26 +46,18 @@ const Messages = () => {
               id,
               customer_name,
               address
-            ),
-            bubbler:bubblers(
-              id,
-              name,
-              email
             )
           ),
-          from_user:from_user_id(id, name, email),
-          to_user:to_user_id(id, name, email)
+          sender:bubblers(
+            id,
+            name,
+            email
+          )
         `)
         .order('created_at', { ascending: false });
 
-      // Filter based on user role
-      if (isAdmin) {
-        // Admins see all messages
-        query = query.eq('to_user_id', user?.id).or(`from_user_id.eq.${user?.id}`);
-      } else {
-        // Bubblers see only their messages
-        query = query.eq('to_user_id', user?.id).or(`from_user_id.eq.${user?.id}`);
-      }
+      // RLS will automatically filter messages based on user role
+      // No need to manually filter - the RLS policy handles this
 
       const { data, error } = await query;
       
@@ -96,7 +92,7 @@ const Messages = () => {
       threads[jobId].messages.push(message);
       
       // Count unread messages
-      if (!message.read && message.to_user_id === user?.id) {
+      if (!message.is_read && message.recipient_group && ['admin', 'support'].includes(message.recipient_group)) {
         threads[jobId].unreadCount++;
       }
       
@@ -158,6 +154,50 @@ const Messages = () => {
     return filtered;
   };
 
+  // Send a new message
+  const sendMessage = async () => {
+    if (!composeMessage.trim()) return;
+    
+    setSending(true);
+    try {
+      // Get the current bubbler's ID
+      const { data: bubblerData, error: bubblerError } = await supabase
+        .from('bubblers')
+        .select('id')
+        .eq('user_id', user?.id)
+        .single();
+      
+      if (bubblerError) throw bubblerError;
+      
+      // Insert the message
+      const { error } = await supabase
+        .from('messages')
+        .insert({
+          bubbler_id: bubblerData.id,
+          recipient_group: recipientGroup,
+          content: composeMessage.trim(),
+          is_read: false
+        });
+      
+      if (error) throw error;
+      
+      // Reset form and close modal
+      setComposeMessage('');
+      setRecipientGroup('admin');
+      setShowComposeModal(false);
+      
+      // Reload messages
+      await loadMessageThreads();
+      
+      toast.success('Message sent successfully!');
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast.error('Failed to send message: ' + error.message);
+    } finally {
+      setSending(false);
+    }
+  };
+
   // Refresh messages
   const refreshMessages = async () => {
     setRefreshing(true);
@@ -201,13 +241,21 @@ const Messages = () => {
           <div className="p-4 border-b border-gray-200">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900">Messages</h2>
-              <button
-                onClick={refreshMessages}
-                disabled={refreshing}
-                className="p-2 text-gray-500 hover:text-gray-700 transition-colors"
-              >
-                <FiRefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setShowComposeModal(true)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                >
+                  Compose
+                </button>
+                <button
+                  onClick={refreshMessages}
+                  disabled={refreshing}
+                  className="p-2 text-gray-500 hover:text-gray-700 transition-colors"
+                >
+                  <FiRefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+                </button>
+              </div>
             </div>
 
             {/* Search and Filters */}
@@ -349,6 +397,60 @@ const Messages = () => {
           )}
         </div>
       </div>
+
+      {/* Compose Message Modal */}
+      {showComposeModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <h3 className="text-lg font-semibold mb-4">Compose Message</h3>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  To:
+                </label>
+                <select
+                  value={recipientGroup}
+                  onChange={(e) => setRecipientGroup(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="admin">Admin</option>
+                  <option value="support">Support</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Message:
+                </label>
+                <textarea
+                  value={composeMessage}
+                  onChange={(e) => setComposeMessage(e.target.value)}
+                  placeholder="Type your message here..."
+                  rows={4}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+            
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                onClick={() => setShowComposeModal(false)}
+                className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={sendMessage}
+                disabled={sending || !composeMessage.trim()}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+              >
+                {sending ? 'Sending...' : 'Send Message'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

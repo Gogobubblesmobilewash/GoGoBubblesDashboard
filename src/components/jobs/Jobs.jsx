@@ -752,10 +752,8 @@ const Jobs = () => {
         `)
         .order('created_at', { ascending: false });
 
-      // For regular bubblers, only fetch their assigned jobs
-      if (!isAdmin && !isSupport && !isMarketManager && !isLeadBubbler) {
-        query = query.eq('order_service.job_assignments.bubbler_id', user?.id);
-      }
+      // For regular bubblers, RLS will automatically filter to show only their assigned jobs
+      // No need to manually filter - the RLS policy handles this
 
       const { data: ordersData, error } = await query;
 

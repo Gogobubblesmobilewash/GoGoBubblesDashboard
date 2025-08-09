@@ -447,15 +447,19 @@ const Equipment = () => {
         </div>
       </div>
 
-      {/* Equipment Filters */}
+      {/* Equipment Tabs */}
       <div className="flex flex-wrap gap-2 mb-4">
         <button onClick={() => setStatusFilter('all')} className={`px-4 py-2 rounded ${statusFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}>All</button>
         <button onClick={() => setStatusFilter('available')} className={`px-4 py-2 rounded ${statusFilter === 'available' ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-700'}`}>Available</button>
-        <button onClick={() => setStatusFilter('rented')} className={`px-4 py-2 rounded ${statusFilter === 'rented' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}>Out / Rented</button>
-        <button onClick={() => setStatusFilter('overdue')} className={`px-4 py-2 rounded ${statusFilter === 'overdue' ? 'bg-red-600 text-white' : 'bg-gray-100 text-gray-700'}`}>Overdue</button>
-        <button onClick={() => setStatusFilter('maintenance')} className={`px-4 py-2 rounded ${statusFilter === 'maintenance' ? 'bg-yellow-600 text-white' : 'bg-gray-100 text-gray-700'}`}>Maintenance</button>
-        <button onClick={() => setStatusFilter('damaged')} className={`px-4 py-2 rounded ${statusFilter === 'damaged' ? 'bg-orange-600 text-white' : 'bg-gray-100 text-gray-700'}`}>Damaged</button>
-        <button onClick={() => setStatusFilter('assignedToMe')} className={`px-4 py-2 rounded ${statusFilter === 'assignedToMe' ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-700'}`}>Assigned to Me</button>
+        <button onClick={() => setStatusFilter('myGear')} className={`px-4 py-2 rounded ${statusFilter === 'myGear' ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-700'}`}>My Gear</button>
+        {isAdmin && (
+          <>
+            <button onClick={() => setStatusFilter('rented')} className={`px-4 py-2 rounded ${statusFilter === 'rented' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}>Out / Rented</button>
+            <button onClick={() => setStatusFilter('overdue')} className={`px-4 py-2 rounded ${statusFilter === 'overdue' ? 'bg-red-600 text-white' : 'bg-gray-100 text-gray-700'}`}>Overdue</button>
+            <button onClick={() => setStatusFilter('maintenance')} className={`px-4 py-2 rounded ${statusFilter === 'maintenance' ? 'bg-yellow-600 text-white' : 'bg-gray-100 text-gray-700'}`}>Maintenance</button>
+            <button onClick={() => setStatusFilter('damaged')} className={`px-4 py-2 rounded ${statusFilter === 'damaged' ? 'bg-orange-600 text-white' : 'bg-gray-100 text-gray-700'}`}>Damaged</button>
+          </>
+        )}
       </div>
 
       {/* Equipment Grid */}

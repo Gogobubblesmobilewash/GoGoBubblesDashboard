@@ -73,17 +73,17 @@ const Profile = () => {
   }
 
   if (error) {
-    return (
+  return (
       <div className="max-w-7xl mx-auto p-6">
         <div className="bg-red-50 border border-red-200 rounded-lg p-6">
           <h1 className="text-2xl font-bold text-red-800 mb-4">Profile Error</h1>
           <p className="text-red-700 mb-4">{error}</p>
-          <button 
+                <button
             onClick={fetchProfileData}
             className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
           >
             Retry
-          </button>
+              </button>
         </div>
       </div>
     );
@@ -101,8 +101,8 @@ const Profile = () => {
             <p><strong>Email:</strong> {profileData.email}</p>
             <p><strong>Name:</strong> {profileData.name || 'Not set'}</p>
             <p><strong>Role:</strong> {profileData.role || 'Not set'}</p>
-          </div>
-        )}
+        </div>
+      )}
       </div>
     </div>
   );
