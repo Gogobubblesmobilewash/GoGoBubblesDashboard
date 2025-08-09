@@ -1,5 +1,28 @@
 {
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "framework": null,
   "rewrites": [
+    {
+      "source": "/dashboard",
+      "destination": "/dashboard.html"
+    },
+    {
+      "source": "/",
+      "destination": "/gogobubbles-site/index.html"
+    },
+    {
+      "source": "/booking",
+      "destination": "/gogobubbles-site/booking.html"
+    },
+    {
+      "source": "/feedback",
+      "destination": "/gogobubbles-site/feedback.html"
+    },
+    {
+      "source": "/jobs",
+      "destination": "/gogobubbles-site/jobs.html"
+    },
     {
       "source": "/(.*)",
       "destination": "/index.html"
@@ -114,4 +137,4 @@
       ]
     }
   ]
-} 
+}
