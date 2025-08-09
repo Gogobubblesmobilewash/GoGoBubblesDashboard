@@ -3,7 +3,7 @@ import {
   SUPABASE_URL, 
   SUPABASE_ANON_KEY, 
   assertEnv 
-} from './config.js'
+} from './config.ts'
 
 // Validate environment configuration on import
 assertEnv()
