@@ -5,12 +5,12 @@ This project now uses a centralized configuration system that reads from environ
 
 ## Required Environment Variables
 
-### Client-Side (NEXT_PUBLIC_*)
+### Client-Side (VITE_*)
 These variables are exposed to the browser and should be set in your deployment platform:
 
-- `NEXT_PUBLIC_BASE_URL`: Your application's base URL (defaults to https://www.gogobubblesclean.com)
-- `NEXT_PUBLIC_SUPABASE_URL`: Your Supabase project URL
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Your Supabase anonymous key
+- `VITE_BASE_URL`: Your application's base URL (defaults to https://www.gogobubblesclean.com)
+- `VITE_SUPABASE_URL`: Your Supabase project URL
+- `VITE_SUPABASE_ANON_KEY`: Your Supabase anonymous key
 
 ### Server-Side Only
 These variables are never exposed to the client:
@@ -28,10 +28,10 @@ These variables are never exposed to the client:
 1. Go to your Vercel project dashboard
 2. Navigate to Settings → Environment Variables
 3. Add each required variable:
-   - `NEXT_PUBLIC_BASE_URL` = https://www.gogobubblesclean.com
-   - `NEXT_PUBLIC_SUPABASE_URL` = https://your-project-id.supabase.co
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` = your-anon-key
-   - `SUPABASE_SERVICE_ROLE_KEY` = your-service-role-key (Server only)
+   - `VITE_BASE_URL` = https://www.gogobubblesclean.com
+   - `VITE_SUPABASE_URL` = https://your-project-id.supabase.co
+   - `VITE_SUPABASE_ANON_KEY` = your-anon-key
+   - `VITE_SUPABASE_SERVICE_ROLE_KEY` = your-service-role-key (Server only)
 4. Redeploy your application
 
 ### Other Platforms
