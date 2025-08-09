@@ -10,12 +10,25 @@ function App() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
+    // Debug environment variables
+    console.log('🔍 [DEBUG] Environment check:')
+    console.log('SUPABASE_URL:', import.meta.env.VITE_SUPABASE_URL ? '✅ Set' : '❌ Missing')
+    console.log('SUPABASE_ANON_KEY:', import.meta.env.VITE_SUPABASE_ANON_KEY ? '✅ Set' : '❌ Missing')
+    
+    try {
+      // Get initial session
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        setSession(session)
+        setLoading(false)
+        console.log('Initial session:', session?.user?.id)
+      }).catch(error => {
+        console.error('❌ [DEBUG] Error getting session:', error)
+        setLoading(false)
+      })
+    } catch (error) {
+      console.error('❌ [DEBUG] Error initializing Supabase:', error)
       setLoading(false)
-      console.log('Initial session:', session?.user?.id)
-    })
+    }
 
     // Listen for auth changes
     const {
