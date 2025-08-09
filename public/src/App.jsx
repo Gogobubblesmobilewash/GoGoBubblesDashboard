@@ -14,6 +14,11 @@ function App() {
     console.log('🔍 [DEBUG] Environment check:')
     console.log('SUPABASE_URL:', import.meta.env.VITE_SUPABASE_URL ? '✅ Set' : '❌ Missing')
     console.log('SUPABASE_ANON_KEY:', import.meta.env.VITE_SUPABASE_ANON_KEY ? '✅ Set' : '❌ Missing')
+    console.log('🔍 [DEBUG] Full env check:', {
+      VITE_BASE_URL: import.meta.env.VITE_BASE_URL,
+      VITE_SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL ? '***SET***' : 'MISSING',
+      VITE_SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY ? '***SET***' : 'MISSING'
+    })
     
     try {
       // Get initial session
