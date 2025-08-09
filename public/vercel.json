@@ -1,22 +1,27 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "framework": "vite",
+  "buildCommand": null,
+  "outputDirectory": "public",
+  "framework": null,
   "rewrites": [
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
-  ],
-  "headers": [
+      "source": "/",
+      "destination": "/gogobubbles-site/index.html"
+    },
     {
-      "source": "/assets/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
-        }
-      ]
+      "source": "/booking",
+      "destination": "/gogobubbles-site/booking.html"
+    },
+    {
+      "source": "/jobs",
+      "destination": "/gogobubbles-site/jobs.html"
+    },
+    {
+      "source": "/feedback",
+      "destination": "/gogobubbles-site/feedback.html"
+    },
+    {
+      "source": "/dashboard",
+      "destination": "/dashboard.html"
     }
   ]
 }
