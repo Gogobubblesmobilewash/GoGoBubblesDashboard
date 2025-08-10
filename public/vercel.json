@@ -4,10 +4,6 @@
   "framework": null,
   "rewrites": [
     {
-      "source": "/dashboard",
-      "destination": "/index.html"
-    },
-    {
       "source": "/",
       "destination": "/gogobubbles-site/index.html"
     },
@@ -22,6 +18,14 @@
     {
       "source": "/jobs",
       "destination": "/gogobubbles-site/jobs.html"
+    },
+    {
+      "source": "/dashboard",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/assets/(.*)",
+      "destination": "/assets/$1"
     },
     {
       "source": "/(.*)",
