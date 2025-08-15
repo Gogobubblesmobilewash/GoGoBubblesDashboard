@@ -1,0 +1,5 @@
+.app-root{ min-height:100vh; }
+.grid-4{ display:grid; gap:16px; padding:16px; grid-template-columns:repeat(4,minmax(0,1fr)); }
+@media (max-width: 900px){ .grid-4{ grid-template-columns:repeat(2,minmax(0,1fr)); } }
+
+
