@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://script.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://script.google.com;">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Strict-Transport-Security" content="max-age=31536000; includeSubDomains">
+  
+  <title>GOGOBUBBLES - Rate Your Service</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', Arial, sans-serif;
+      background: linear-gradient(135deg, #f8fafc 0%, #e6f7fa 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: #222;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      animation: slideUp 0.6s ease-out;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .header {
+      background: linear-gradient(120deg, #4fd1c5 0%, #4299e1 100%);
+      color: #fff;
+      text-align: center;
+      padding: 40px 30px;
+      position: relative;
+    }
+
+    .logo {
+      max-width: 180px;
+      margin-bottom: 20px;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
+    }
+
+    .header h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .header p {
+      font-size: 1.1rem;
+      opacity: 0.95;
+      line-height: 1.5;
+    }
+
+    .form-container {
+      padding: 40px 30px;
+    }
+
+    .form-group {
+      margin-bottom: 25px;
+    }
+
+    .form-group label {
+      display: block;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #374151;
+      margin-bottom: 8px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 16px 20px;
+      border: 2px solid #e5e7eb;
+      border-radius: 16px;
+      font-size: 16px; /* Prevents zoom on iOS */
+      font-family: 'Inter', sans-serif;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      background: #fff;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #4fd1c5;
+      box-shadow: 0 0 0 4px rgba(79, 209, 197, 0.1);
+      transform: translateY(-1px);
+    }
+
+    .form-group input.error,
+    .form-group select.error,
+    .form-group textarea.error {
+      border-color: #ef4444;
+      box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 120px;
+      line-height: 1.5;
+    }
+
+    .form-group select {
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+      background-position: right 16px center;
+      background-repeat: no-repeat;
+      background-size: 16px;
+      padding-right: 48px;
+    }
+
+    .stars-container {
+      display: flex;
+      gap: 12px;
+      margin-top: 12px;
+      justify-content: center;
+    }
+
+    .star-btn {
+      background: none;
+      border: none;
+      font-size: 2.5rem;
+      color: #d1d5db;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      padding: 8px;
+      border-radius: 50%;
+      line-height: 1;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    .star-btn:hover,
+    .star-btn.active {
+      color: #fbbf24;
+      transform: scale(1.15);
+      filter: drop-shadow(0 4px 8px rgba(251, 191, 36, 0.3));
+    }
+
+    .star-btn:active {
+      transform: scale(1.1);
+    }
+
+    .submit-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #1fc2a7 0%, #4fd1c5 100%);
+      color: #fff;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+      padding: 18px 32px;
+      border: none;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 8px 24px rgba(31, 194, 167, 0.3);
+      margin-top: 20px;
+      position: relative;
+      overflow: hidden;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    .submit-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .submit-btn:hover::before {
+      left: 100%;
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(31, 194, 167, 0.4);
+    }
+
+    .submit-btn:active {
+      transform: translateY(0);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .result {
+      margin-top: 24px;
+      padding: 20px;
+      border-radius: 16px;
+      font-weight: 500;
+      text-align: center;
+      animation: fadeIn 0.5s ease;
+      border: 1px solid;
+    }
+
+    .result.success {
+      background: #d1fae5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+    }
+
+    .result.error {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+
+    @keyframes fadeIn {
+      from { 
+        opacity: 0; 
+        transform: translateY(10px) scale(0.95);
+      }
+      to { 
+        opacity: 1; 
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s linear infinite;
+      margin-right: 12px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .footer {
+      text-align: center;
+      padding: 30px;
+      background: #f8fafc;
+      color: #6b7280;
+      font-size: 0.9rem;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .error-message {
+      color: #ef4444;
+      font-size: 0.85rem;
+      margin-top: 6px;
+      display: none;
+    }
+
+    .error-message.show {
+      display: block;
+      animation: shake 0.5s ease;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+
+    .rating-label {
+      text-align: center;
+      margin-top: 12px;
+      font-size: 0.9rem;
+      color: #6b7280;
+      font-weight: 500;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+      }
+      
+      .container {
+        border-radius: 15px;
+      }
+      
+      .header {
+        padding: 30px 20px;
+      }
+      
+      .header h1 {
+        font-size: 1.75rem;
+      }
+      
+      .form-container {
+        padding: 30px 20px;
+      }
+      
+      .logo {
+        max-width: 150px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header h1 {
+        font-size: 1.4rem;
+      }
+      
+      .header p {
+        font-size: 0.95rem;
+      }
+      
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        padding: 14px 18px;
+        font-size: 16px;
+      }
+
+      .submit-btn {
+        padding: 16px 24px;
+        font-size: 1rem;
+      }
+    }
+
+    /* High contrast mode support */
+    @media (prefers-contrast: high) {
+      :root {
+        --border: #000000;
+        --text-primary: #000000;
+        --text-secondary: #333333;
+      }
+    }
+
+    /* Reduced motion support */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+              <img src="bubblers_logo.png" alt="GOGOBUBBLES Logo" class="logo">
+      <h1>We Value Your Feedback!</h1>
+              <p>Help us improve our services by sharing your experience with your BUBBLER</p>
+    </div>
+
+    <div class="form-container">
+      <form id="feedbackForm" novalidate>
+        <!-- Hidden Job ID field -->
+        <input type="hidden" id="jobId" name="jobId">
+        
+        <div class="form-group required">
+          <label for="customerName">Your Name</label>
+          <input 
+            type="text" 
+            id="customerName" 
+            name="customerName" 
+            required 
+            placeholder="Enter your full name"
+            maxlength="100"
+            autocomplete="name"
+          >
+          <div class="error-message" id="customerNameError"></div>
+        </div>
+
+        <div class="form-group">
+                      <label for="bubblerName">Bubbler Name (Optional)</label>
+          <input 
+            type="text" 
+            id="bubblerName" 
+            name="bubblerName" 
+            placeholder="Who provided your service?"
+            maxlength="100"
+            autocomplete="off"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="serviceType">Service Type (Optional)</label>
+          <select id="serviceType" name="serviceType">
+            <option value="">Select a service...</option>
+            <option value="Mobile Car Wash">Mobile Car Wash</option>
+            <option value="Home Cleaning">Home Cleaning</option>
+            <option value="Laundry Service">Laundry Service</option>
+            <option value="Merch Purchase">Merch Purchase</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div class="form-group required">
+          <label>Rating</label>
+          <div class="stars-container">
+            <button type="button" class="star-btn" data-rating="1" aria-label="1 star">★</button>
+            <button type="button" class="star-btn" data-rating="2" aria-label="2 stars">★</button>
+            <button type="button" class="star-btn" data-rating="3" aria-label="3 stars">★</button>
+            <button type="button" class="star-btn" data-rating="4" aria-label="4 stars">★</button>
+            <button type="button" class="star-btn" data-rating="5" aria-label="5 stars">★</button>
+          </div>
+          <div class="rating-label" id="ratingLabel">Tap to rate your experience</div>
+          <input type="hidden" id="stars" name="stars" required>
+          <div class="error-message" id="starsError"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="comment">Comments (Optional)</label>
+          <textarea 
+            id="comment" 
+            name="comment" 
+            placeholder="Tell us about your experience..."
+            maxlength="1000"
+            rows="4"
+          ></textarea>
+        </div>
+
+        <!-- Submit button will be moved below tipping section -->
+        <div id="submit-button-container">
+          <button type="submit" class="submit-btn" id="submitBtn">
+            <span class="btn-text">Submit Feedback</span>
+            <span class="btn-loading" style="display: none;">
+              <span class="loading"></span>Submitting...
+            </span>
+          </button>
+        </div>
+      </form>
+
+      <div id="result" class="result" style="display: none;"></div>
+    </div>
+
+    <div class="footer">
+              <img src="thanks_icon.png" alt="Thank you for choosing GOGOBUBBLES" style="max-width: 200px; width: 100%; height: auto; display: block; margin: 0 auto;" />
+    </div>
+  </div>
+
+  <script>
+    // Supabase configuration
+    const SUPABASE_URL = 'https://your-project.supabase.co'; // Replace with your actual Supabase URL
+    const SUPABASE_ANON_KEY = 'your-anon-key'; // Replace with your actual anon key
+    
+    // Initialize Supabase client
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Utility functions
+    const sanitizeInput = (input) => {
+      if (typeof input !== 'string') return '';
+      return input
+        .trim()
+        .replace(/[<>]/g, '') // Remove potential HTML tags
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#x27;')
+        .replace(/\//g, '&#x2F;');
+    };
+
+    const showError = (fieldId, message) => {
+      const field = document.getElementById(fieldId);
+      const errorDiv = document.getElementById(fieldId + 'Error');
+      
+      field.classList.add('error');
+      errorDiv.textContent = message;
+      errorDiv.classList.add('show');
+    };
+
+    const clearError = (fieldId) => {
+      const field = document.getElementById(fieldId);
+      const errorDiv = document.getElementById(fieldId + 'Error');
+      
+      field.classList.remove('error');
+      errorDiv.classList.remove('show');
+    };
+
+    // Autofill from URL
+    window.addEventListener("DOMContentLoaded", async () => {
+      const params = new URLSearchParams(window.location.search);
+
+      const jobId = params.get("jobId") || "";
+      const orderId = params.get("order_id") || "";
+      const bubblerName = params.get("bubblerName") || "";
+      const serviceType = params.get("serviceType") || "";
+      const customerName = params.get("customerName") || "";
+
+      // inject into fields if they exist
+      if (document.getElementById("jobId")) {
+        document.getElementById("jobId").value = jobId;
+      }
+      if (document.getElementById("bubblerName")) {
+        document.getElementById("bubblerName").value = bubblerName;
+      }
+      if (document.getElementById("serviceType")) {
+        document.getElementById("serviceType").value = serviceType;
+      }
+      if (document.getElementById("customerName")) {
+        document.getElementById("customerName").value = customerName;
+      }
+
+      // Auto-fill bubbler name and service type from order_id if available
+      if (orderId && !bubblerName && !serviceType) {
+        try {
+          // Get order details from Supabase
+          const { data: order, error: orderError } = await supabase
+            .from('orders')
+            .select(`
+              id,
+              customer_name,
+              service_type,
+              job_assignments (
+                id,
+                bubbler_id,
+                bubblers (
+                  id,
+                  first_name,
+                  last_name
+                )
+              )
+            `)
+            .eq('id', orderId)
+            .single();
+
+          if (orderError) {
+            console.log('Could not fetch order details:', orderError);
+          } else if (order) {
+            // Pre-fill customer name
+            if (!customerName && order.customer_name) {
+              const customerNameField = document.getElementById('customerName');
+              if (customerNameField) {
+                customerNameField.value = order.customer_name;
+              }
+            }
+
+            // Pre-fill service type
+            if (!serviceType && order.service_type) {
+              const serviceTypeField = document.getElementById('serviceType');
+              if (serviceTypeField) {
+                serviceTypeField.value = order.service_type;
+              }
+            }
+
+            // Pre-fill bubbler name
+            if (!bubblerName && order.job_assignments && order.job_assignments.length > 0) {
+              const jobAssignment = order.job_assignments[0];
+              if (jobAssignment.bubblers) {
+                const bubblerNameField = document.getElementById('bubblerName');
+                if (bubblerNameField) {
+                  const fullName = `${jobAssignment.bubblers.first_name} ${jobAssignment.bubblers.last_name}`;
+                  bubblerNameField.value = fullName;
+                }
+              }
+            }
+          }
+        } catch (error) {
+          console.log('Error auto-filling form data:', error);
+        }
+      }
+    });
+
+    // Star rating functionality
+    const starButtons = document.querySelectorAll('.star-btn');
+    const ratingLabel = document.getElementById('ratingLabel');
+    const starsInput = document.getElementById('stars');
+    let currentRating = 0;
+
+    starButtons.forEach((button, index) => {
+      button.addEventListener('click', () => {
+        const rating = index + 1;
+        currentRating = rating;
+        starsInput.value = rating;
+        
+        // Update star display
+        starButtons.forEach((star, starIndex) => {
+          if (starIndex < rating) {
+            star.classList.add('active');
+          } else {
+            star.classList.remove('active');
+          }
+        });
+        
+        // Update rating label
+        const ratingTexts = [
+          'Poor',
+          'Fair', 
+          'Good',
+          'Very Good',
+          'Excellent'
+        ];
+        ratingLabel.textContent = ratingTexts[rating - 1];
+        
+        // Show tipping section after rating is selected
+        showTippingSection();
+      });
+      
+      // Hover effects
+      button.addEventListener('mouseenter', () => {
+        const hoverRating = index + 1;
+        starButtons.forEach((star, starIndex) => {
+          if (starIndex < hoverRating) {
+            star.classList.add('hover');
+          } else {
+            star.classList.remove('hover');
+          }
+        });
+      });
+      
+      button.addEventListener('mouseleave', () => {
+        starButtons.forEach(star => star.classList.remove('hover'));
+        // Restore current rating display
+        starButtons.forEach((star, starIndex) => {
+          if (starIndex < currentRating) {
+            star.classList.add('active');
+          } else {
+            star.classList.remove('active');
+          }
+        });
+      });
+    });
+
+    // Form validation
+    const validateForm = () => {
+      let isValid = true;
+      
+      // Customer name validation
+      const customerName = document.getElementById('customerName').value.trim();
+      if (!customerName) {
+        showError('customerName', 'Please enter your name');
+        isValid = false;
+      } else if (customerName.length < 2) {
+        showError('customerName', 'Name must be at least 2 characters');
+        isValid = false;
+      } else {
+        clearError('customerName');
+      }
+
+      // Rating validation
+      if (!currentRating) {
+        showError('stars', 'Please select a rating');
+        isValid = false;
+      } else {
+        clearError('stars');
+      }
+
+      return isValid;
+    };
+
+    // Real-time validation
+    document.getElementById('customerName').addEventListener('blur', () => {
+      const value = document.getElementById('customerName').value.trim();
+      if (value && value.length < 2) {
+        showError('customerName', 'Name must be at least 2 characters');
+      } else if (value) {
+        clearError('customerName');
+      }
+    });
+
+    // Form submission with Supabase
+    document.getElementById('feedbackForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      // Validate
+      if (!currentRating) {
+        showError('stars', 'Please select a rating before submitting.');
+        return;
+      }
+      
+      const form = e.target;
+      const submitBtn = document.getElementById('submitBtn');
+      const btnText = submitBtn.querySelector('.btn-text');
+      const btnLoading = submitBtn.querySelector('.btn-loading');
+      const resultDiv = document.getElementById('result');
+
+      // Show loading state
+      submitBtn.disabled = true;
+      btnText.style.display = 'none';
+      btnLoading.style.display = 'inline-block';
+      resultDiv.style.display = 'none';
+
+      try {
+        // Get bubbler ID from job assignment if jobId is provided
+        let bubblerId = null;
+        if (form.jobId.value) {
+          const { data: jobAssignment } = await supabase
+            .from('job_assignments')
+            .select('bubbler_id')
+            .eq('id', form.jobId.value)
+            .single();
+          
+          if (jobAssignment) {
+            bubblerId = jobAssignment.bubbler_id;
+          }
+        }
+
+        // Prepare rating data for Supabase
+        const ratingData = {
+          bubbler_id: bubblerId,
+          job_assignment_id: form.jobId.value || null,
+          rating: parseInt(form.stars.value),
+          review: sanitizeInput(form.comment.value),
+          customer_name: sanitizeInput(form.customerName.value),
+          service_type: sanitizeInput(form.serviceType.value),
+          created_at: new Date().toISOString()
+        };
+
+        console.log('Submitting rating to Supabase:', ratingData);
+
+        // Insert rating into Supabase
+        const { data, error } = await supabase
+          .from('ratings')
+          .insert([ratingData]);
+
+        if (error) {
+          console.error('Supabase error:', error);
+          throw new Error(`Database error: ${error.message}`);
+        }
+
+        console.log('Rating submitted successfully:', data);
+
+        // Hide form and show success message
+        form.style.display = "none";
+        resultDiv.textContent = "Thank you for your feedback! We appreciate you taking the time to share your experience.";
+        resultDiv.className = "result success";
+        resultDiv.style.display = "block";
+        resultDiv.scrollIntoView({ behavior: "smooth", block: "center" });
+
+        // Show tipping section after successful submission
+        showTippingSection();
+
+      } catch (error) {
+        console.error('Submission error:', error);
+        
+        // Show error message
+        resultDiv.textContent = `Error: ${error.message || 'Something went wrong. Please try again.'}`;
+        resultDiv.className = "result error";
+        resultDiv.style.display = "block";
+        resultDiv.scrollIntoView({ behavior: "smooth", block: "center" });
+      } finally {
+        submitBtn.disabled = false;
+        btnText.style.display = 'inline';
+        btnLoading.style.display = 'none';
+      }
+    });
+
+    // Tipping functionality
+    function showTippingSection() {
+      // Check if tipping section already exists
+      const existingTippingSection = document.querySelector('.tip-thankyou');
+      if (existingTippingSection) {
+        return; // Already exists, don't create another
+      }
+
+      const tippingSection = document.createElement('div');
+      tippingSection.className = 'tip-thankyou';
+      tippingSection.style.cssText = `
+        margin-top: 2rem;
+        padding: 2rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 1.2rem;
+        border: 2px solid #4fd1c5;
+        text-align: center;
+      `;
+      
+      tippingSection.innerHTML = `
+        <h3 style="color: #2d3748; margin-bottom: 1rem; font-size: 1.5rem;">Want to leave a tip?</h3>
+        <p style="color: #4a5568; margin-bottom: 1.5rem; font-size: 1.1rem;">Your BUBBLER will appreciate it! 100% of tips go directly to them.</p>
+        
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1.5rem;">
+          <button onclick="startTipCheckout(5)" style="background: #4fd1c5; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 1rem;">$5 Tip</button>
+          <button onclick="startTipCheckout(10)" style="background: #4fd1c5; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 1rem;">$10 Tip</button>
+          <button onclick="startTipCheckout(15)" style="background: #4fd1c5; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 1rem;">$15 Tip</button>
+        </div>
+        
+        <div style="display: flex; gap: 1rem; justify-content: center; align-items: center; flex-wrap: wrap; margin-bottom: 2rem;">
+          <input type="number" id="customTip" placeholder="Other amount" style="padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; width: 150px;" min="1" step="0.01" />
+          <button onclick="startTipCheckoutCustom()" style="background: #1086bc; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 1rem;">Send Custom Tip</button>
+        </div>
+        
+        <hr style="margin: 2rem 0; border: none; border-top: 1px solid #ddd;">
+        
+        <div style="text-align: center;">
+          <p style="color: #6b7280; margin-bottom: 1rem; font-size: 1rem;">Ready to submit your feedback?</p>
+          <div id="moved-submit-button-container"></div>
+        </div>
+      `;
+      
+      document.querySelector('.form-container').appendChild(tippingSection);
+      
+      // Move the submit button below the tipping section
+      const submitButtonContainer = document.getElementById('submit-button-container');
+      const movedSubmitButtonContainer = document.getElementById('moved-submit-button-container');
+      
+      if (submitButtonContainer && movedSubmitButtonContainer) {
+        const submitButton = submitButtonContainer.querySelector('.submit-btn');
+        if (submitButton) {
+          movedSubmitButtonContainer.appendChild(submitButton);
+        }
+      }
+    }
+
+    async function startTipCheckout(amount) {
+      const orderId = getUrlParam('order_id');
+      const bubblerId = getUrlParam('bubbler_id');
+
+      try {
+        const response = await fetch('/api/create-tip-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ amount, orderId, bubblerId }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to create tip session');
+        }
+
+        const { checkoutUrl } = await response.json();
+        window.location.href = checkoutUrl;
+      } catch (error) {
+        console.error('Error creating tip session:', error);
+        alert('Unable to process tip at this time. Please try again later.');
+      }
+    }
+
+    async function startTipCheckoutCustom() {
+      const customAmount = parseFloat(document.getElementById('customTip').value);
+      if (customAmount > 0) {
+        await startTipCheckout(customAmount);
+      } else {
+        alert('Please enter a valid tip amount.');
+      }
+    }
+
+    function getUrlParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
+
+    function showResult(message, type) {
+      const resultDiv = document.getElementById('result');
+      resultDiv.textContent = message;
+      resultDiv.className = `result ${type}`;
+      resultDiv.style.display = 'block';
+      
+      // Scroll to result smoothly
+      resultDiv.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'center',
+        inline: 'nearest'
+      });
+    }
+
+    // Prevent form resubmission on page refresh
+    if (window.history.replaceState) {
+      window.history.replaceState(null, null, window.location.href);
+    }
+
+    // Focus management for accessibility
+    document.addEventListener('DOMContentLoaded', () => {
+      const firstInput = document.getElementById('customerName');
+      if (firstInput) {
+        firstInput.focus();
+      }
+      
+      // Check if customer just completed a tip
+      const urlParams = new URLSearchParams(window.location.search);
+      const tipSuccess = urlParams.get('tip_success');
+      const tipAmount = urlParams.get('tip_amount');
+      
+      if (tipSuccess === 'true' && tipAmount) {
+        showTipSuccessMessage(tipAmount);
+      }
+    });
+
+    // Show tip success message
+    function showTipSuccessMessage(amount) {
+      const successMessage = document.createElement('div');
+      successMessage.style.cssText = `
+        margin: 1rem 0;
+        padding: 1rem;
+        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        border: 1px solid #28a745;
+        border-radius: 8px;
+        color: #155724;
+        text-align: center;
+        font-weight: 600;
+      `;
+      successMessage.innerHTML = `
+        ✅ Thank you for your $${amount} tip! Your BUBBLER will appreciate it.
+      `;
+      
+      // Insert at the top of the form container
+      const formContainer = document.querySelector('.form-container');
+      if (formContainer) {
+        formContainer.insertBefore(successMessage, formContainer.firstChild);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+          successMessage.style.opacity = '0';
+          successMessage.style.transition = 'opacity 0.5s ease';
+          setTimeout(() => {
+            if (successMessage.parentNode) {
+              successMessage.parentNode.removeChild(successMessage);
+            }
+          }, 500);
+        }, 5000);
+      }
+    }
+
+    // Handle offline/online status
+    window.addEventListener('online', () => {
+      console.log('Connection restored');
+    });
+
+    window.addEventListener('offline', () => {
+      showResult('You appear to be offline. Please check your connection and try again.', 'error');
+    });
+
+  </script>
+</body>
+</html>

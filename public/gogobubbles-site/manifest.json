@@ -1,0 +1,92 @@
+{
+  "name": "GoGoBubbles - Premium Cleaning Services",
+  "short_name": "GoGoBubbles",
+  "description": "Premium on-demand cleaning services including mobile car wash, home cleaning, and laundry services",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1086bc",
+  "theme_color": "#1086bc",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["lifestyle", "business", "utilities"],
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Book Car Wash",
+      "short_name": "Car Wash",
+      "description": "Book a mobile car wash service",
+      "url": "/booking.html?service=car-wash",
+      "icons": [
+        {
+          "src": "/mobilecarwash.webp",
+          "sizes": "96x96",
+          "type": "image/webp"
+        }
+      ]
+    },
+    {
+      "name": "Book Home Cleaning",
+      "short_name": "Home Clean",
+      "description": "Book a home cleaning service",
+      "url": "/booking.html?service=home-cleaning",
+      "icons": [
+        {
+          "src": "/homecleaning.webp",
+          "sizes": "96x96",
+          "type": "image/webp"
+        }
+      ]
+    },
+    {
+      "name": "Book Laundry",
+      "short_name": "Laundry",
+      "description": "Book a laundry service",
+      "url": "/booking.html?service=laundry",
+      "icons": [
+        {
+          "src": "/laundry.webp",
+          "sizes": "96x96",
+          "type": "image/webp"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot-wide.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "/screenshot-narrow.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "edge_side_panel": {
+    "preferred_width": 400
+  }
+} 

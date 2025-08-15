@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GOGOBUBBLES Careers & Subcontractor Jobs</title>
+  <meta name="description" content="Join GOGOBUBBLES as a cleaner, driver, or subcontractor. View open jobs and apply to join our growing team!" />
+  <!-- No noindex tag: allow search engines to index -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', Arial, sans-serif;
+      background: linear-gradient(120deg, #f8fafc 0%, #e6f3ff 100%);
+      margin: 0;
+      min-height: 100vh;
+      color: #222;
+    }
+    .jobs-container {
+      max-width: 540px;
+      margin: 3rem auto 2rem auto;
+      background: #fff;
+      border-radius: 1.5rem;
+      box-shadow: 0 4px 24px rgba(44,62,80,0.10);
+      padding: 2.5rem 1.5rem 2.5rem 1.5rem;
+    }
+    h1 {
+      text-align: center;
+      font-size: 2.1rem;
+      font-weight: 700;
+      margin-bottom: 0.7em;
+      color: #1086bc;
+    }
+    .jobs-intro {
+      text-align: center;
+      font-size: 1.1rem;
+      margin-bottom: 2.2em;
+      color: #444;
+    }
+    .search-box {
+      display: flex;
+      gap: 0.5em;
+      margin-bottom: 2em;
+      justify-content: center;
+    }
+    .search-box input {
+      flex: 1;
+      padding: 0.8em 1em;
+      border-radius: 1em;
+      border: 1.5px solid #e0e0e0;
+      font-size: 1em;
+      font-family: inherit;
+    }
+    .job-listing {
+      background: #f8fafd;
+      border-radius: 1em;
+      padding: 1.2em 1em;
+      margin-bottom: 1.2em;
+      box-shadow: 0 1px 4px rgba(44,62,80,0.04);
+    }
+    .job-title {
+      font-weight: 600;
+      font-size: 1.15em;
+      color: #2ed8c3;
+      margin-bottom: 0.2em;
+    }
+    .job-desc {
+      color: #444;
+      font-size: 1em;
+      margin-bottom: 0.5em;
+    }
+    .job-location {
+      font-size: 0.98em;
+      color: #1086bc;
+      margin-bottom: 0.5em;
+    }
+    .job-apply {
+      display: inline-block;
+      background: #1086bc;
+      color: #fff;
+      border-radius: 1em;
+      padding: 0.5em 1.2em;
+      font-weight: 600;
+      text-decoration: none;
+      font-size: 1em;
+      margin-top: 0.5em;
+      transition: background 0.2s;
+    }
+    .job-apply:hover {
+      background: #2ed8c3;
+    }
+    @media (max-width: 600px) {
+      .jobs-container {
+        padding: 1.2rem 0.3rem 2.5rem 0.3rem;
+        margin: 1rem 0 2rem 0;
+        max-width: 100vw;
+      }
+      h1 {
+        font-size: 1.4rem;
+      }
+    }
+    
+    /* Modal Styles */
+    .modal {
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      overflow-y: auto;
+    }
+    
+    .modal-content {
+      background-color: #fff;
+      margin: 2rem auto;
+      padding: 2rem;
+      border-radius: 1.5rem;
+      width: 90%;
+      max-width: 600px;
+      position: relative;
+      box-shadow: 0 4px 24px rgba(44,62,80,0.15);
+    }
+    
+    .close {
+      position: absolute;
+      right: 1.5rem;
+      top: 1rem;
+      font-size: 2rem;
+      font-weight: bold;
+      cursor: pointer;
+      color: #666;
+    }
+    
+    .close:hover {
+      color: #000;
+    }
+    
+    /* Form Styles */
+    .application-form {
+      margin-top: 1rem;
+    }
+    
+    .form-section {
+      margin-bottom: 1.5rem;
+    }
+    
+    .form-section label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #333;
+    }
+    
+    .form-section input,
+    .form-section select,
+    .form-section textarea {
+      width: 100%;
+      padding: 0.8rem;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 0.8rem;
+      font-size: 1rem;
+      font-family: inherit;
+      background: #f8fafd;
+    }
+    
+    .form-section textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+    
+    .form-row {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    
+    .form-row .form-section {
+      flex: 1;
+      margin-bottom: 0;
+    }
+    
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-top: 0.5rem;
+    }
+    
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .checkbox-item input[type="checkbox"] {
+      width: auto;
+    }
+    
+    .radio-group {
+      display: flex;
+      gap: 1.5rem;
+      margin-top: 0.5rem;
+    }
+    
+    .radio-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .radio-item input[type="radio"] {
+      width: auto;
+      margin: 0;
+    }
+    
+    .radio-item label {
+      margin: 0;
+      font-weight: normal;
+      cursor: pointer;
+    }
+    
+    label.required::after {
+      content: " *";
+      color: #e53e3e;
+    }
+    
+    .label-note {
+      font-size: 0.85rem;
+      font-style: italic;
+      font-weight: normal;
+      color: #666;
+      margin-left: 0.5rem;
+    }
+    
+    .submit-btn {
+      background: #1086bc;
+      color: #fff;
+      border: none;
+      border-radius: 1rem;
+      padding: 1rem 2rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 1rem;
+      transition: background 0.2s;
+    }
+    
+    .submit-btn:hover {
+      background: #0f7aa8;
+    }
+    
+    .role-header {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid #e0e0e0;
+    }
+    
+    .role-header h2 {
+      color: #1086bc;
+      margin-bottom: 0.5rem;
+    }
+    
+    .role-header p {
+      color: #666;
+      font-style: italic;
+    }
+    
+    @media (max-width: 600px) {
+      .modal-content {
+        margin: 1rem;
+        padding: 1.5rem;
+        width: calc(100% - 2rem);
+      }
+      
+      .form-row {
+        flex-direction: column;
+        gap: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="jobs-container">
+    <img src="bubblers_logo.png" alt="Bubbler Logo" style="display: block; margin: 0 auto 0.5rem auto; max-width: 180px;">
+          <h1>Join GOGOBUBBLES. Start Earning Your Way.</h1>
+    <div class="jobs-intro">
+              Set your own schedule. Choose the jobs you want. Get paid fast. Whether you're washing cars, cleaning homes, handling laundry - or doing it all - you're in control. We're building something fresh in Houston. If you've got hustle, reliability, and pride in a job well done, GOGOBUBBLES is your next move. Apply as a ShineBubbler, SparkleBubbler, FreshBubbler - or go all in as an EliteBubbler. Your city needs you.
+    </div>
+    <div class="search-box">
+      <input type="text" id="job-search" placeholder="Search jobs by title, location, or keyword..." />
+    </div>
+    <div id="job-listings">
+      <div class="job-listing" data-title="Shine Bubbler (Mobile Car Wash)" data-location="Houston" data-desc="Become a shine bubler - our mobile car wash experts who provide on-site car washing and detailing services based on tiered packages throughout the Houston Tri-State area.">
+        <div class="job-title">ShineBubbler (Mobile Car Wash)</div>
+        <div class="job-location">Houston, TX</div>
+        <div class="job-desc">Become a Shine Bubbler - our mobile car wash specialists who deliver exterior and interior detailing on the go. You'll perform tiered wash services with flexible hours across the Houston Tri-State area. Must have your own vehicle, basic supplies, and be customer-friendly. Equipment rentals available if needed.</div>
+        <button type="button" class="job-apply" onclick="showApplicationForm('shine')">Apply Now</button>
+      </div>
+      <div class="job-listing" data-title="Sparkle Bubbler (Home Cleaning)" data-location="Houston" data-desc="Become a sparkle bubbler - our home cleaning pros who bring shine and peace of mind.">
+        <div class="job-title">SparkleBubbler (Home Cleaning)</div>
+        <div class="job-location">Houston, TX</div>
+        <div class="job-desc">Become a Sparkle Bubbler - our home cleaning pros who bring shine and peace of mind. You'll provide standard and deep cleaning for homes and apartments based on tiered packages all around the Houston Tri-State area. Flexible hours. Must have basic cleaning supplies, own transportation required.</div>
+        <button type="button" class="job-apply" onclick="showApplicationForm('sparkle')">Apply Now</button>
+      </div>
+      <div class="job-listing" data-title="Fresh Bubbler (Laundry)" data-location="Houston" data-desc="Become a fresh bubbler our laundry service specialists who handle door-to-door pickup, washing, folding, and delivery.">
+        <div class="job-title">FreshBubbler (Laundry)</div>
+        <div class="job-location">Houston, TX</div>
+        <div class="job-desc">Become a Fresh Bubbler our laundry service specialists who handle door-to-door pickup, washing, folding, and delivery in the Houston Tri-State area. You'll help busy customers save time while ensuring their clothes return fresh, clean, and carefully sorted. Must have reliable transportation, able to lift and carry laundry bags (10-30 lbs) and access to washer/dryer or laundromat.</div>
+        <button type="button" class="job-apply" onclick="showApplicationForm('fresh')">Apply Now</button>
+      </div>
+      <div class="job-listing" data-title="Elite Bubbler (Dual-Service Role)" data-location="Houston" data-desc="Become an elite bubbler- our versatile pros approved to handle any two GoGoBubbles service.">
+        <div class="job-title">EliteBubbler (Dual-Service Role)</div>
+        <div class="job-location">Houston, TX</div>
+        <div class="job-desc">Become an Elite Bubbler- our versatile pros approved to handle any two GOGOBUBBLES service (Mobile Car Wash + Laundry or Home Cleaning + Laundry). Earn more by cross-sourcing jobs and providing high-quality service across specialties. Flexible hours, must have your own transportation and basic supplies. Elite status available to experienced Bubblers only.</div>
+        <button type="button" class="job-apply" onclick="showApplicationForm('elite')">Apply Now</button>
+      </div>
+      <!-- Add more job listings here -->
+    </div>
+    
+    <!-- Application Form Modal -->
+    <div id="application-modal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <span class="close" onclick="closeApplicationForm()">&times;</span>
+        <div id="application-form-container"></div>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // Supabase configuration
+    const supabaseUrl = 'https://your-project.supabase.co';
+    const supabaseKey = 'your-anon-key';
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+    // Simple search/filter for job listings
+    document.getElementById('job-search').addEventListener('input', function() {
+      const val = this.value.trim().toLowerCase();
+      document.querySelectorAll('.job-listing').forEach(listing => {
+        const title = listing.dataset.title.toLowerCase();
+        const location = listing.dataset.location.toLowerCase();
+        const desc = listing.dataset.desc.toLowerCase();
+        if (title.includes(val) || location.includes(val) || desc.includes(val)) {
+          listing.style.display = '';
+        } else {
+          listing.style.display = 'none';
+        }
+      });
+    });
+
+    // Application form functions
+    function showApplicationForm(role) {
+      const modal = document.getElementById('application-modal');
+      const container = document.getElementById('application-form-container');
+      
+      container.innerHTML = generateApplicationForm(role);
+      modal.style.display = 'block';
+      
+      // Close modal when clicking outside
+      modal.onclick = function(event) {
+        if (event.target === modal) {
+          closeApplicationForm();
+        }
+      };
+    }
+
+    function closeApplicationForm() {
+      document.getElementById('application-modal').style.display = 'none';
+    }
+
+    function generateApplicationForm(role) {
+      const roleData = {
+        shine: {
+          title: 'ShineBubbler Application',
+          subtitle: 'Mobile Car Wash Specialist',
+          color: '#4299e1'
+        },
+        sparkle: {
+          title: 'SparkleBubbler Application',
+          subtitle: 'Home Cleaning Professional',
+          color: '#2ed8c3'
+        },
+        fresh: {
+          title: 'FreshBubbler Application',
+          subtitle: 'Laundry Service Specialist',
+          color: '#4fd1c5'
+        },
+        elite: {
+          title: 'EliteBubbler Application',
+          subtitle: 'Internal Application for Existing Bubblers',
+          color: '#f6ad55'
+        }
+      };
+
+      const data = roleData[role];
+      
+      let formHTML = `
+        <div class="role-header">
+          <h2>${data.title}</h2>
+          <p>${data.subtitle}</p>
+        </div>
+        <form class="application-form" onsubmit="submitApplication(event, '${role}')">
+          <div class="form-row">
+            <div class="form-section">
+              <label for="firstName" class="required">First Name</label>
+              <input type="text" id="firstName" name="firstName" required>
+            </div>
+            <div class="form-section">
+              <label for="lastName" class="required">Last Name</label>
+              <input type="text" id="lastName" name="lastName" required>
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-section">
+              <label for="email" class="required">Email Address</label>
+              <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-section">
+              <label for="phone" class="required">Phone Number</label>
+              <input type="tel" id="phone" name="phone" required>
+            </div>
+          </div>
+      `;
+
+      if (role === 'elite') {
+        formHTML += `
+          <div class="form-section" style="text-align: center;">
+              <p style="color: #444; font-size: 1.1rem; margin-top: 1.5rem; margin-bottom: 2rem;">Ready to level up? Apply to become an EliteBubbler and expand your earning potential by taking on a second service category.</p>
+          </div>
+
+          <div class="form-section">
+            <label for="currentRole" class="required">Which GoGoBubbles role are you currently working in?</label>
+            <select id="currentRole" name="currentRole" required>
+              <option value="">Select current role</option>
+              <option value="shine">ShineBubbler (Mobile Car Wash)</option>
+              <option value="sparkle">SparkleBubbler (Home Cleaning)</option>
+              <option value="fresh">FreshBubbler (Laundry Service)</option>
+            </select>
+          </div>
+
+          <div class="form-section">
+            <label for="additionalService" class="required">Which additional service are you seeking to qualify for?</label>
+            <p style="color: #666; font-size: 0.85rem; margin-bottom: 0.5rem; font-style: italic;">Note: applicants may only request one additional role at a time.</p>
+            <select id="additionalService" name="additionalService" required>
+              <option value="">Select additional service</option>
+              <option value="shine">ShineBubbler (Mobile Car Wash)</option>
+              <option value="sparkle">SparkleBubbler (Home Cleaning)</option>
+              <option value="fresh">FreshBubbler (Laundry Service)</option>
+            </select>
+          </div>
+
+          <div class="form-section">
+            <label for="jobsCompleted" class="required">Have you completed at least 5 GoGoBubbles jobs in your current role?</label>
+            <p style="color: #666; font-size: 0.85rem; margin-bottom: 0.5rem; font-style: italic;">You must meet this milestone to qualify.</p>
+            <div class="radio-group">
+              <div class="radio-item">
+                <input type="radio" id="jobsCompleted_yes" name="jobsCompleted" value="yes" required>
+                <label for="jobsCompleted_yes">Yes</label>
+              </div>
+              <div class="radio-item">
+                <input type="radio" id="jobsCompleted_no" name="jobsCompleted" value="no" required>
+                <label for="jobsCompleted_no">No</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <label for="sameDayAvailability" class="required">Are you available to perform both service types within the same day if needed?</label>
+            <div class="radio-group">
+              <div class="radio-item">
+                <input type="radio" id="sameDayAvailability_yes" name="sameDayAvailability" value="yes" required>
+                <label for="sameDayAvailability_yes">Yes</label>
+              </div>
+              <div class="radio-item">
+                <input type="radio" id="sameDayAvailability_no" name="sameDayAvailability" value="no" required>
+                <label for="sameDayAvailability_no">No</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <label for="jobFlexibility" class="required">Do you have flexibility to accept jobs for either service type within your scheduled hours?</label>
+            <div class="radio-group">
+              <div class="radio-item">
+                <input type="radio" id="jobFlexibility_yes" name="jobFlexibility" value="yes" required>
+                <label for="jobFlexibility_yes">Yes</label>
+              </div>
+              <div class="radio-item">
+                <input type="radio" id="jobFlexibility_no" name="jobFlexibility" value="no" required>
+                <label for="jobFlexibility_no">No</label>
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-section">
+            <label for="travelDistance" class="required">This job may require you to drive up to 45 minutes outside your home address. How far are you willing to travel?</label>
+            <select id="travelDistance" name="travelDistance" required>
+              <option value="">Select distance</option>
+              <option value="5">5 minutes</option>
+              <option value="10">10 minutes</option>
+              <option value="15">15 minutes</option>
+              <option value="25">25 minutes</option>
+              <option value="30">30 minutes</option>
+              <option value="45">45 minutes</option>
+              <option value="60">60 minutes</option>
+            </select>
+          </div>
+          
+          <div class="form-section">
+            <label for="elitePrimaryLanguage" class="required">Is English your primary language?</label>
+            <div class="radio-group">
+              <div class="radio-item">
+                <input type="radio" id="elitePrimaryLanguage_yes" name="elitePrimaryLanguage" value="yes" required onchange="toggleEliteLanguageFollowup(this.value)">
+                <label for="elitePrimaryLanguage_yes">Yes</label>
+              </div>
+              <div class="radio-item">
+                <input type="radio" id="elitePrimaryLanguage_no" name="elitePrimaryLanguage" value="no" required onchange="toggleEliteLanguageFollowup(this.value)">
+                <label for="elitePrimaryLanguage_no">No</label>
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-section" id="eliteLanguageFollowup" style="display: none;">
+            <label for="eliteEnglishCommunication" class="required">Are you comfortable communicating in English with customers on-site and via phone or text?</label>
+            <div class="radio-group">
+              <div class="radio-item">
+                <input type="radio" id="eliteEnglishCommunication_yes" name="eliteEnglishCommunication" value="yes">
+                <label for="eliteEnglishCommunication_yes">Yes</label>
+              </div>
+              <div class="radio-item">
+                <input type="radio" id="eliteEnglishCommunication_no" name="eliteEnglishCommunication" value="no">
+                <label for="eliteEnglishCommunication_no">No</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <label for="standardsAgreement" class="required">Do you understand that EliteBubblers are expected to maintain high standards across both service types, and failure to do so may result in removal from elite status?</label>
+            <div class="radio-group">
+              <div class="radio-item">
+                <input type="radio" id="standardsAgreement_yes" name="standardsAgreement" value="yes" required>
+                <label for="standardsAgreement_yes">Yes, I understand and agree</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <label for="whyElite" class="required">Why do you want to become an EliteBubbler?</label>
+            <textarea id="whyElite" name="whyElite" placeholder="Tell us what interests you about this opportunity..." required></textarea>
+          </div>
+
+          <div class="form-section">
+            <label for="mentoringInterest">Are you interested in mentoring or training future Bubblers once you've gained Elite status?</label>
+            <div class="radio-group">
+              <div class="radio-item">
+                <input type="radio" id="mentoring_yes" name="mentoringInterest" value="yes">
+                <label for="mentoring_yes">Yes</label>
+              </div>
+              <div class="radio-item">
+                <input type="radio" id="mentoring_no" name="mentoringInterest" value="no">
+                <label for="mentoring_no">No</label>
+              </div>
+              <div class="radio-item">
+                <input type="radio" id="mentoring_maybe" name="mentoringInterest" value="maybe">
+                <label for="mentoring_maybe">Maybe</label>
+              </div>
+            </div>
+          </div>
+        `;
+      } else {
+        formHTML += `
+          <div class="form-section">
+            <label for="address" class="required">Home Address</label>
+            <input type="text" id="address" name="address" required>
+            <div class="label-note" style="margin-top: 0.2rem;">Street Address, City, State, Zip Code (Apt, Suite, etc. optional)</div>
+          </div>
+          
+          <!-- Screening Questions -->
+          <div class="form-section">
+            <label class="required">Screening Questions</label>
+            <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem; font-style: italic;">Please answer each question:</p>
+            
+            <div class="form-section">
+              <label for="authorized" class="required">Are you legally authorized to work in the U.S.?</label>
+              <div class="radio-group">
+                <div class="radio-item">
+                  <input type="radio" id="authorized_yes" name="authorized" value="yes" required>
+                  <label for="authorized_yes">Yes</label>
+                </div>
+                <div class="radio-item">
+                  <input type="radio" id="authorized_no" name="authorized" value="no" required>
+                  <label for="authorized_no">No</label>
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-section">
+              <label for="age18" class="required">Are you 18 years of age or older?</label>
+              <div class="radio-group">
+                <div class="radio-item">
+                  <input type="radio" id="age18_yes" name="age18" value="yes" required>
+                  <label for="age18_yes">Yes</label>
+                </div>
+                <div class="radio-item">
+                  <input type="radio" id="age18_no" name="age18" value="no" required>
+                  <label for="age18_no">No</label>
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-section">
+              <label for="transportation" class="required">Do you have reliable transportation to reach job sites?</label>
+              <div class="radio-group">
+                <div class="radio-item">
+                  <input type="radio" id="transportation_yes" name="transportation" value="yes" required>
+                  <label for="transportation_yes">Yes</label>
+                </div>
+                <div class="radio-item">
+                  <input type="radio" id="transportation_no" name="transportation" value="no" required>
+                  <label for="transportation_no">No</label>
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-section">
+              <label for="travelDistance" class="required">This job may require you to drive up to 45 minutes outside your home address. How far are you willing to travel?</label>
+              <select id="travelDistance" name="travelDistance" required>
+                <option value="">Select distance</option>
+                <option value="5">5 minutes</option>
+                <option value="10">10 minutes</option>
+                <option value="15">15 minutes</option>
+                <option value="25">25 minutes</option>
+                <option value="30">30 minutes</option>
+                <option value="45">45 minutes</option>
+                <option value="60">60 minutes</option>
+              </select>
+            </div>
+            
+            <div class="form-section">
+              <label>Do you speak Spanish?</label>
+              <div class="radio-group">
+                <div class="radio-item">
+                  <input type="radio" id="spanish_yes" name="spanish" value="yes" onchange="toggleSpanishFollowup(this.value)">
+                  <label for="spanish_yes">Yes</label>
+                </div>
+                <div class="radio-item">
+                  <input type="radio" id="spanish_some" name="spanish" value="some" onchange="toggleSpanishFollowup(this.value)">
+                  <label for="spanish_some">Some</label>
+                </div>
+                <div class="radio-item">
+                  <input type="radio" id="spanish_no" name="spanish" value="no" onchange="toggleSpanishFollowup(this.value)">
+                  <label for="spanish_no">No</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section" id="spanishFollowup" style="display: none;">
+              <label for="spanishProficiency" class="required">What is your Spanish proficiency level?</label>
+              <select id="spanishProficiency" name="spanishProficiency">
+                <option value="">Select proficiency level</option>
+                <option value="fluent">Yes, I'm fluent in Spanish</option>
+                <option value="conversational">Conversational, I can hold a basic conversation in Spanish</option>
+                <option value="beginner">Beginner, I know some Spanish words and phrases</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="form-section">
+            <label for="experience" class="required">Relevant Experience</label>
+            <textarea id="experience" name="experience" placeholder="Describe your experience in this field..." required></textarea>
+          </div>
+          
+          <div class="form-section">
+            <label for="availability" class="required">Availability</label>
+            <select id="availability" name="availability" required>
+              <option value="">Select availability</option>
+              <option value="full-time">Full-time (40+ hours/week)</option>
+              <option value="part-time">Part-time (20-39 hours/week)</option>
+              <option value="flexible">Flexible (as needed)</option>
+              <option value="weekends">Weekends only</option>
+            </select>
+          </div>`;
+
+        // Language questions for Shine and Sparkle Bubblers
+        if (role === 'shine' || role === 'sparkle') {
+          formHTML += `
+            <div class="form-section">
+              <label for="primaryLanguage" class="required">Is English your primary language?</label>
+              <div class="radio-group">
+                <div class="radio-item">
+                  <input type="radio" id="primaryLanguage_yes" name="primaryLanguage" value="yes" required onchange="toggleLanguageFollowup(this.value)">
+                  <label for="primaryLanguage_yes">Yes</label>
+                </div>
+                <div class="radio-item">
+                  <input type="radio" id="primaryLanguage_no" name="primaryLanguage" value="no" required onchange="toggleLanguageFollowup(this.value)">
+                  <label for="primaryLanguage_no">No</label>
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-section" id="languageFollowup" style="display: none;">
+              <label for="englishCommunication" class="required">Can you comfortably communicate with customers in English?</label>
+              <select id="englishCommunication" name="englishCommunication">
+                <option value="">Select your English proficiency</option>
+                <option value="fluent">Yes, I'm fluent in English</option>
+                <option value="conversational">I speak conversational English</option>
+                <option value="limited">I don't speak English well yet</option>
+                <option value="bilingual">I'm fluent in both English and Spanish</option>
+                <option value="spanishPreferred">I prefer Spanish but can understand English</option>
+              </select>
+            </div>`;
+        }
+        
+        // Role-specific questions
+        if (role === 'shine') {
+          formHTML += `
+            <div class="form-section">
+              <label>Vehicle & Equipment Requirements</label>
+              <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem; font-style: italic;">ShineBubblers are required to use their own power and water supplies. However, equipment rental is available.</p>
+              
+              <div class="form-section">
+                <label for="equipmentRental">Are you interested in renting equipment like power washer and/or water tank from us?</label>
+                <p style="color: #666; font-size: 0.85rem; margin-bottom: 0.5rem; font-style: italic;">Renting is optional but helps you earn more on specific jobs.</p>
+                <div class="radio-group">
+                  <div class="radio-item">
+                    <input type="radio" id="equipmentRental_yes" name="equipmentRental" value="yes">
+                    <label for="equipmentRental_yes">Yes</label>
+                  </div>
+                  <div class="radio-item">
+                    <input type="radio" id="equipmentRental_no" name="equipmentRental" value="no">
+                    <label for="equipmentRental_no">No</label>
+                  </div>
+                  <div class="radio-item">
+                    <input type="radio" id="equipmentRental_maybe" name="equipmentRental" value="maybe">
+                    <label for="equipmentRental_maybe">Maybe</label>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="form-section">
+                <label for="carWashExperience" class="required">Have you ever done car detailing or mobile car washing before?</label>
+                <div class="radio-group">
+                  <div class="radio-item">
+                    <input type="radio" id="carWashExperience_yes" name="carWashExperience" value="yes" onchange="toggleExperienceDetails(this.value)" required>
+                    <label for="carWashExperience_yes">Yes</label>
+                  </div>
+                  <div class="radio-item">
+                    <input type="radio" id="carWashExperience_no" name="carWashExperience" value="no" onchange="toggleExperienceDetails(this.value)" required>
+                    <label for="carWashExperience_no">No</label>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="form-section" id="experienceDetails" style="display: none;">
+                <label for="experienceDescription">If yes, please describe your experience (e.g. years, type of jobs, equipment used)</label>
+                <textarea id="experienceDescription" name="experienceDescription" placeholder="Describe your car washing/detailing experience..." required></textarea>
+              </div>
+              
+              <div class="form-section">
+                <label for="weatherConditions" class="required">Are you comfortable working outside in various weather conditions?</label>
+                <div class="radio-group">
+                  <div class="radio-item">
+                    <input type="radio" id="weatherConditions_yes" name="weatherConditions" value="yes" required>
+                    <label for="weatherConditions_yes">Yes</label>
+                  </div>
+                  <div class="radio-item">
+                    <input type="radio" id="weatherConditions_no" name="weatherConditions" value="no" required>
+                    <label for="weatherConditions_no">No</label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-section">
+                <label class="required">Do you own or have access to any of the following? <span class="label-note">(Select all that apply)</span></label>
+                <div class="checkbox-group">
+                  <div class="checkbox-item">
+                    <input type="checkbox" id="equip_power_washer" name="equipment_owned" value="power_washer" onclick="handleEquipmentSelection(this)">
+                    <label for="equip_power_washer">Power washer</label>
+                  </div>
+                  <div class="checkbox-item">
+                    <input type="checkbox" id="equip_hose_tank" name="equipment_owned" value="hose_tank" onclick="handleEquipmentSelection(this)">
+                    <label for="equip_hose_tank">Hose or water tank</label>
+                  </div>
+                  <div class="checkbox-item">
+                    <input type="checkbox" id="equip_solutions" name="equipment_owned" value="solutions" onclick="handleEquipmentSelection(this)">
+                    <label for="equip_solutions">Cleaning solution and soap</label>
+                  </div>
+                  <div class="checkbox-item">
+                    <input type="checkbox" id="equip_cords" name="equipment_owned" value="cords" onclick="handleEquipmentSelection(this)">
+                    <label for="equip_cords">Extension cords</label>
+                  </div>
+                  <div class="checkbox-item">
+                    <input type="checkbox" id="equip_towels" name="equipment_owned" value="towels" onclick="handleEquipmentSelection(this)">
+                    <label for="equip_towels">Drying towels</label>
+                  </div>
+                  <div class="checkbox-item">
+                    <input type="checkbox" id="equip_vacuum" name="equipment_owned" value="vacuum" onclick="handleEquipmentSelection(this)">
+                    <label for="equip_vacuum">Vacuum</label>
+                  </div>
+                  <div class="checkbox-item">
+                    <input type="checkbox" id="equip_bucket" name="equipment_owned" value="bucket" onclick="handleEquipmentSelection(this)">
+                    <label for="equip_bucket">Bucket</label>
+                  </div>
+                  <div class="checkbox-item">
+                    <input type="checkbox" id="equip_brushes" name="equipment_owned" value="brushes" onclick="handleEquipmentSelection(this)">
+                    <label for="equip_brushes">Brushes</label>
+                  </div>
+                  <div class="checkbox-item">
+                    <input type="checkbox" id="equip_inverter" name="equipment_owned" value="inverter" onclick="handleEquipmentSelection(this)">
+                    <label for="equip_inverter">Car power inverter and/or own power source</label>
+                  </div>
+                  <div class="checkbox-item">
+                    <input type="checkbox" id="equip_upholstery_machine" name="equipment_owned" value="upholstery_machine" onclick="handleEquipmentSelection(this)">
+                    <label for="equip_upholstery_machine">Upholstery cleaner machine</label>
+                  </div>
+                  <div class="checkbox-item">
+                    <input type="checkbox" id="equip_microfiber_towels" name="equipment_owned" value="microfiber_towels" onclick="handleEquipmentSelection(this)">
+                    <label for="equip_microfiber_towels">Microfiber towels</label>
+                  </div>
+                  <div class="checkbox-item" style="width: 100%; border-top: 1px solid #eee; margin-top: 0.5rem; padding-top: 0.5rem;">
+                    <input type="checkbox" id="equip_none" name="equipment_owned" value="none" onclick="handleEquipmentSelection(this)">
+                    <label for="equip_none">None of the above</label>
+                  </div>
+                </div>
+              </div>
+            </div>`;
+        }
+        
+        if (role === 'sparkle') {
+          formHTML += `
+            <div class="form-section">
+              <label>Cleaning Supplies & Equipment</label>
+              <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem; font-style: italic;">SparkleBubblers need basic cleaning supplies to get started. Specialty equipment rental is available for specific jobs.</p>
+              
+              <div class="form-section">
+                <label class="required">Do you currently own basic cleaning supplies? <span class="label-note">(Select all that apply)</span></label>
+                <div class="checkbox-group">
+                  <div class="checkbox-item"><input type="checkbox" id="supply_mop" name="basic_supplies_owned" value="mop" onclick="handleSupplySelection(this)"><label for="supply_mop">Mop</label></div>
+                  <div class="checkbox-item"><input type="checkbox" id="supply_swiffer" name="basic_supplies_owned" value="swiffer_style_mop" onclick="handleSupplySelection(this)"><label for="supply_swiffer">Swiffer-style mop</label></div>
+                  <div class="checkbox-item"><input type="checkbox" id="supply_microfiber" name="basic_supplies_owned" value="microfiber_cloths" onclick="handleSupplySelection(this)"><label for="supply_microfiber">Microfiber cloths</label></div>
+                  <div class="checkbox-item"><input type="checkbox" id="supply_sponges" name="basic_supplies_owned" value="scrubbing_sponges" onclick="handleSupplySelection(this)"><label for="supply_sponges">Scrubbing sponges or pads</label></div>
+                  <div class="checkbox-item"><input type="checkbox" id="supply_trash_bags" name="basic_supplies_owned" value="trash_bags" onclick="handleSupplySelection(this)"><label for="supply_trash_bags">Trash bags</label></div>
+                  <div class="checkbox-item"><input type="checkbox" id="supply_caddy" name="basic_supplies_owned" value="cleaning_caddy" onclick="handleSupplySelection(this)"><label for="supply_caddy">Cleaning caddy or tote</label></div>
+                  <div class="checkbox-item"><input type="checkbox" id="supply_glass_cleaner" name="basic_supplies_owned" value="glass_cleaner" onclick="handleSupplySelection(this)"><label for="supply_glass_cleaner">Glass cleaner</label></div>
+                  <div class="checkbox-item"><input type="checkbox" id="supply_toilet_brush" name="basic_supplies_owned" value="toilet_brush" onclick="handleSupplySelection(this)"><label for="supply_toilet_brush">Toilet bowl brush</label></div>
+                  <div class="checkbox-item"><input type="checkbox" id="supply_oven_cleaner" name="basic_supplies_owned" value="oven_cleaner" onclick="handleSupplySelection(this)"><label for="supply_oven_cleaner">Oven cleaner</label></div>
+                  <div class="checkbox-item"><input type="checkbox" id="supply_bathroom_cleaner" name="basic_supplies_owned" value="bathroom_cleaner" onclick="handleSupplySelection(this)"><label for="supply_bathroom_cleaner">Bathroom cleaner</label></div>
+                  <div class="checkbox-item"><input type="checkbox" id="supply_all_purpose_cleaner" name="basic_supplies_owned" value="all_purpose_cleaner" onclick="handleSupplySelection(this)"><label for="supply_all_purpose_cleaner">All-purpose cleaner</label></div>
+                  <div class="checkbox-item"><input type="checkbox" id="supply_broom_dustpan" name="basic_supplies_owned" value="broom_and_dustpan" onclick="handleSupplySelection(this)"><label for="supply_broom_dustpan">Broom and Dustpan</label></div>
+                  <div class="checkbox-item"><input type="checkbox" id="supply_duster" name="basic_supplies_owned" value="duster" onclick="handleSupplySelection(this)"><label for="supply_duster">Duster</label></div>
+                  <div class="checkbox-item" style="width: 100%; border-top: 1px solid #eee; margin-top: 0.5rem; padding-top: 0.5rem;"><input type="checkbox" id="supply_none" name="basic_supplies_owned" value="none" onclick="handleSupplySelection(this)"><label for="supply_none">None of the above</label></div>
+                </div>
+              </div>
+              
+              <div class="form-section">
+                <label for="ownVacuum" class="required">Do you have your own vacuum cleaner?</label>
+                <div class="radio-group">
+                  <div class="radio-item">
+                    <input type="radio" id="ownVacuum_yes" name="ownVacuum" value="yes" required>
+                    <label for="ownVacuum_yes">Yes</label>
+                  </div>
+                  <div class="radio-item">
+                    <input type="radio" id="ownVacuum_no" name="ownVacuum" value="no" required>
+                    <label for="ownVacuum_no">No</label>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="form-section">
+                <label for="equipmentRental">Would you be interested in renting specialty equipment like a steam mop from GoGoBubbles when jobs require it?</label>
+                <p style="color: #666; font-size: 0.85rem; margin-bottom: 0.5rem; font-style: italic;">Renting is optional but helps you earn more on specific jobs.</p>
+                <div class="radio-group">
+                  <div class="radio-item">
+                    <input type="radio" id="equipmentRental_yes" name="equipmentRental" value="yes">
+                    <label for="equipmentRental_yes">Yes, I'm open to renting when needed</label>
+                  </div>
+                  <div class="radio-item">
+                    <input type="radio" id="equipmentRental_no" name="equipmentRental" value="no">
+                    <label for="equipmentRental_no">No, I will only accept jobs I can do with my own supplies</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-section">
+              <label class="required">Cleaning Experience</label>
+              <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem; font-style: italic;">Please check the boxes that apply to your cleaning experience:</p>
+              <div class="checkbox-group">
+                <div class="checkbox-item">
+                  <input type="checkbox" id="residential" name="cleaning_experience_type" value="residential">
+                  <label for="residential">Residential cleaning</label>
+                </div>
+                <div class="checkbox-item">
+                  <input type="checkbox" id="commercial" name="cleaning_experience_type" value="commercial">
+                  <label for="commercial">Commercial cleaning</label>
+                </div>
+                <div class="checkbox-item">
+                  <input type="checkbox" id="deepCleaning" name="cleaning_experience_type" value="deep_cleaning">
+                  <label for="deepCleaning">Deep cleaning experience</label>
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-section">
+              <label for="cleaningExperience" class="required">Cleaning Experience Details</label>
+              <textarea id="cleaningExperience" name="cleaningExperience" placeholder="Describe your cleaning experience and techniques..." required></textarea>
+            </div>`;
+        }
+        
+        if (role === 'fresh') {
+          formHTML += `
+            <div class="form-section">
+              <label>Laundry Service Capabilities</label>
+              <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem; font-style: italic;">FreshBubblers handle the complete laundry process from pickup to delivery.</p>
+              
+              <div class="form-section">
+                <label for="laundryProcess" class="required">Are you comfortable picking up, washing, drying, folding, and delivering customer laundry?</label>
+                <div class="radio-group">
+                  <div class="radio-item">
+                    <input type="radio" id="laundryProcess_yes" name="laundryProcess" value="yes" required>
+                    <label for="laundryProcess_yes">Yes</label>
+                  </div>
+                  <div class="radio-item">
+                    <input type="radio" id="laundryProcess_no" name="laundryProcess" value="no" required>
+                    <label for="laundryProcess_no">No</label>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="form-section">
+                <label for="homeWasher" class="required">Do you have access to a washer and dryer at home you plan to use for customer orders?</label>
+                <p style="color: #666; font-size: 0.85rem; margin-bottom: 0.5rem; font-style: italic;">Note: cleanliness and safety standards apply if using your own machines.</p>
+                <div class="radio-group">
+                  <div class="radio-item">
+                    <input type="radio" id="homeWasher_yes" name="homeWasher" value="yes" onchange="toggleHygieneCertification(this.value)" required>
+                    <label for="homeWasher_yes">Yes</label>
+                  </div>
+                  <div class="radio-item">
+                    <input type="radio" id="homeWasher_no" name="homeWasher" value="no" onchange="toggleHygieneCertification(this.value)" required>
+                    <label for="homeWasher_no">No</label>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="form-section" id="hygieneCertification" style="display: none;">
+                <div class="checkbox-item">
+                  <input type="checkbox" id="hygieneStandards" name="hygieneStandards" value="yes" required>
+                  <label for="hygieneStandards" class="required">I understand and agree that cleanliness and safety standards apply when using my personal machine.</label>
+                </div>
+              </div>
+              
+              <div class="form-section">
+                <label for="freshPrimaryLanguage" class="required">Is English your primary language?</label>
+                <div class="radio-group">
+                  <div class="radio-item">
+                    <input type="radio" id="freshPrimaryLanguage_yes" name="freshPrimaryLanguage" value="yes" required onchange="toggleFreshLanguageFollowup(this.value)">
+                    <label for="freshPrimaryLanguage_yes">Yes</label>
+                  </div>
+                  <div class="radio-item">
+                    <input type="radio" id="freshPrimaryLanguage_no" name="freshPrimaryLanguage" value="no" required onchange="toggleFreshLanguageFollowup(this.value)">
+                    <label for="freshPrimaryLanguage_no">No</label>
+                  </div>
+                </div>
+              </div>
+              <div class="form-section" id="freshLanguageFollowup" style="display: none;">
+                <label for="freshEnglishCommunication" class="required">Can you comfortably communicate with customers in English?</label>
+                <div class="radio-group">
+                  <div class="radio-item">
+                    <input type="radio" id="freshEnglishCommunication_yes" name="freshEnglishCommunication" value="yes">
+                    <label for="freshEnglishCommunication_yes">Yes</label>
+                  </div>
+                  <div class="radio-item">
+                    <input type="radio" id="freshEnglishCommunication_no" name="freshEnglishCommunication" value="no">
+                    <label for="freshEnglishCommunication_no">No</label>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="form-section">
+                <label for="equipmentRental">Are you interested in renting equipment like a mini steamer or iron from us?</label>
+                <p style="color: #666; font-size: 0.85rem; margin-bottom: 0.5rem; font-style: italic;">Renting is optional but helps you earn more on specific jobs.</p>
+                <div class="radio-group">
+                  <div class="radio-item">
+                    <input type="radio" id="equipmentRental_yes" name="equipmentRental" value="yes">
+                    <label for="equipmentRental_yes">Yes</label>
+                  </div>
+                  <div class="radio-item">
+                    <input type="radio" id="equipmentRental_no" name="equipmentRental" value="no">
+                    <label for="equipmentRental_no">No</label>
+                  </div>
+                  <div class="radio-item">
+                    <input type="radio" id="equipmentRental_maybe" name="equipmentRental" value="maybe">
+                    <label for="equipmentRental_maybe">Maybe</label>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="form-section">
+                <label for="laundryCart">Do you own a laundry cart or bin to handle heavier loads?</label>
+                <div class="radio-group">
+                  <div class="radio-item">
+                    <input type="radio" id="laundryCart_yes" name="laundryCart" value="yes">
+                    <label for="laundryCart_yes">Yes</label>
+                  </div>
+                  <div class="radio-item">
+                    <input type="radio" id="laundryCart_no" name="laundryCart" value="no">
+                    <label for="laundryCart_no">No</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-section">
+              <label for="laundryExperience" class="required">Laundry Experience</label>
+              <textarea id="laundryExperience" name="laundryExperience" placeholder="Describe any laundry or customer service experience..." required></textarea>
+            </div>`;
+        }
+        
+        formHTML += `
+            <div class="form-section">
+              <label for="whyGoGoBubbles" class="required">What interests you about working with GoGoBubbles as a Bubbler?</label>
+              <textarea id="whyGoGoBubbles" name="whyGoGoBubbles" placeholder="Tell us what drew you in - flexibility, working with people, the chance to build income, etc." required></textarea>
+            </div>
+            
+            <div class="form-section">
+              <label for="startDate" class="required">When can you start?</label>
+              <input type="date" id="startDate" name="startDate" required>
+            </div>`;
+      }
+
+      formHTML += `
+          <button type="submit" class="submit-btn">Submit Application</button>
+        </form>`;
+
+      return formHTML;
+    }
+
+    async function submitApplication(event, role) {
+      event.preventDefault();
+      
+              // Custom validation for ShineBubbler equipment checklist
+      if (role === 'shine') {
+        const equipmentCheckboxes = document.querySelectorAll('.application-form input[name="equipment_owned"]');
+        const oneEquipmentChecked = Array.from(equipmentCheckboxes).some(cb => cb.checked);
+        if (!oneEquipmentChecked) {
+          alert('Please select at least one equipment option.');
+          return;
+        }
+      }
+      
+              // Custom validation for SparkleBubbler supply checklist
+      if (role === 'sparkle') {
+        const supplyCheckboxes = document.querySelectorAll('.application-form input[name="basic_supplies_owned"]');
+        const oneSupplyChecked = Array.from(supplyCheckboxes).some(cb => cb.checked);
+        if (!oneSupplyChecked) {
+          alert('Please select your currently owned supplies.');
+          return;
+        }
+
+        const experienceCheckboxes = document.querySelectorAll('.application-form input[name="cleaning_experience_type"]');
+        const oneExperienceChecked = Array.from(experienceCheckboxes).some(cb => cb.checked);
+        if (!oneExperienceChecked) {
+          alert('Please select at least one cleaning experience type.');
+          return;
+        }
+      }
+      
+      // Collect form data
+      const formData = new FormData(event.target);
+      const applicationData = {
+        first_name: formData.get('firstName'),
+        last_name: formData.get('lastName'),
+        email: formData.get('email'),
+        phone: formData.get('phone'),
+        address: formData.get('address'),
+        role_applied_for: role,
+        authorized_to_work: formData.get('authorized') === 'yes',
+        age_verified: formData.get('age18') === 'yes',
+        has_transportation: formData.get('transportation') === 'yes',
+        travel_radius_minutes: parseInt(formData.get('travelDistance')),
+        primary_language: formData.get('primaryLanguage') || formData.get('elitePrimaryLanguage') || formData.get('freshPrimaryLanguage'),
+        english_comfort: formData.get('englishCommunication') || formData.get('eliteEnglishCommunication') || formData.get('freshEnglishCommunication'),
+        experience: formData.get('experience') || formData.get('cleaningExperience') || formData.get('laundryExperience'),
+        availability: formData.get('availability'),
+        why_go_gobubbles: formData.get('whyGoGoBubbles'),
+        start_date: formData.get('startDate'),
+        application_status: 'pending',
+        created_at: new Date().toISOString()
+      };
+
+      // Role-specific data
+      if (role === 'shine') {
+        applicationData.has_water_supply = formData.getAll('equipment_owned').includes('hose_tank');
+        applicationData.has_power_supply = formData.getAll('equipment_owned').includes('inverter');
+        applicationData.has_bucket = formData.getAll('equipment_owned').includes('bucket');
+        applicationData.has_towels = formData.getAll('equipment_owned').includes('towels');
+        applicationData.has_soap = formData.getAll('equipment_owned').includes('solutions');
+        applicationData.willing_to_rent_equipment = formData.get('equipmentRental') === 'yes';
+        applicationData.car_wash_experience = formData.get('carWashExperience') === 'yes';
+        applicationData.experience_description = formData.get('experienceDescription');
+        applicationData.weather_conditions_ok = formData.get('weatherConditions') === 'yes';
+          }
+
+      if (role === 'sparkle') {
+        applicationData.has_mop = formData.getAll('basic_supplies_owned').includes('mop') || formData.getAll('basic_supplies_owned').includes('swiffer_style_mop');
+        applicationData.has_toilet_brush = formData.getAll('basic_supplies_owned').includes('toilet_brush');
+        applicationData.has_all_purpose_cleaner = formData.getAll('basic_supplies_owned').includes('all_purpose_cleaner');
+        applicationData.has_glass_cleaner = formData.getAll('basic_supplies_owned').includes('glass_cleaner');
+        applicationData.has_bathroom_cleaner = formData.getAll('basic_supplies_owned').includes('bathroom_cleaner');
+        applicationData.has_broom_dustpan = formData.getAll('basic_supplies_owned').includes('broom_and_dustpan');
+        applicationData.has_cloths = formData.getAll('basic_supplies_owned').includes('microfiber_cloths');
+        applicationData.has_sponges = formData.getAll('basic_supplies_owned').includes('scrubbing_sponges');
+        applicationData.has_vacuum = formData.get('ownVacuum') === 'yes';
+        applicationData.willing_to_rent_equipment = formData.get('equipmentRental') === 'yes';
+        applicationData.selected_none_supplies = formData.getAll('basic_supplies_owned').includes('none');
+        applicationData.cleaning_experience_types = formData.getAll('cleaning_experience_type');
+      }
+
+      if (role === 'fresh') {
+        applicationData.laundry_process_ok = formData.get('laundryProcess') === 'yes';
+        applicationData.home_washer = formData.get('homeWasher') === 'yes';
+        applicationData.hygiene_standards_agreed = formData.get('hygieneStandards') === 'yes';
+        applicationData.willing_to_rent_equipment = formData.get('equipmentRental') === 'yes';
+        applicationData.has_laundry_cart = formData.get('laundryCart') === 'yes';
+      }
+
+      if (role === 'elite') {
+        applicationData.current_role = formData.get('currentRole');
+        applicationData.additional_service = formData.get('additionalService');
+        applicationData.jobs_completed_5_plus = formData.get('jobsCompleted') === 'yes';
+        applicationData.same_day_availability = formData.get('sameDayAvailability') === 'yes';
+        applicationData.job_flexibility = formData.get('jobFlexibility') === 'yes';
+        applicationData.why_elite = formData.get('whyElite');
+        applicationData.mentoring_interest = formData.get('mentoringInterest');
+      }
+
+      // Spanish proficiency
+      if (formData.get('spanish') === 'yes' || formData.get('spanish') === 'some') {
+        applicationData.spanish_proficiency = formData.get('spanishProficiency');
+      }
+
+      try {
+        // Save to Supabase
+        const { data, error } = await supabase
+          .from('applications')
+          .insert([applicationData]);
+
+        if (error) throw error;
+
+          // Show success message
+          alert('Thank you for your application! We will review your information and contact you within 2-3 business days.');
+        
+          // Close the modal
+          closeApplicationForm();
+        
+          // Reset the form
+        event.target.reset();
+      } catch (error) {
+        console.error('Error submitting application:', error);
+        alert('There was an error submitting your application. Please try again or contact us directly.');
+      }
+    }
+
+    function toggleLanguageFollowup(value) {
+      const followup = document.getElementById('languageFollowup');
+      const englishCommunication = document.getElementById('englishCommunication');
+      
+      if (value === 'no') {
+        followup.style.display = 'block';
+        englishCommunication.required = true;
+      } else {
+        followup.style.display = 'none';
+        englishCommunication.required = false;
+        // Clear radio button selection
+        const radioButtons = englishCommunication.querySelectorAll('input[type="radio"]');
+        radioButtons.forEach(radio => radio.checked = false);
+      }
+    }
+
+    function toggleExperienceDetails(value) {
+      const details = document.getElementById('experienceDetails');
+      const experienceDescription = document.getElementById('experienceDescription');
+      
+      if (value === 'yes') {
+        details.style.display = 'block';
+        experienceDescription.required = true;
+      } else {
+        details.style.display = 'none';
+        experienceDescription.required = false;
+        experienceDescription.value = '';
+      }
+    }
+
+    function toggleHygieneCertification(value) {
+      const certification = document.getElementById('hygieneCertification');
+      const hygieneStandards = document.getElementById('hygieneStandards');
+      
+      if (value === 'yes') {
+        certification.style.display = 'block';
+        hygieneStandards.required = true;
+      } else {
+        certification.style.display = 'none';
+        hygieneStandards.required = false;
+        hygieneStandards.checked = false;
+      }
+    }
+
+    function toggleEliteLanguageFollowup(value) {
+      const followup = document.getElementById('eliteLanguageFollowup');
+      const communicationRadios = document.querySelectorAll('input[name="eliteEnglishCommunication"]');
+      
+      if (value === 'no') {
+        followup.style.display = 'block';
+        communicationRadios.forEach(radio => radio.required = true);
+      } else {
+        followup.style.display = 'none';
+        communicationRadios.forEach(radio => {
+          radio.required = false;
+          radio.checked = false;
+        });
+      }
+    }
+
+    function handleEquipmentSelection(checkbox) {
+      const checklist = checkbox.closest('.checkbox-group');
+      const noneCheckbox = checklist.querySelector('#equip_none');
+      
+      if (checkbox.id === 'equip_none' && checkbox.checked) {
+        // If "None" is checked, uncheck all others
+        const equipmentCheckboxes = checklist.querySelectorAll('input[name="equipment_owned"]:not(#equip_none)');
+        equipmentCheckboxes.forEach(cb => {
+          cb.checked = false;
+        });
+      } else if (checkbox.id !== 'equip_none' && checkbox.checked) {
+        // If another item is checked, uncheck "None"
+        noneCheckbox.checked = false;
+      }
+    }
+
+    function handleSupplySelection(checkbox) {
+      const checklist = checkbox.closest('.checkbox-group');
+      const noneCheckbox = checklist.querySelector('#supply_none');
+      
+      if (checkbox.id === 'supply_none' && checkbox.checked) {
+        // If "None" is checked, uncheck all others
+        const supplyCheckboxes = checklist.querySelectorAll('input[name="basic_supplies_owned"]:not(#supply_none)');
+        supplyCheckboxes.forEach(cb => {
+          cb.checked = false;
+        });
+      } else if (checkbox.id !== 'supply_none' && checkbox.checked) {
+        // If another item is checked, uncheck "None"
+        noneCheckbox.checked = false;
+      }
+    }
+
+    function toggleSpanishFollowup(value) {
+      const followup = document.getElementById('spanishFollowup');
+      const proficiencySelect = document.getElementById('spanishProficiency');
+      if (value === 'yes' || value === 'some') {
+        followup.style.display = 'block';
+        proficiencySelect.required = true;
+      } else {
+        followup.style.display = 'none';
+        proficiencySelect.required = false;
+        proficiencySelect.value = '';
+      }
+    }
+
+    function toggleFreshLanguageFollowup(value) {
+      const followup = document.getElementById('freshLanguageFollowup');
+      const commRadios = document.querySelectorAll('input[name="freshEnglishCommunication"]');
+      if (value === 'no') {
+        followup.style.display = 'block';
+        commRadios.forEach(radio => radio.required = true);
+      } else {
+        followup.style.display = 'none';
+        commRadios.forEach(radio => {
+          radio.required = false;
+          radio.checked = false;
+        });
+      }
+    }
+  </script>
+</body>
+</html> 
