@@ -31,3 +31,4 @@ node_modules/
 .env*
 **/.cache/
 >>>>>>> build-pack-v2-restore
+.vercel

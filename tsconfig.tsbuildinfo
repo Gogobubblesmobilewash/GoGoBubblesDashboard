@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/components/header.tsx","./src/components/overview.tsx","./src/components/shared/card.tsx","./src/lib/config.ts","./src/store/appstore.ts","./src/types/contracts.ts"],"errors":true,"version":"5.9.2"}
